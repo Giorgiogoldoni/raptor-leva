@@ -7,183 +7,170 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
-  --bg:#f5f7fa;--bg2:#ffffff;--bg3:#eef0f3;--border:#d0d7de;
-  --text:#1f2328;--text2:#57606a;--green:#1a7f37;--red:#cf222e;
-  --blue:#0969da;--orange:#bc4c00;--yellow:#7d4e00;--purple:#6e40c9;
-  --long-conf:#1a7f37;--long-early:#0969da;--grigia:#7d4e00;
-  --uscita:#cf222e;--stop:#a40000;--attenzione:#7d4e00;
+  --bg:#f5f7fa;--bg2:#fff;--bg3:#eef0f3;--border:#d0d7de;
+  --text:#1f2328;--text2:#57606a;
+  --green:#1a7f37;--red:#cf222e;--blue:#0969da;--orange:#bc4c00;--yellow:#7d4e00;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;min-height:100vh}
 
-/* ═══ HEADER ═══════════════════════════════ */
-#header{background:var(--bg2);border-bottom:1px solid var(--border);
-  padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  position:sticky;top:0;z-index:100;}
-#header .logo{font-size:18px;font-weight:700;letter-spacing:1px;white-space:nowrap;
-  background:linear-gradient(135deg,#f85149,#e3b341);-webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;background-clip:text;}
-#header .sub{font-size:11px;color:var(--text2);white-space:nowrap}
-#header .spacer{flex:1}
-.hbadge{background:var(--bg3);border:1px solid var(--border);border-radius:12px;
-  padding:3px 10px;font-size:11px;color:var(--text2);white-space:nowrap}
-.hbadge span{color:var(--text);font-weight:600}
+/* HEADER */
+#hdr{background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:8px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  position:sticky;top:0;z-index:100}
+.logo{font-size:17px;font-weight:700;letter-spacing:1px;
+  background:linear-gradient(135deg,#f85149,#e3b341);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sub{font-size:10px;color:var(--text2)}
+.spacer{flex:1}
+.hbadge{background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  padding:3px 9px;font-size:11px;color:var(--text2);white-space:nowrap}
+.hbadge b{color:var(--text)}
+.hbtn{padding:5px 13px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;border:1px solid}
+.hbtn-red{background:#dc2626;border-color:#dc2626;color:#fff}
+.hbtn-red:hover{background:#ef4444}
+.hbtn-grey{background:var(--bg3);border-color:var(--border);color:var(--text)}
+.hbtn-grey:hover{border-color:var(--green);color:var(--green)}
+.hbtn-spec{background:#fff8c5;border-color:#d4a017;color:#7d4e00}
+.hbtn-back{background:var(--bg3);border-color:var(--border);color:var(--text2);
+  text-decoration:none;padding:5px 13px;border-radius:6px;font-size:11px;border:1px solid}
+.hbtn-back:hover{border-color:var(--blue);color:var(--blue)}
 
-/* VIX BADGE — sempre visibile */
+/* VIX BADGE */
 #vixBadge{display:flex;align-items:center;gap:8px;border-radius:8px;
-  padding:5px 14px;border:2px solid #d0d7de;font-size:12px;font-weight:700;
-  white-space:nowrap;transition:all .3s}
-#vixBadge .vix-label{font-size:9px;font-weight:400;opacity:0.8}
+  padding:4px 12px;border:2px solid var(--border);font-size:11px;font-weight:700;white-space:nowrap}
+#vixBadge .vlbl{font-size:8px;font-weight:400;opacity:.75;display:block}
 #vixBadge.calma      {background:#dafbe1;border-color:#1a7f37;color:#1a7f37}
 #vixBadge.normale    {background:#fff8c5;border-color:#7d4e00;color:#7d4e00}
 #vixBadge.attenzione {background:#fff1e5;border-color:#bc4c00;color:#bc4c00}
 #vixBadge.stress     {background:#ffebe9;border-color:#cf222e;color:#cf222e}
 #vixBadge.paura      {background:#ffebe9;border-color:#a40000;color:#a40000}
 
-#btnReload{background:#dc2626;border:1px solid #ef4444;color:#fff;padding:6px 14px;
-  border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;}
-#btnReload:hover{background:#ef4444}
-#btnExcel{background:var(--bg3);border:1px solid var(--border);color:var(--text);
-  padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px}
-#btnExcel:hover{border-color:var(--green);color:var(--green)}
-
-/* BACK LINK */
-#backLink{background:var(--bg3);border:1px solid var(--border);color:var(--text2);
-  padding:5px 12px;border-radius:6px;font-size:11px;text-decoration:none;white-space:nowrap}
-#backLink:hover{border-color:var(--blue);color:var(--blue)}
-
-/* ═══ TIMESTAMP BAR ═══════════════════════ */
+/* TS BAR */
 #tsBar{background:#fff8c5;border-bottom:1px solid #d4a017;
-  padding:5px 16px;font-size:11px;color:#7d4e00;display:flex;align-items:center;gap:10px}
+  padding:4px 16px;font-size:11px;color:#7d4e00}
 #tsBar.fresh{background:#dafbe1;border-color:#1a7f37;color:#1a7f37}
 #tsBar.stale{background:#ffebe9;border-color:#cf222e;color:#cf222e}
 
-/* ═══ PROVIDER FILTER ══════════════════════ */
-#providerBar{background:var(--bg2);border-bottom:1px solid var(--border);
-  padding:6px 16px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-#providerBar .label{font-size:11px;color:var(--text2);margin-right:4px}
-.prov-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);
-  padding:3px 10px;border-radius:12px;cursor:pointer;font-size:11px;font-weight:600}
-.prov-btn:hover{border-color:#dc2626;color:#dc2626}
-.prov-btn.active{background:#ffebe9;border-color:#dc2626;color:#dc2626}
+/* FILTER BARS */
+.fbar{background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:5px 16px;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.flbl{font-size:10px;color:var(--text2);font-weight:600;margin-right:4px;white-space:nowrap}
+.fbtn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);
+  padding:3px 10px;border-radius:12px;cursor:pointer;font-size:11px;font-weight:600;transition:all .15s}
+.fbtn:hover{border-color:#dc2626;color:#dc2626}
+.fbtn.pact{background:#fef2f2;border-color:#dc2626;color:#dc2626}
+.fbtn.sact-ALL        {background:#f0f6ff;border-color:var(--blue);color:var(--blue)}
+.fbtn.sact-LONG_CONF  {background:#dafbe1;border-color:var(--green);color:var(--green)}
+.fbtn.sact-LONG_EARLY {background:#ddf4ff;border-color:var(--blue);color:var(--blue)}
+.fbtn.sact-GRIGIA     {background:#fff8c5;border-color:var(--yellow);color:var(--yellow)}
+.fbtn.sact-USCITA     {background:#ffebe9;border-color:var(--red);color:var(--red)}
+.fbtn.sact-STOP       {background:#ffebe9;border-color:#a40000;color:#a40000}
 
-/* ═══ SIGNAL FILTER ════════════════════════ */
-#sigBar{background:var(--bg2);border-bottom:1px solid var(--border);
-  padding:6px 16px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-#sigBar .label{font-size:11px;color:var(--text2);margin-right:4px}
-.sig-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);
-  padding:4px 12px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:600;
-  transition:all .15s}
-.sig-btn.active{font-weight:700}
-.sig-ALL.active    {background:#f0f6ff;border-color:var(--blue);color:var(--blue)}
-.sig-LONG_CONF.active{background:#dafbe1;border-color:var(--green);color:var(--green)}
-.sig-LONG_EARLY.active{background:#ddf4ff;border-color:var(--blue);color:var(--blue)}
-.sig-GRIGIA.active {background:#fff8c5;border-color:var(--yellow);color:var(--yellow)}
-.sig-USCITA.active {background:#ffebe9;border-color:var(--red);color:var(--red)}
-.sig-STOP.active   {background:#ffebe9;border-color:#a40000;color:#a40000}
-
-/* ═══ TABLE ════════════════════════════════ */
-#tableWrap{overflow-x:auto;padding:0}
-table{width:100%;border-collapse:collapse;min-width:1100px}
-thead tr{background:var(--bg2);position:sticky;top:0;z-index:10}
-th{padding:8px 6px;text-align:left;font-size:11px;color:var(--text2);
+/* TABLE */
+#tblWrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:1150px}
+thead tr{background:var(--bg2);position:sticky;top:0;z-index:9}
+th{padding:7px 6px;text-align:left;font-size:10px;color:var(--text2);
   border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
 th:hover{color:var(--text)}
-th.sort-asc::after{content:' ▲';font-size:9px}
-th.sort-desc::after{content:' ▼';font-size:9px}
-td{padding:6px 6px;border-bottom:1px solid #e8ecf0;vertical-align:middle;white-space:nowrap}
+th.asc::after{content:' ▲';font-size:9px}
+th.desc::after{content:' ▼';font-size:9px}
+td{padding:5px 6px;border-bottom:1px solid #eaecef;vertical-align:middle;white-space:nowrap}
 tr:hover td{background:#fef2f2}
 
-/* ZONA badges */
-.zona{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
-.zona-LONG_CONF  {background:#dafbe1;color:#1a7f37;border:1px solid #1a7f37}
-.zona-LONG_EARLY {background:#ddf4ff;color:#0969da;border:1px solid #0969da}
-.zona-GRIGIA     {background:#fff8c5;color:#7d4e00;border:1px solid #7d4e00}
-.zona-USCITA     {background:#ffebe9;color:#cf222e;border:1px solid #cf222e}
-.zona-STOP       {background:#ffebe9;color:#a40000;border:1px solid #a40000}
-.zona-ND         {background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+/* ZONA */
+.zona{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.z-LC{background:#dafbe1;color:#1a7f37;border:1px solid #1a7f37}
+.z-LE{background:#ddf4ff;color:#0969da;border:1px solid #0969da}
+.z-G {background:#fff8c5;color:#7d4e00;border:1px solid #d4a017}
+.z-U {background:#ffebe9;color:#cf222e;border:1px solid #cf222e}
+.z-S {background:#ffebe9;color:#a40000;border:1px solid #a40000}
+.z-N {background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
 
 /* KAMA doppia */
-.kama-wrap{display:flex;flex-direction:column;gap:1px;font-size:10px}
-.kama-fast{color:#dc2626;font-weight:700}
-.kama-slow{color:#7c3aed}
+.kd{display:flex;flex-direction:column;gap:1px;font-size:10px;line-height:1.3}
+.kf{color:#dc2626;font-weight:700}
+.ks{color:#7c3aed}
 
-/* Vol ratio */
-.vol-high{color:#1a7f37;font-weight:700}
-.vol-low{color:#cf222e}
-
-/* Pos/neg */
+/* Colori */
+.vh{color:#1a7f37;font-weight:700}
+.vl{color:#cf222e}
 .pos{color:var(--green)}.neg{color:var(--red)}
 
-/* ═══ EMPTY STATE ═══════════════════════════ */
-#emptyState{padding:60px;text-align:center;color:var(--text2)}
-#emptyState .big{font-size:48px;margin-bottom:12px}
+/* Chart btn */
+.btn-chart{background:var(--bg3);border:1px solid var(--border);color:var(--text2);
+  padding:2px 8px;border-radius:5px;cursor:pointer;font-size:11px}
+.btn-chart:hover{border-color:#dc2626;color:#dc2626}
 
-/* ═══ SCROLLBAR ════════════════════════════ */
+#empty{padding:60px;text-align:center;color:var(--text2);font-size:16px}
+
+/* MODAL */
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;overflow-y:auto;padding:20px}
+.mi{background:#fff;max-width:740px;margin:0 auto;border-radius:12px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.3)}
+.mh{background:#dc2626;color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center}
+.mb{padding:20px 24px;font-size:12px;line-height:1.7}
+.mb h3{color:#dc2626;border-bottom:2px solid #fca5a5;padding-bottom:4px;margin:14px 0 8px}
+.mb h3:first-child{margin-top:0}
+.mi table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px}
+.mi th{background:#fef2f2;padding:5px 9px;text-align:left;border:1px solid #fca5a5}
+.mi td{padding:4px 9px;border:1px solid #fca5a5}
+
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-
-/* SPECIFICHE MODAL */
-#specsModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:3000;overflow-y:auto;padding:20px}
-#specsModal .inner{background:#fff;max-width:760px;margin:0 auto;border-radius:12px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.3)}
-#specsModal .inner-hdr{background:#dc2626;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
-#specsModal .inner-body{padding:20px 24px;font-size:13px;line-height:1.7}
-#specsModal table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px}
-#specsModal th{background:#fef2f2;padding:6px 10px;text-align:left;border:1px solid #fca5a5}
-#specsModal td{padding:5px 10px;border:1px solid #fca5a5}
 </style>
 </head>
 <body>
 
 <!-- HEADER -->
-<div id="header">
-  <div class="logo">⚡ RAPTOR LEVA</div>
-  <div class="sub">Doppia KAMA · AO Veloce · Volume · VIX Regime</div>
-  <div class="spacer"></div>
-  <div class="hbadge">Ticker: <span id="hTotal">—</span></div>
-  <div class="hbadge">🟢 <span id="hLongConf">—</span> | 🔵 <span id="hLongEarly">—</span></div>
-  <div class="hbadge">⛔ <span id="hStop">—</span> | 🔴 <span id="hUscita">—</span></div>
-  <div id="vixBadge" class="normale">
-    <div>
-      <div class="vix-label">VIX USA / VSTOXX</div>
-      <span id="vixVal">— / —</span>
-    </div>
-    <div id="regimeLabel">—</div>
+<div id="hdr">
+  <div>
+    <div class="logo">⚡ RAPTOR LEVA</div>
+    <div class="sub">Doppia KAMA · AO Veloce EMA3-EMA13 · Volume · VIX Regime · 538 strumenti</div>
   </div>
-  <button id="btnReload" onclick="loadJSON()">🔄 Aggiorna</button>
-  <button id="btnExcel" onclick="exportExcel()">📥 Excel</button>
-  <button onclick="openSpecs()" style="background:#fff8c5;border:1px solid #7d4e00;color:#7d4e00;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600">📄 Specifiche</button>
-  <a id="backLink" href="https://giorgiogoldoni.github.io/fixed/">← RAPTOR Suite</a>
+  <div class="spacer"></div>
+  <div class="hbadge">Tot: <b id="hTot">—</b></div>
+  <div class="hbadge">🟢 <b id="hLC">—</b> | 🔵 <b id="hLE">—</b></div>
+  <div class="hbadge">🔴 <b id="hU">—</b> | ⛔ <b id="hS">—</b></div>
+  <div id="vixBadge" class="normale">
+    <div><span class="vlbl">VIX USA / VSTOXX</span><span id="vixVal">— / —</span></div>
+    <div id="regimeLbl">—</div>
+  </div>
+  <button class="hbtn hbtn-red" onclick="loadJSON()">🔄 Aggiorna</button>
+  <button class="hbtn hbtn-grey" onclick="exportExcel()">📥 Excel</button>
+  <button class="hbtn hbtn-spec" onclick="openModal()">📄 Specifiche</button>
+  <a class="hbtn-back" href="https://giorgiogoldoni.github.io/fixed/">← RAPTOR Suite</a>
 </div>
 
-<!-- TIMESTAMP BAR -->
-<div id="tsBar">⏳ Caricamento dati...</div>
+<!-- TS BAR -->
+<div id="tsBar">⏳ Caricamento dati leva...</div>
 
 <!-- PROVIDER FILTER -->
-<div id="providerBar">
-  <span class="label">Provider:</span>
-  <button class="prov-btn active" data-prov="ALL"            onclick="setProv('ALL',this)">Tutti</button>
-  <button class="prov-btn"        data-prov="Xtrackers"      onclick="setProv('Xtrackers',this)">Xtrackers</button>
-  <button class="prov-btn"        data-prov="LEVERAGE SHARES" onclick="setProv('LEVERAGE SHARES',this)">Leverage Shares</button>
-  <button class="prov-btn"        data-prov="SG"             onclick="setProv('SG',this)">SG (Société Générale)</button>
-  <button class="prov-btn"        data-prov="GRANITIS"       onclick="setProv('GRANITIS',this)">GraniteShares</button>
+<div class="fbar">
+  <span class="flbl">PROVIDER:</span>
+  <button class="fbtn pact" data-p="ALL"             onclick="setProv('ALL',this)">Tutti</button>
+  <button class="fbtn"      data-p="Xtrackers"       onclick="setProv('Xtrackers',this)">Xtrackers</button>
+  <button class="fbtn"      data-p="Leverage Shares" onclick="setProv('Leverage Shares',this)">Leverage Shares</button>
+  <button class="fbtn"      data-p="SG"              onclick="setProv('SG',this)">SG</button>
+  <button class="fbtn"      data-p="GraniteShares"   onclick="setProv('GraniteShares',this)">GraniteShares</button>
+  <button class="fbtn"      data-p="WisdomTree"      onclick="setProv('WisdomTree',this)">WisdomTree</button>
 </div>
 
 <!-- SIGNAL FILTER -->
-<div id="sigBar">
-  <span class="label">Segnale:</span>
-  <button class="sig-btn sig-ALL active"        data-sig="ALL"        onclick="setSig('ALL',this)">📋 Tutti</button>
-  <button class="sig-btn sig-LONG_CONF"         data-sig="LONG_CONF"  onclick="setSig('LONG_CONF',this)">🟢 Long Confermato</button>
-  <button class="sig-btn sig-LONG_EARLY"        data-sig="LONG_EARLY" onclick="setSig('LONG_EARLY',this)">🔵 Long Early</button>
-  <button class="sig-btn sig-GRIGIA"            data-sig="GRIGIA"     onclick="setSig('GRIGIA',this)">🟡 Grigia</button>
-  <button class="sig-btn sig-USCITA"            data-sig="USCITA"     onclick="setSig('USCITA',this)">🔴 Uscita</button>
-  <button class="sig-btn sig-STOP"              data-sig="STOP"       onclick="setSig('STOP',this)">⛔ Stop</button>
+<div class="fbar">
+  <span class="flbl">SEGNALE:</span>
+  <button class="fbtn sact-ALL" data-s="ALL"        onclick="setSig('ALL',this)">📋 Tutti</button>
+  <button class="fbtn"          data-s="LONG_CONF"  onclick="setSig('LONG_CONF',this)">🟢 Long Confermato</button>
+  <button class="fbtn"          data-s="LONG_EARLY" onclick="setSig('LONG_EARLY',this)">🔵 Long Early</button>
+  <button class="fbtn"          data-s="GRIGIA"     onclick="setSig('GRIGIA',this)">🟡 Grigia</button>
+  <button class="fbtn"          data-s="USCITA"     onclick="setSig('USCITA',this)">🔴 Uscita</button>
+  <button class="fbtn"          data-s="STOP"       onclick="setSig('STOP',this)">⛔ Stop</button>
 </div>
 
 <!-- TABLE -->
-<div id="tableWrap">
-  <table id="mainTable" style="display:none">
+<div id="tblWrap">
+  <table id="tbl" style="display:none">
     <thead>
       <tr>
         <th onclick="sortBy('ticker')">Ticker</th>
@@ -192,7 +179,7 @@ tr:hover td{background:#fef2f2}
         <th onclick="sortBy('zona')">Zona</th>
         <th onclick="sortBy('score')">Score ↓</th>
         <th onclick="sortBy('prezzo')">Prezzo</th>
-        <th>KAMA Fast / Slow</th>
+        <th>KAMA F/S</th>
         <th onclick="sortBy('er')">ER</th>
         <th onclick="sortBy('baff')">Baff</th>
         <th onclick="sortBy('ao')">AO</th>
@@ -200,279 +187,225 @@ tr:hover td{background:#fef2f2}
         <th onclick="sortBy('rsi')">RSI</th>
         <th onclick="sortBy('perfSett')">Sett%</th>
         <th onclick="sortBy('perfMese')">Mese%</th>
+        <th>📈</th>
       </tr>
     </thead>
-    <tbody id="tableBody"></tbody>
+    <tbody id="tbody"></tbody>
   </table>
-  <div id="emptyState">
-    <div class="big">⚡</div>
-    <div>Caricamento dati leva in corso...</div>
-  </div>
+  <div id="empty">⚡ Caricamento in corso...</div>
 </div>
 
-<!-- SPECIFICHE MODAL -->
-<div id="specsModal">
-  <div class="inner">
-    <div class="inner-hdr">
+<!-- MODAL -->
+<div id="modal">
+  <div class="mi">
+    <div class="mh">
       <div>
-        <div style="font-size:17px;font-weight:700">⚡ RAPTOR Leva — Specifiche Tecniche</div>
-        <div style="font-size:12px;opacity:0.8;margin-top:2px">Doppia KAMA · AO Veloce · Volume · Regime VIX</div>
+        <div style="font-size:16px;font-weight:700">⚡ RAPTOR Leva — Specifiche</div>
+        <div style="font-size:11px;opacity:.8">Doppia KAMA · AO EMA3-EMA13 · Volume · VIX Regime</div>
       </div>
-      <button onclick="closeSpecs()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:18px;cursor:pointer;border-radius:6px;padding:4px 12px">✕</button>
+      <button onclick="closeModal()" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:18px;cursor:pointer;border-radius:6px;padding:4px 12px">✕</button>
     </div>
-    <div class="inner-body">
-      <h3 style="color:#dc2626;border-bottom:2px solid #fca5a5;padding-bottom:6px;margin-top:0">⚙️ Logica Doppia KAMA</h3>
+    <div class="mb">
+      <h3>⚙️ Doppia KAMA</h3>
       <table>
         <thead><tr><th>KAMA</th><th>Parametri</th><th>Ruolo</th></tr></thead>
         <tbody>
-          <tr><td style="color:#dc2626;font-weight:700">KAMA Veloce</td><td>n=5, fast=3, slow=20</td><td>Segnale di ENTRATA — molto reattiva</td></tr>
-          <tr style="background:#fef2f2"><td style="color:#7c3aed;font-weight:700">KAMA Lenta</td><td>n=20, fast=2, slow=40</td><td>Segnale di USCITA — stabile, filtra rumore</td></tr>
+          <tr><td style="color:#dc2626;font-weight:700">Veloce</td><td>n=5, fast=3, slow=20</td><td>ENTRATA — reattiva, segue il prezzo da vicino</td></tr>
+          <tr><td style="color:#7c3aed;font-weight:700">Lenta</td><td>n=20, fast=2, slow=40</td><td>USCITA — stabile, filtra il rumore intraday</td></tr>
         </tbody>
       </table>
-
-      <h3 style="color:#dc2626;border-bottom:2px solid #fca5a5;padding-bottom:6px">🎯 Zone operative</h3>
+      <h3>🎯 Zone operative</h3>
       <table>
-        <thead><tr><th>Zona</th><th>Condizione</th><th>Significato</th></tr></thead>
+        <thead><tr><th>Zona</th><th>Condizione</th><th>Azione</th></tr></thead>
         <tbody>
-          <tr><td><span class="zona zona-LONG_CONF">LONG_CONF</span></td><td>Prezzo &gt; KAMA Fast &gt; KAMA Slow</td><td>Entrata confermata — trend allineato</td></tr>
-          <tr style="background:#fef2f2"><td><span class="zona zona-LONG_EARLY">LONG_EARLY</span></td><td>Prezzo &gt; KAMA Fast, non ancora &gt; KAMA Slow</td><td>Entrata anticipata — momentum inizia</td></tr>
-          <tr><td><span class="zona zona-GRIGIA">GRIGIA</span></td><td>Prezzo tra le due KAMA</td><td>Zona di attesa — non operare</td></tr>
-          <tr style="background:#fef2f2"><td><span class="zona zona-USCITA">USCITA</span></td><td>Prezzo sotto KAMA Lenta (&lt;2%)</td><td>Uscire dalla posizione</td></tr>
-          <tr><td><span class="zona zona-STOP">STOP</span></td><td>Prezzo &gt;2% sotto KAMA Lenta</td><td>Stop loss — uscita immediata</td></tr>
+          <tr><td><span class="zona z-LC">🟢 LONG CONF</span></td><td>Prezzo &gt; KAMA Fast &gt; KAMA Slow + Vol≥1.5x</td><td>Entrata confermata</td></tr>
+          <tr><td><span class="zona z-LE">🔵 LONG EARLY</span></td><td>Prezzo &gt; KAMA Fast, sotto KAMA Slow</td><td>Entrata anticipata</td></tr>
+          <tr><td><span class="zona z-G">🟡 GRIGIA</span></td><td>Prezzo tra le due KAMA</td><td>Attendere — non operare</td></tr>
+          <tr><td><span class="zona z-U">🔴 USCITA</span></td><td>Prezzo &lt; KAMA Slow (&lt;2%)</td><td>Uscire dalla posizione</td></tr>
+          <tr><td><span class="zona z-S">⛔ STOP</span></td><td>Prezzo &gt;2% sotto KAMA Slow</td><td>Stop loss immediato</td></tr>
         </tbody>
       </table>
-
-      <h3 style="color:#dc2626;border-bottom:2px solid #fca5a5;padding-bottom:6px">📊 Indicatori</h3>
+      <h3>📊 Indicatori</h3>
       <table>
-        <thead><tr><th>Indicatore</th><th>Parametri</th><th>Note</th></tr></thead>
+        <thead><tr><th>Indicatore</th><th>Parametri leva</th><th>vs Standard</th></tr></thead>
         <tbody>
-          <tr><td><strong>AO Veloce</strong></td><td>EMA3 − EMA13 midpoint</td><td>Più reattivo del classico EMA5-EMA34</td></tr>
-          <tr style="background:#fef2f2"><td><strong>Baffetti</strong></td><td>Barre AO consecutive crescenti</td><td>≥2 = momentum valido per leva</td></tr>
-          <tr><td><strong>Vol Ratio</strong></td><td>Volume / Media 20gg</td><td>&gt;1.5x richiesto per LONG_CONF</td></tr>
-          <tr style="background:#fef2f2"><td><strong>ER</strong></td><td>n=10</td><td>Misura efficienza del movimento</td></tr>
+          <tr><td><b>AO Veloce</b></td><td>EMA3 − EMA13 midpoint H+L</td><td>Standard: EMA5-EMA34</td></tr>
+          <tr><td><b>Baffetti</b></td><td>≥2 consecutive crescenti</td><td>≥3 per ETF normali</td></tr>
+          <tr><td><b>Vol Ratio</b></td><td>&gt;1.5x media 20gg</td><td>Richiesto per LONG_CONF</td></tr>
+          <tr><td><b>ER</b></td><td>n=10</td><td>Stesso parametro</td></tr>
         </tbody>
       </table>
-
-      <h3 style="color:#dc2626;border-bottom:2px solid #fca5a5;padding-bottom:6px">🌡️ Regime VIX</h3>
+      <h3>🌡️ Regime VIX</h3>
       <table>
-        <thead><tr><th>VIX medio</th><th>Regime</th><th>Effetto sullo score</th></tr></thead>
+        <thead><tr><th>VIX medio</th><th>Regime</th><th>Score mult</th></tr></thead>
         <tbody>
-          <tr><td>&lt; 15</td><td style="color:#1a7f37;font-weight:700">CALMA</td><td>Score × 1.00</td></tr>
-          <tr style="background:#fef2f2"><td>15–20</td><td style="color:#7d4e00;font-weight:700">NORMALE</td><td>Score × 0.95</td></tr>
-          <tr><td>20–25</td><td style="color:#bc4c00;font-weight:700">ATTENZIONE</td><td>Score × 0.85</td></tr>
-          <tr style="background:#fef2f2"><td>25–30</td><td style="color:#cf222e;font-weight:700">STRESS</td><td>Score × 0.70</td></tr>
-          <tr><td>&gt; 30</td><td style="color:#a40000;font-weight:700">PAURA</td><td>Score × 0.50</td></tr>
+          <tr><td>&lt;15</td><td style="color:#1a7f37;font-weight:700">CALMA</td><td>×1.00</td></tr>
+          <tr><td>15–20</td><td style="color:#7d4e00;font-weight:700">NORMALE</td><td>×0.95</td></tr>
+          <tr><td>20–25</td><td style="color:#bc4c00;font-weight:700">ATTENZIONE</td><td>×0.85</td></tr>
+          <tr><td>25–30</td><td style="color:#cf222e;font-weight:700">STRESS</td><td>×0.70</td></tr>
+          <tr><td>&gt;30</td><td style="color:#a40000;font-weight:700">PAURA</td><td>×0.50</td></tr>
         </tbody>
       </table>
-
-      <p style="font-size:11px;color:#57606a;margin-top:8px">⚠️ Strumenti a leva amplificano guadagni E perdite. Usare solo con piena consapevolezza del rischio. Non consulenza finanziaria.</p>
+      <p style="font-size:10px;color:#57606a;margin-top:8px">⚠️ Strumenti a leva amplificano guadagni E perdite. Solo uso educativo — non consulenza finanziaria.</p>
     </div>
   </div>
 </div>
 
 <script>
-const JSON_URL = 'https://raw.githubusercontent.com/Giorgiogoldoni/raptor-leva/main/raptor_leva.json';
+const JSON_URL='https://raw.githubusercontent.com/Giorgiogoldoni/raptor-leva/main/raptor_leva.json';
+let allData=[],filteredData=[];
+let activeSig='ALL',activeProv='ALL';
+let sortField='score',sortDir=-1;
 
-let allData = [];
-let filteredData = [];
-let activeSig = 'ALL';
-let activeProv = 'ALL';
-let sortField = 'score';
-let sortDir = -1;
-
-// ═══ LOAD JSON ═════════════════════════════════════════
-async function loadJSON() {
-  const tsBar = document.getElementById('tsBar');
-  tsBar.textContent = '⏳ Caricamento dati leva...';
-  tsBar.className = '';
-  try {
-    const res = await fetch(JSON_URL);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const obj = await res.json();
-    if (!obj.data || !obj.data.length) throw new Error('JSON vuoto');
-
-    allData = obj.data;
-
-    // VIX badge
-    updateVixBadge(obj.vix, obj.vstoxx, obj.regime, obj.regime_color);
-
-    // Timestamp
-    const dt = new Date(obj.timestamp);
-    const ageH = (Date.now() - dt.getTime()) / 3600000;
-    const ageStr = ageH < 1 ? Math.round(ageH * 60) + ' min fa' : Math.round(ageH) + 'h fa';
-    const fresh = ageH <= 1;
-    tsBar.className = fresh ? 'fresh' : 'stale';
-    tsBar.innerHTML = `${fresh ? '🟢' : '🟡'} Aggiornato: <strong>${obj.timestamp_it}</strong> (${ageStr}) · ${obj.ok}/${obj.total} ticker · Regime: <strong>${obj.regime || '—'}</strong>`;
-
-    document.getElementById('hTotal').textContent = obj.total;
-    updateStats();
-    renderTable();
-  } catch (e) {
-    tsBar.className = 'stale';
-    tsBar.textContent = '⚠️ Dati non disponibili: ' + e.message + ' — Lanciare RAPTOR Leva Fetch da GitHub Actions';
+async function loadJSON(){
+  const tb=document.getElementById('tsBar');
+  tb.textContent='⏳ Caricamento...';tb.className='';
+  try{
+    const r=await fetch(JSON_URL+'?t='+Date.now());
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const obj=await r.json();
+    if(!obj.data?.length)throw new Error('JSON vuoto');
+    allData=obj.data;
+    setVix(obj.vix,obj.vstoxx,obj.regime,obj.regime_color);
+    const dt=new Date(obj.timestamp);
+    const ageH=(Date.now()-dt.getTime())/3600000;
+    const ageStr=ageH<1?Math.round(ageH*60)+' min fa':Math.round(ageH)+'h fa';
+    tb.className=ageH<=1?'fresh':'stale';
+    tb.innerHTML=`${ageH<=1?'🟢':'🟡'} Aggiornato: <b>${obj.timestamp_it}</b> (${ageStr}) &nbsp;·&nbsp; ${obj.ok}/${obj.total} ticker &nbsp;·&nbsp; Regime: <b>${obj.regime||'—'}</b>`;
+    document.getElementById('hTot').textContent=obj.total;
+    updateCounters();renderTable();
+  }catch(e){
+    tb.className='stale';
+    tb.textContent='⚠️ '+e.message+' — Lanciare Actions → RAPTOR Leva Fetch → Run workflow';
   }
 }
 
-function updateVixBadge(vix, vstoxx, regime, color) {
-  const badge = document.getElementById('vixBadge');
-  const regL = document.getElementById('regimeLabel');
-  const vixV = document.getElementById('vixVal');
-  vixV.textContent = (vix || '—') + ' / ' + (vstoxx || '—');
-  regL.textContent = regime || '—';
-  const cls = color === 'verde' ? 'calma' :
-              color === 'giallo' ? 'normale' :
-              color === 'arancio' ? 'attenzione' :
-              color === 'rosso' ? 'stress' : 'paura';
-  badge.className = cls;
+function setVix(vix,vstoxx,regime,color){
+  document.getElementById('vixVal').textContent=(vix||'—')+' / '+(vstoxx||'—');
+  document.getElementById('regimeLbl').textContent=regime||'—';
+  const m={verde:'calma',giallo:'normale',arancio:'attenzione',rosso:'stress',rosso_scuro:'paura'};
+  document.getElementById('vixBadge').className=m[color]||'normale';
 }
 
-// ═══ STATS ══════════════════════════════════════════════
-function updateStats() {
-  const ok = allData.filter(r => r.segnale);
-  document.getElementById('hLongConf').textContent  = ok.filter(r => r.zona === 'LONG_CONF').length;
-  document.getElementById('hLongEarly').textContent = ok.filter(r => r.zona === 'LONG_EARLY').length;
-  document.getElementById('hStop').textContent      = ok.filter(r => r.zona === 'STOP').length;
-  document.getElementById('hUscita').textContent    = ok.filter(r => r.zona === 'USCITA').length;
+function updateCounters(){
+  document.getElementById('hLC').textContent=allData.filter(r=>r.zona==='LONG_CONF').length;
+  document.getElementById('hLE').textContent=allData.filter(r=>r.zona==='LONG_EARLY').length;
+  document.getElementById('hU').textContent =allData.filter(r=>r.zona==='USCITA').length;
+  document.getElementById('hS').textContent =allData.filter(r=>r.zona==='STOP').length;
 }
 
-// ═══ FILTERS ════════════════════════════════════════════
-function setSig(sig, btn) {
-  activeSig = sig;
-  document.querySelectorAll('.sig-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+function setSig(s,btn){
+  activeSig=s;
+  document.querySelectorAll('.fbtn[data-s]').forEach(b=>{b.className='fbtn';});
+  btn.className='fbtn sact-'+s;
   renderTable();
 }
-
-function setProv(prov, btn) {
-  activeProv = prov;
-  document.querySelectorAll('.prov-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+function setProv(p,btn){
+  activeProv=p;
+  document.querySelectorAll('.fbtn[data-p]').forEach(b=>{b.className='fbtn';});
+  btn.className='fbtn pact';
   renderTable();
 }
-
-function applyFilters() {
-  let d = [...allData];
-  if (activeSig !== 'ALL') d = d.filter(r => r.zona === activeSig);
-  if (activeProv !== 'ALL') d = d.filter(r => (r.provider || '').includes(activeProv));
+function applyFilters(){
+  let d=[...allData];
+  if(activeSig!=='ALL')d=d.filter(r=>r.zona===activeSig);
+  if(activeProv!=='ALL')d=d.filter(r=>(r.provider||'').includes(activeProv));
   return d;
 }
 
-// ═══ SORT ═══════════════════════════════════════════════
-function sortBy(field) {
-  if (sortField === field) sortDir *= -1;
-  else { sortField = field; sortDir = -1; }
-  document.querySelectorAll('th').forEach(th => {
-    th.classList.remove('sort-asc', 'sort-desc');
-    if (th.getAttribute('onclick') === `sortBy('${field}')`) {
-      th.classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
-    }
+function sortBy(f){
+  if(sortField===f)sortDir*=-1;
+  else{sortField=f;sortDir=-1;}
+  document.querySelectorAll('th').forEach(th=>{
+    th.classList.remove('asc','desc');
+    if(th.getAttribute('onclick')===`sortBy('${f}')`)
+      th.classList.add(sortDir===1?'asc':'desc');
   });
   renderTable();
 }
 
-// ═══ RENDER ═════════════════════════════════════════════
-function fp(v) {
-  if (v == null) return '—';
-  return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
-}
-function f3(v) {
-  return v != null ? v.toFixed(3) : '—';
-}
+const ZH={
+  'LONG_CONF': '<span class="zona z-LC">🟢 LONG CONF</span>',
+  'LONG_EARLY':'<span class="zona z-LE">🔵 LONG EARLY</span>',
+  'GRIGIA':    '<span class="zona z-G">🟡 GRIGIA</span>',
+  'USCITA':    '<span class="zona z-U">🔴 USCITA</span>',
+  'STOP':      '<span class="zona z-S">⛔ STOP</span>',
+  'ND':        '<span class="zona z-N">— ND</span>'
+};
+function f3(v){return v!=null?Number(v).toFixed(3):'—'}
+function fp(v){return v!=null?(v>=0?'+':'')+Number(v).toFixed(2)+'%':'—'}
 
-function zonaBadge(zona) {
-  const icons = {
-    'LONG_CONF':  '🟢 LONG CONF',
-    'LONG_EARLY': '🔵 LONG EARLY',
-    'GRIGIA':     '🟡 GRIGIA',
-    'USCITA':     '🔴 USCITA',
-    'STOP':       '⛔ STOP',
-    'ND':         '— ND'
-  };
-  const z = zona || 'ND';
-  return `<span class="zona zona-${z}">${icons[z] || z}</span>`;
-}
-
-function renderTable() {
-  let data = applyFilters();
-
-  // Sort
-  data.sort((a, b) => {
-    let va = a[sortField], vb = b[sortField];
-    if (va == null && vb == null) return 0;
-    if (va == null) return 1; if (vb == null) return -1;
-    if (typeof va === 'string') return sortDir * va.localeCompare(vb);
-    return sortDir * (va - vb);
+function renderTable(){
+  let data=applyFilters();
+  data.sort((a,b)=>{
+    let va=a[sortField],vb=b[sortField];
+    if(va==null&&vb==null)return 0;
+    if(va==null)return 1;if(vb==null)return -1;
+    return typeof va==='string'?sortDir*va.localeCompare(vb):sortDir*(va-vb);
   });
-
-  filteredData = data;
-  const tbody = document.getElementById('tableBody');
-
-  if (!data.length) {
-    document.getElementById('mainTable').style.display = 'none';
-    document.getElementById('emptyState').style.display = 'block';
-    document.getElementById('emptyState').innerHTML = '<div class="big">⚡</div><div>Nessun risultato con i filtri selezionati</div>';
+  filteredData=data;
+  if(!data.length){
+    document.getElementById('tbl').style.display='none';
+    document.getElementById('empty').style.display='block';
+    document.getElementById('empty').textContent='Nessun risultato';
     return;
   }
-
-  const rows = data.map(r => {
-    const ps = fp(r.perfSett), pm = fp(r.perfMese);
-    const sc = r.perfSett >= 0 ? 'pos' : 'neg';
-    const mc = r.perfMese >= 0 ? 'pos' : 'neg';
-    const volCls = r.volRatio >= 1.5 ? 'vol-high' : r.volRatio < 0.7 ? 'vol-low' : '';
-    const aoCls = (r.ao || 0) >= 0 ? 'pos' : 'neg';
-    const nomeShort = (r.nome || '').length > 45 ? r.nome.substring(0, 45) + '…' : (r.nome || '—');
-    const provShort = (r.provider || '').replace('LEVERAGE SHARES', 'Lev.Sh.').replace('GRANITIS', 'Granite').replace('Xtrackers', 'Xtrack.');
-
+  const rows=data.map(r=>{
+    const z=r.zona||'ND';
+    const vc=(r.volRatio||0)>=1.5?'vh':(r.volRatio||0)<0.7?'vl':'';
+    const ac=(r.ao||0)>=0?'pos':'neg';
+    const nm=(r.nome||'').length>40?(r.nome||'').slice(0,40)+'…':(r.nome||'—');
+    const ps=fp(r.perfSett),pm=fp(r.perfMese);
+    const pc=(r.perfSett||0)>=0?'pos':'neg',mc=(r.perfMese||0)>=0?'pos':'neg';
+    const pv=(r.provider||'').replace('Leverage Shares','Lev.Sh.');
     return `<tr>
-      <td><strong>${r.ticker}</strong></td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis" title="${r.nome || ''}">${nomeShort}</td>
-      <td style="font-size:10px;color:var(--text2)">${provShort}</td>
-      <td>${zonaBadge(r.zona)}</td>
-      <td><strong>${r.score || 0}</strong></td>
+      <td><b>${r.ticker}</b></td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis" title="${r.nome||''}">${nm}</td>
+      <td style="font-size:10px;color:var(--text2)">${pv}</td>
+      <td>${ZH[z]||ZH['ND']}</td>
+      <td><b>${r.score||0}</b></td>
       <td>${f3(r.prezzo)}</td>
-      <td><div class="kama-wrap">
-        <span class="kama-fast">F: ${f3(r.kama_fast)}</span>
-        <span class="kama-slow">S: ${f3(r.kama_slow)}</span>
-      </div></td>
-      <td>${r.er != null ? (r.er * 100).toFixed(0) + '%' : '—'}</td>
-      <td>${r.baff || 0}</td>
-      <td class="${aoCls}">${(r.ao || 0) >= 0 ? '▲' : '▼'} ${Math.abs(r.ao || 0).toFixed(3)}</td>
-      <td class="${volCls}">${r.volRatio != null ? r.volRatio.toFixed(1) + 'x' : '—'}</td>
-      <td>${r.rsi != null ? r.rsi.toFixed(1) : '—'}</td>
-      <td class="${sc}">${ps}</td>
+      <td><div class="kd"><span class="kf">F: ${f3(r.kama_fast)}</span><span class="ks">S: ${f3(r.kama_slow)}</span></div></td>
+      <td>${r.er!=null?(r.er*100).toFixed(0)+'%':'—'}</td>
+      <td>${r.baff||0}</td>
+      <td class="${ac}">${(r.ao||0)>=0?'▲':'▼'} ${Math.abs(r.ao||0).toFixed(3)}</td>
+      <td class="${vc}">${r.volRatio!=null?r.volRatio.toFixed(1)+'x':'—'}</td>
+      <td>${r.rsi!=null?r.rsi.toFixed(1):'—'}</td>
+      <td class="${pc}">${ps}</td>
       <td class="${mc}">${pm}</td>
+      <td><button class="btn-chart" onclick="openChart('${r.yahoo||r.ticker}')">📈</button></td>
     </tr>`;
   }).join('');
-
-  tbody.innerHTML = rows;
-  document.getElementById('mainTable').style.display = '';
-  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('tbody').innerHTML=rows;
+  document.getElementById('tbl').style.display='';
+  document.getElementById('empty').style.display='none';
 }
 
-// ═══ EXPORT EXCEL ═══════════════════════════════════════
-function exportExcel() {
-  const data = filteredData.length ? filteredData : allData;
-  if (!data.length) { alert('Nessun dato da esportare'); return; }
-  const rows = data.map(r => ({
-    Ticker: r.ticker, Nome: r.nome || '', Provider: r.provider || '',
-    Zona: r.zona || '', Score: r.score || 0,
-    Prezzo: r.prezzo || 0, KAMA_Fast: r.kama_fast || 0, KAMA_Slow: r.kama_slow || 0,
-    ER: r.er || 0, Baffetti: r.baff || 0, AO: r.ao || 0,
-    VolRatio: r.volRatio || 0, RSI: r.rsi || 0,
-    Sett_pct: r.perfSett || 0, Mese_pct: r.perfMese || 0
+function openChart(sym){
+  window.open('https://giorgiogoldoni.github.io/fixed/RAPTOR_Advanced.html?ticker='+encodeURIComponent(sym),'_blank');
+}
+
+function exportExcel(){
+  const data=filteredData.length?filteredData:allData;
+  if(!data.length){alert('Nessun dato');return;}
+  const rows=data.map(r=>({
+    Ticker:r.ticker,Nome:r.nome||'',Provider:r.provider||'',
+    Zona:r.zona||'',Score:r.score||0,Prezzo:r.prezzo||0,
+    KAMA_Fast:r.kama_fast||0,KAMA_Slow:r.kama_slow||0,
+    ER:r.er||0,Baffetti:r.baff||0,AO:r.ao||0,
+    VolRatio:r.volRatio||0,RSI:r.rsi||0,
+    Sett_pct:r.perfSett||0,Mese_pct:r.perfMese||0
   }));
-  const ws = XLSX.utils.json_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'RAPTOR Leva');
-  XLSX.writeFile(wb, `raptor_leva_${new Date().toISOString().slice(0,10)}.xlsx`);
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'RAPTOR Leva');
+  XLSX.writeFile(wb,'raptor_leva_'+new Date().toISOString().slice(0,10)+'.xlsx');
 }
 
-// ═══ SPECS MODAL ════════════════════════════════════════
-function openSpecs()  { document.getElementById('specsModal').style.display = 'block'; document.body.style.overflow = 'hidden'; }
-function closeSpecs() { document.getElementById('specsModal').style.display = 'none';  document.body.style.overflow = ''; }
+function openModal() {document.getElementById('modal').style.display='block';document.body.style.overflow='hidden'}
+function closeModal(){document.getElementById('modal').style.display='none';document.body.style.overflow=''}
 
-// ═══ INIT ════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => { loadJSON(); });
+document.addEventListener('DOMContentLoaded',loadJSON);
 </script>
 </body>
 </html>
