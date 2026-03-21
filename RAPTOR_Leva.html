@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>⚡ RAPTOR Leva</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
   --bg:#f5f7fa;--bg2:#fff;--bg3:#eef0f3;--border:#d0d7de;
@@ -115,6 +116,25 @@ tr:hover td{background:#fef2f2}
 .mi table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px}
 .mi th{background:#fef2f2;padding:5px 9px;text-align:left;border:1px solid #fca5a5}
 .mi td{padding:4px 9px;border:1px solid #fca5a5}
+
+/* CHART MODAL */
+#chartModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:4000;overflow-y:auto;padding:20px}
+.cm{background:#0f1117;max-width:1000px;margin:0 auto;border-radius:12px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.cmh{background:#1a1a2e;color:#e2e8f0;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2d3748}
+.cmh .ctitle{font-size:15px;font-weight:700;color:#f8fafc}
+.cmh .csub{font-size:10px;color:#94a3b8;margin-top:2px}
+.cmh .cclose{background:rgba(255,255,255,.1);border:none;color:#e2e8f0;font-size:16px;cursor:pointer;border-radius:6px;padding:3px 11px}
+.cmtf{display:flex;gap:4px;padding:8px 18px;background:#1a1a2e;border-bottom:1px solid #2d3748}
+.cmtf button{background:#2d3748;border:1px solid #4a5568;color:#94a3b8;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:10px;font-family:inherit}
+.cmtf button:hover,.cmtf button.act{background:#dc2626;border-color:#dc2626;color:#fff}
+.cmbody{padding:12px 16px;background:#0f1117}
+.cpanel{background:#1a1a2e;border:1px solid #2d3748;border-radius:6px;margin-bottom:8px;padding:8px 12px}
+.cplbl{font-size:9px;color:#dc2626;letter-spacing:1px;margin-bottom:4px}
+.cpanel canvas{width:100%!important;display:block}
+.cstats{display:flex;gap:8px;flex-wrap:wrap;padding:8px 16px;background:#1a1a2e;border-top:1px solid #2d3748}
+.cstat{background:#2d3748;border-radius:5px;padding:5px 10px;text-align:center}
+.cstat .sl{font-size:8px;color:#94a3b8}
+.cstat .sv{font-size:13px;font-weight:700;color:#e2e8f0}
 
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:var(--bg)}
@@ -251,7 +271,175 @@ tr:hover td{background:#fef2f2}
   </div>
 </div>
 
+<!-- CHART MODAL -->
+<div id="chartModal">
+  <div class="cm">
+    <div class="cmh">
+      <div>
+        <div class="ctitle" id="cmTitle">—</div>
+        <div class="csub" id="cmSub">—</div>
+      </div>
+      <button class="cclose" onclick="closeChartModal()">✕</button>
+    </div>
+    <div class="cmtf">
+      <span style="font-size:10px;color:#94a3b8;align-self:center;margin-right:4px">TF:</span>
+      <button onclick="setChartTF('1m')" id="ctf1m" class="act">1m</button>
+      <button onclick="setChartTF('3m')" id="ctf3m">3m</button>
+      <button onclick="setChartTF('6m')" id="ctf6m">6m</button>
+      <button onclick="setChartTF('1y')" id="ctf1y">1a</button>
+    </div>
+    <div class="cmbody">
+      <div class="cpanel">
+        <div class="cplbl">PREZZO · KAMA VELOCE (rossa) · KAMA LENTA (viola)</div>
+        <canvas id="cChart1" height="180"></canvas>
+      </div>
+      <div class="cpanel">
+        <div class="cplbl">AO VELOCE (EMA3−EMA13)</div>
+        <canvas id="cChart2" height="70"></canvas>
+      </div>
+    </div>
+    <div class="cstats" id="cStatsBar"></div>
+  </div>
+</div>
+
 <script>
+
+const JSON_URL='https://raw.githubusercontent.com/Giorgiogoldoni/raptor-leva/main/raptor_leva.json';
+const CHART_JSON_URL='https://raw.githubusercontent.com/Giorgiogoldoni/fixed/main/raptor_chart.json';
+let chartJsonCache=null;
+let currentChartTicker=null;
+let currentChartTF='1m';
+let chartInst1=null,chartInst2=null;
+
+// ── KAMA calcolata lato client per il grafico ───────────────────
+function calcKAMA(close,n,fast,slow){
+  const fsc=2/(fast+1),ssc=2/(slow+1);
+  const k=new Array(close.length).fill(null);
+  if(close.length<=n)return k;
+  k[n]=close[n];
+  for(let i=n+1;i<close.length;i++){
+    const dir=Math.abs(close[i]-close[i-n]);
+    let vol=0; for(let j=i-n+1;j<=i;j++)vol+=Math.abs(close[j]-close[j-1]);
+    const er=vol>0?dir/vol:0;
+    const sc=Math.pow(er*(fsc-ssc)+ssc,2);
+    k[i]=k[i-1]+sc*(close[i]-k[i-1]);
+  }
+  return k;
+}
+function calcAOFast(high,low){
+  const mid=high.map((h,i)=>(h+low[i])/2);
+  if(mid.length<13)return new Array(mid.length).fill(0);
+  function ema(arr,p){const kk=2/(p+1);let e=arr[0];const r=[e];for(let i=1;i<arr.length;i++){e=arr[i]*kk+e*(1-kk);r.push(e);}return r;}
+  const e3=ema(mid,3),e13=ema(mid,13);
+  return e3.map((v,i)=>v-e13[i]);
+}
+
+// ── OPEN CHART ──────────────────────────────────────────────────
+async function openChart(sym){
+  currentChartTicker=sym;
+  const row=allData.find(r=>r.yahoo===sym||r.ticker===sym);
+  document.getElementById('cmTitle').textContent=sym+(row&&row.nome?' — '+row.nome.slice(0,50):'');
+  document.getElementById('cmSub').textContent='Doppia KAMA · AO EMA3-EMA13 · Dati da raptor_chart.json';
+  document.getElementById('chartModal').style.display='block';
+  document.body.style.overflow='hidden';
+  await loadChartData();
+}
+function closeChartModal(){
+  document.getElementById('chartModal').style.display='none';
+  document.body.style.overflow='';
+  if(chartInst1){chartInst1.destroy();chartInst1=null;}
+  if(chartInst2){chartInst2.destroy();chartInst2=null;}
+}
+function setChartTF(tf){
+  currentChartTF=tf;
+  ['1m','3m','6m','1y'].forEach(t=>{
+    document.getElementById('ctf'+t).classList.remove('act');
+  });
+  document.getElementById('ctf'+tf).classList.add('act');
+  loadChartData();
+}
+
+async function loadChartData(){
+  if(!chartJsonCache){
+    try{
+      const r=await fetch(CHART_JSON_URL);
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      chartJsonCache=await r.json();
+    }catch(e){
+      document.getElementById('cmSub').textContent='⚠️ raptor_chart.json non disponibile: '+e.message;
+      return;
+    }
+  }
+  const bars_n={'1m':21,'3m':63,'6m':126,'1y':252}[currentChartTF]||21;
+  const sym=currentChartTicker;
+  const key=Object.keys(chartJsonCache.data||{}).find(k=>k.toLowerCase()===sym.toLowerCase());
+  if(!key){
+    document.getElementById('cmSub').textContent='⚠️ Dati non disponibili per '+sym+' in raptor_chart.json';
+    return;
+  }
+  const raw=(chartJsonCache.data[key].d||[]).slice(-bars_n);
+  if(raw.length<10){
+    document.getElementById('cmSub').textContent='⚠️ Dati insufficienti ('+raw.length+' barre)';
+    return;
+  }
+  const closes=raw.map(b=>b[4]);
+  const highs =raw.map(b=>b[2]);
+  const lows  =raw.map(b=>b[3]);
+  const labels=raw.map(b=>{const d=new Date(b[0]*1000);return d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});});
+  const kf=calcKAMA(closes,5,3,20);
+  const ks=calcKAMA(closes,20,2,40);
+  const ao=calcAOFast(highs,lows);
+
+  // aggiorna stats bar
+  const lc=closes[closes.length-1];
+  const lkf=kf[kf.length-1];
+  const lks=ks[ks.length-1];
+  const lao=ao[ao.length-1];
+  document.getElementById('cStatsBar').innerHTML=
+    '<div class="cstat"><div class="sl">PREZZO</div><div class="sv" style="color:'+(lc>(lkf||lc)?'#3fb950':'#f85149')+'">'+lc.toFixed(3)+'</div></div>'+
+    '<div class="cstat"><div class="sl">KAMA FAST</div><div class="sv" style="color:#f85149">'+(lkf?lkf.toFixed(3):'—')+'</div></div>'+
+    '<div class="cstat"><div class="sl">KAMA SLOW</div><div class="sv" style="color:#a78bfa">'+(lks?lks.toFixed(3):'—')+'</div></div>'+
+    '<div class="cstat"><div class="sl">AO EMA3-13</div><div class="sv" style="color:'+(lao>=0?'#3fb950':'#f85149')+'">'+(lao>=0?'▲':'▼')+lao.toFixed(3)+'</div></div>';
+
+  // distruggi chart precedenti
+  if(chartInst1){chartInst1.destroy();chartInst1=null;}
+  if(chartInst2){chartInst2.destroy();chartInst2=null;}
+
+  // P1: Prezzo + KAMA fast + KAMA slow
+  const ctx1=document.getElementById('cChart1').getContext('2d');
+  chartInst1=new Chart(ctx1,{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Prezzo',data:closes.map(v=>+v.toFixed(3)),borderColor:'#e2e8f0',borderWidth:2.5,pointRadius:0,tension:0},
+      {label:'KAMA Fast',data:kf.map(v=>v!=null?+v.toFixed(3):null),borderColor:'#f85149',borderWidth:2,pointRadius:0,tension:0.2,spanGaps:true},
+      {label:'KAMA Slow',data:ks.map(v=>v!=null?+v.toFixed(3):null),borderColor:'#a78bfa',borderWidth:2,pointRadius:0,tension:0.3,spanGaps:true,borderDash:[5,3]},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{labels:{color:'#94a3b8',font:{size:9},boxWidth:12}},
+        tooltip:{backgroundColor:'#1a1a2e',titleColor:'#e2e8f0',bodyColor:'#94a3b8',
+          callbacks:{label:c=>' '+c.dataset.label+': '+c.parsed.y?.toFixed(3)}}},
+      scales:{x:{ticks:{color:'#64748b',font:{size:8},maxTicksLimit:10},grid:{color:'#2d3748'}},
+              y:{ticks:{color:'#64748b',font:{size:9}},grid:{color:'#2d3748'},position:'right'}}}
+  });
+
+  // P2: AO veloce
+  const aoColors=ao.map((v,i)=>v>=(ao[i-1]??v)?'#3fb950':'#f85149');
+  const ctx2=document.getElementById('cChart2').getContext('2d');
+  chartInst2=new Chart(ctx2,{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'AO',data:ao.map(v=>+v.toFixed(4)),backgroundColor:aoColors,borderRadius:1}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1a2e',titleColor:'#e2e8f0',bodyColor:'#94a3b8'}},
+      scales:{x:{ticks:{color:'#64748b',font:{size:8},maxTicksLimit:10},grid:{color:'#2d3748'}},
+              y:{ticks:{color:'#64748b',font:{size:8}},grid:{color:'#2d3748'},position:'right'}}}
+  });
+
+  document.getElementById('cmSub').textContent='Dati da raptor_chart.json · '+raw.length+' barre · KAMA F(5,3,20) · KAMA S(20,2,40)';
+}
+
 const JSON_URL='https://raw.githubusercontent.com/Giorgiogoldoni/raptor-leva/main/raptor_leva.json';
 let allData=[],filteredData=[];
 let activeSig='ALL',activeProv='ALL';
