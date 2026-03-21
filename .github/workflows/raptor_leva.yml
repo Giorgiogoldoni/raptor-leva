@@ -25,6 +25,9 @@ jobs:
         run: pip install yfinance
 
       - name: Esegui RAPTOR Leva Fetch
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
         run: python raptor_leva_fetch.py
 
       - name: Commit e push raptor_leva.json
