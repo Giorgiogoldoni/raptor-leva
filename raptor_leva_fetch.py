@@ -191,6 +191,22 @@ def process_leva(info, regime_mult):
         perf5  = round((lc/close[-6]-1)*100,2)  if len(close)>6  else 0
         perf20 = round((lc/close[-21]-1)*100,2) if len(close)>21 else 0
 
+        # Data cambio zona (crossover KAMA)
+        entry_date = '—'
+        try:
+            timestamps = [int(t.timestamp()) for t in hist.index]
+            zona_series = []
+            for ii in range(len(close)):
+                kfi = kama_fast[ii]; ksi = kama_slow[ii]
+                zona_series.append(get_zona(close[ii], kfi, ksi) if kfi and ksi else 'ND')
+            current_z = zona_series[-1]
+            for idx in range(len(zona_series)-2, max(0, len(zona_series)-60), -1):
+                if zona_series[idx] != current_z:
+                    dt = datetime.datetime.fromtimestamp(timestamps[idx+1])
+                    entry_date = dt.strftime('%d/%m/%Y')
+                    break
+        except: pass
+
         return {
             'ticker':    info['t'],
             'yahoo':     symbol,
@@ -209,9 +225,89 @@ def process_leva(info, regime_mult):
             'volRatio':  vol_r,
             'perfSett':  perf5,
             'perfMese':  perf20,
+            'entryDate': entry_date,
         }
     except Exception:
         return None
+
+
+# ═══════════════════════════════════════════════════════
+# EMAIL ALERT
+# ═══════════════════════════════════════════════════════
+def send_alert_email(alerts, vix, vstoxx, regime, now):
+    import smtplib, os
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    EMAIL_USER = os.environ.get('EMAIL_USER','')
+    EMAIL_PASS = os.environ.get('EMAIL_PASS','')
+    if not EMAIL_USER or not EMAIL_PASS:
+        print("EMAIL non configurata — skip")
+        return
+    ICONS = {'LONG_CONF':'🟢 LONG CONF','LONG_EARLY':'🔵 LONG EARLY',
+             'GRIGIA':'🟡 GRIGIA','USCITA':'🔴 USCITA','STOP':'⛔ STOP'}
+    subj = "⚡ RAPTOR LEVA — {} segnale/i · {}".format(len(alerts), now.strftime('%d/%m/%Y %H:%M'))
+    rows_html = ""
+    for a in alerts:
+        bg = '#dafbe1' if 'LONG' in a['new'] else '#ffebe9'
+        rows_html += '<tr style="background:{}">' \
+            '<td style="padding:7px;font-weight:700;font-family:monospace">{}</td>' \
+            '<td style="padding:7px;font-size:11px;color:#57606a">{}</td>' \
+            '<td style="padding:7px">{}</td>' \
+            '<td style="padding:7px">→</td>' \
+            '<td style="padding:7px;font-weight:700">{}</td>' \
+            '<td style="padding:7px;font-family:monospace">{}</td>' \
+            '<td style="padding:7px;font-family:monospace;color:#dc2626">F:{}</td>' \
+            '<td style="padding:7px;font-family:monospace;color:#7c3aed">S:{}</td>' \
+            '<td style="padding:7px;font-weight:700">{}</td>' \
+            '<td style="padding:7px">{}</td>' \
+            '</tr>'.format(
+                bg, a['ticker'], (a['nome'] or '')[:45],
+                ICONS.get(a['old'],a['old']), ICONS.get(a['new'],a['new']),
+                a['prezzo'], a['kf'], a['ks'], a['score'], a['entry'])
+    vix_c = '#1a7f37' if (vix or 20)<20 else '#bc4c00' if (vix or 20)<30 else '#cf222e'
+    html = """<!DOCTYPE html><html><body style="font-family:'Segoe UI',sans-serif;background:#f5f7fa;padding:20px">
+<div style="max-width:860px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1)">
+  <div style="background:#dc2626;color:#fff;padding:14px 20px">
+    <h2 style="margin:0;font-size:18px">⚡ RAPTOR LEVA — Nuovi Segnali</h2>
+    <p style="margin:4px 0 0;font-size:12px;opacity:.85">{ts} · Regime: {reg} · VIX: {vx} / VSTOXX: {vs}</p>
+  </div>
+  <div style="padding:16px">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:#f5f7fa">
+        <th style="padding:6px;text-align:left;border-bottom:2px solid #d0d7de">Ticker</th>
+        <th style="padding:6px;text-align:left;border-bottom:2px solid #d0d7de">Nome</th>
+        <th style="padding:6px;border-bottom:2px solid #d0d7de">Da</th>
+        <th style="padding:6px;border-bottom:2px solid #d0d7de"></th>
+        <th style="padding:6px;border-bottom:2px solid #d0d7de">A</th>
+        <th style="padding:6px;border-bottom:2px solid #d0d7de">Prezzo</th>
+        <th style="padding:6px;border-bottom:2px solid #d0d7de">KAMA F</th>
+        <th style="padding:6px;border-bottom:2px solid #d0d7de">KAMA S</th>
+        <th style="padding:6px;border-bottom:2px solid #d0d7de">Score</th>
+        <th style="padding:6px;border-bottom:2px solid #d0d7de">Data</th>
+      </tr></thead>
+      <tbody>{rows}</tbody>
+    </table>
+    <p style="margin-top:12px;font-size:11px;color:#57606a">
+      🌡️ VIX: <b style="color:{vc}">{vx}</b> · VSTOXX: {vs} · Regime: <b>{reg}</b><br>
+      ⚠️ Solo uso educativo.<br>
+      📊 <a href="https://giorgiogoldoni.github.io/raptor-leva/">Apri RAPTOR Leva</a>
+    </p>
+  </div>
+</div></body></html>""".format(
+        ts=now.strftime('%d/%m/%Y %H:%M'), reg=regime,
+        vx=vix, vs=vstoxx, vc=vix_c, rows=rows_html)
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subj
+        msg['From'] = EMAIL_USER
+        msg['To'] = EMAIL_USER
+        msg.attach(MIMEText(html,'html'))
+        with smtplib.SMTP_SSL('smtp.gmail.com',465) as srv:
+            srv.login(EMAIL_USER, EMAIL_PASS)
+            srv.sendmail(EMAIL_USER, EMAIL_USER, msg.as_string())
+        print("Email inviata: {} alert".format(len(alerts)))
+    except Exception as e:
+        print("Errore email: {}".format(e))
 
 # ═══════════════════════════════════════════════════════
 # MAIN
@@ -237,6 +333,34 @@ def main():
         if (i+1) % 20 == 0:
             print(f"  {i+1}/{len(TICKERS)} — ok:{len(results)} err:{errors}")
         time.sleep(0.3)
+
+    # 3. Rileva cambi segnale e manda email
+    prev_zones = {}
+    try:
+        with open('raptor_leva.json','r',encoding='utf-8') as f:
+            prev_j = json.load(f)
+            for r in prev_j.get('data',[]):
+                prev_zones[r['ticker']] = r.get('zona','')
+    except: pass
+
+    CAMBI = {
+        ('USCITA','LONG_CONF'),('STOP','LONG_CONF'),('GRIGIA','LONG_CONF'),('LONG_EARLY','LONG_CONF'),
+        ('USCITA','LONG_EARLY'),('STOP','LONG_EARLY'),('GRIGIA','LONG_EARLY'),
+        ('LONG_CONF','USCITA'),('LONG_EARLY','USCITA'),
+        ('LONG_CONF','STOP'),('LONG_EARLY','STOP'),
+    }
+    alert_list = []
+    for r in results:
+        old_z = prev_zones.get(r['ticker'],'')
+        new_z = r.get('zona','')
+        if old_z and new_z and old_z != new_z and (old_z,new_z) in CAMBI:
+            alert_list.append({'ticker':r['ticker'],'nome':r.get('nome',''),
+                'old':old_z,'new':new_z,'score':r['score'],'prezzo':r['prezzo'],
+                'kf':r.get('kama_fast','—'),'ks':r.get('kama_slow','—'),
+                'entry':r.get('entryDate','—')})
+    print("Alert rilevati: {}".format(len(alert_list)))
+    if alert_list:
+        send_alert_email(alert_list, vix, vstoxx, regime['regime'], now)
 
     # 3. Salva
     output = {
