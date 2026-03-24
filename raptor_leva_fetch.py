@@ -101,11 +101,34 @@ def get_zona(price, kama_fast, kama_slow):
         return 'STOP' if gap > 2 else 'USCITA'
     return 'GRIGIA'
 
-def get_segnale_leva(zona, ao, vol_ratio, er, baf):
-    """Segnale leva — più selettivo, richiede volume e momentum"""
-    if zona == 'LONG_CONF' and ao > 0 and vol_ratio >= 1.5 and baf >= 2:
+# ── FILTRI QUALITÀ (v2) ─────────────────────────────────────────
+VOL_MIN_CONF  = 2.0   # volume minimo per LONG_CONF
+VOL_MIN_EARLY = 1.5   # volume minimo per LONG_EARLY
+BAF_MIN_CONF  = 3     # baffetti minimi per LONG_CONF
+BAF_MIN_EARLY = 3     # baffetti minimi per LONG_EARLY
+ER_MIN        = 0.35  # efficiency ratio minimo
+KAMA_GAP_MIN  = 0.003 # gap minimo KAMA fast/slow (0.3%)
+SCORE_MIN     = 65    # score minimo per comparire come segnale
+VIX_BLOCK     = 28    # sopra questa soglia: blocco totale Long
+VIX_ONLY_CONF = 22    # tra 22 e 28: solo LONG_CONF (no EARLY)
+
+def get_segnale_leva(zona, ao, vol_ratio, er, baf, kama_fast=None, kama_slow=None, regime='NORMALE'):
+    """Segnale leva v2 — filtri qualità stretti"""
+    # Blocco VIX in STRESS/PAURA
+    if regime in ('STRESS','PAURA'):
+        if zona == 'STOP':   return 'STOP'
+        if zona == 'USCITA': return 'USCITA'
+        return ''  # nessun Long in regime di paura
+
+    # Gap minimo tra le due KAMA
+    kama_gap_ok = True
+    if kama_fast and kama_slow and kama_slow > 0:
+        kama_gap_ok = abs(kama_fast - kama_slow) / kama_slow >= KAMA_GAP_MIN
+
+    if zona == 'LONG_CONF' and ao > 0 and vol_ratio >= VOL_MIN_CONF and baf >= BAF_MIN_CONF and er >= ER_MIN and kama_gap_ok:
         return 'LONG'
-    elif zona == 'LONG_EARLY' and ao > 0 and baf >= 2:
+    elif zona == 'LONG_EARLY' and ao > 0 and vol_ratio >= VOL_MIN_EARLY and baf >= BAF_MIN_EARLY and er >= ER_MIN and kama_gap_ok and regime not in ('ATTENZIONE',):
+        # In ATTENZIONE solo LONG_CONF
         return 'EARLY'
     elif zona == 'LONG_CONF' or zona == 'LONG_EARLY':
         return 'WATCH'
@@ -160,7 +183,7 @@ def fetch_vix():
 # ═══════════════════════════════════════════════════════
 # PROCESS TICKER LEVA
 # ═══════════════════════════════════════════════════════
-def process_leva(info, regime_mult):
+def process_leva(info, regime_mult, regime_name='NORMALE'):
     symbol = info['y']
     try:
         tk = yf.Ticker(symbol)
@@ -185,7 +208,7 @@ def process_leva(info, regime_mult):
         rsi      = calc_rsi(close)
         baf      = calc_baffetti_fast(high, low)
         zona     = get_zona(lc, kf, ks)
-        segnale  = get_segnale_leva(zona, ao, vol_r, er, baf)
+        segnale  = get_segnale_leva(zona, ao, vol_r, er, baf, kf, ks, regime_name)
         score    = calc_score_leva(zona, ao, vol_r, er, baf, regime_mult)
 
         perf5  = round((lc/close[-6]-1)*100,2)  if len(close)>6  else 0
@@ -226,6 +249,7 @@ def process_leva(info, regime_mult):
             'perfSett':  perf5,
             'perfMese':  perf20,
             'entryDate': entry_date,
+            'quality':   segnale in ('LONG','EARLY'),
         }
     except Exception:
         return None
@@ -234,7 +258,7 @@ def process_leva(info, regime_mult):
 # ═══════════════════════════════════════════════════════
 # EMAIL ALERT
 # ═══════════════════════════════════════════════════════
-def send_alert_email(alerts, vix, vstoxx, regime, now):
+def send_alert_email(alerts, vix, vstoxx, regime, now, prev_regime=None):
     import smtplib, os
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
@@ -245,7 +269,18 @@ def send_alert_email(alerts, vix, vstoxx, regime, now):
         return
     ICONS = {'LONG_CONF':'🟢 LONG CONF','LONG_EARLY':'🔵 LONG EARLY',
              'GRIGIA':'🟡 GRIGIA','USCITA':'🔴 USCITA','STOP':'⛔ STOP'}
-    subj = "⚡ RAPTOR LEVA — {} segnale/i · {}".format(len(alerts), now.strftime('%d/%m/%Y %H:%M'))
+    regime_banner = ''
+    if prev_regime:
+        r_icons = {'CALMA':'🟢','NORMALE':'🟡','ATTENZIONE':'🟠','STRESS':'🔴','PAURA':'⛔'}
+        regime_banner = '<div style="background:#1a1a2e;border:2px solid #f59e0b;border-radius:8px;padding:10px 16px;margin-bottom:14px">' \
+            '<b style="color:#f59e0b">⚠️ CAMBIO REGIME VIX</b>&nbsp;&nbsp;' \
+            '{} {} &nbsp;→&nbsp; {} <b>{}</b></div>'.format(
+                r_icons.get(prev_regime,''), prev_regime,
+                r_icons.get(regime,''), regime)
+        subj_prefix = "⚠️ REGIME {} →".format(regime)
+    else:
+        subj_prefix = "⚡ RAPTOR LEVA —"
+    subj = "{} {} segnale/i · {}".format(subj_prefix, len(alerts), now.strftime('%d/%m/%Y %H:%M'))
     rows_html = ""
     for a in alerts:
         bg = '#dafbe1' if 'LONG' in a['new'] else '#ffebe9'
@@ -259,13 +294,17 @@ def send_alert_email(alerts, vix, vstoxx, regime, now):
             '<td style="padding:7px;font-family:monospace;color:#dc2626">F:{}</td>' \
             '<td style="padding:7px;font-family:monospace;color:#7c3aed">S:{}</td>' \
             '<td style="padding:7px;font-weight:700">{}</td>' \
+            '<td style="padding:7px;color:#1a7f37;font-weight:700">{}x</td>' \
             '<td style="padding:7px">{}</td>' \
             '</tr>'.format(
                 bg, a['ticker'], (a['nome'] or '')[:45],
                 ICONS.get(a['old'],a['old']), ICONS.get(a['new'],a['new']),
-                a['prezzo'], a['kf'], a['ks'], a['score'], a['entry'])
+                a['prezzo'], a['kf'], a['ks'], a['score'],
+                round(a.get('vol',0),1), a['entry'])
+    # Inserisci banner regime nel corpo HTML
+    rows_html = regime_banner + rows_html if regime_banner else rows_html
     vix_c = '#1a7f37' if (vix or 20)<20 else '#bc4c00' if (vix or 20)<30 else '#cf222e'
-    html = """<!DOCTYPE html><html><body style="font-family:'Segoe UI',sans-serif;background:#f5f7fa;padding:20px">
+    html = """<!DOCTYPE html><html><body style='font-family:"Segoe UI",sans-serif;background:#f5f7fa;padding:20px'>
 <div style="max-width:860px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1)">
   <div style="background:#dc2626;color:#fff;padding:14px 20px">
     <h2 style="margin:0;font-size:18px">⚡ RAPTOR LEVA — Nuovi Segnali</h2>
@@ -327,7 +366,7 @@ def main():
     # 2. Fetch ticker
     results = []; errors = 0
     for i, info in enumerate(TICKERS):
-        r = process_leva(info, regime['mult'])
+        r = process_leva(info, regime['mult'], regime['regime'])
         if r: results.append(r)
         else: errors += 1
         if (i+1) % 20 == 0:
@@ -343,6 +382,12 @@ def main():
                 prev_zones[r['ticker']] = r.get('zona','')
     except: pass
 
+    # Cambio regime VIX — avviso indipendente
+    prev_regime = prev_j.get('regime','') if 'prev_j' in dir() else ''
+    regime_changed = prev_regime and prev_regime != regime['regime']
+    if regime_changed:
+        print("REGIME CAMBIATO: {} → {}".format(prev_regime, regime['regime']))
+
     CAMBI = {
         ('USCITA','LONG_CONF'),('STOP','LONG_CONF'),('GRIGIA','LONG_CONF'),('LONG_EARLY','LONG_CONF'),
         ('USCITA','LONG_EARLY'),('STOP','LONG_EARLY'),('GRIGIA','LONG_EARLY'),
@@ -353,14 +398,18 @@ def main():
     for r in results:
         old_z = prev_zones.get(r['ticker'],'')
         new_z = r.get('zona','')
-        if old_z and new_z and old_z != new_z and (old_z,new_z) in CAMBI:
-            alert_list.append({'ticker':r['ticker'],'nome':r.get('nome',''),
-                'old':old_z,'new':new_z,'score':r['score'],'prezzo':r['prezzo'],
-                'kf':r.get('kama_fast','—'),'ks':r.get('kama_slow','—'),
-                'entry':r.get('entryDate','—')})
-    print("Alert rilevati: {}".format(len(alert_list)))
-    if alert_list:
-        send_alert_email(alert_list, vix, vstoxx, regime['regime'], now)
+        # Solo alert per ticker di qualità (rispettano tutti i filtri)
+        if r.get('quality') and old_z and new_z and old_z != new_z and (old_z,new_z) in CAMBI:
+            if r.get('score',0) >= SCORE_MIN:
+                alert_list.append({'ticker':r['ticker'],'nome':r.get('nome',''),
+                    'old':old_z,'new':new_z,'score':r['score'],'prezzo':r['prezzo'],
+                    'kf':r.get('kama_fast','—'),'ks':r.get('kama_slow','—'),
+                    'entry':r.get('entryDate','—'),'vol':r.get('volRatio',0),
+                    'er':r.get('er',0),'baff':r.get('baff',0)})
+    print("Alert qualità: {}".format(len(alert_list)))
+    if alert_list or regime_changed:
+        send_alert_email(alert_list, vix, vstoxx, regime['regime'], now,
+                        prev_regime if regime_changed else None)
 
     # 3. Salva
     output = {
