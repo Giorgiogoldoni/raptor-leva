@@ -245,25 +245,45 @@ tr:hover td{background:#fef2f2}
           <tr><td><span class="zona z-S">⛔ STOP</span></td><td>Prezzo &gt;2% sotto KAMA Slow</td><td>Stop loss immediato</td></tr>
         </tbody>
       </table>
-      <h3>📊 Indicatori</h3>
+      <h3>📊 Filtri Qualità (v2)</h3>
       <table>
-        <thead><tr><th>Indicatore</th><th>Parametri leva</th><th>vs Standard</th></tr></thead>
+        <thead><tr><th>Filtro</th><th>Soglia</th><th>Motivo</th></tr></thead>
         <tbody>
-          <tr><td><b>AO Veloce</b></td><td>EMA3 − EMA13 midpoint H+L</td><td>Standard: EMA5-EMA34</td></tr>
-          <tr><td><b>Baffetti</b></td><td>≥2 consecutive crescenti</td><td>≥3 per ETF normali</td></tr>
-          <tr><td><b>Vol Ratio</b></td><td>&gt;1.5x media 20gg</td><td>Richiesto per LONG_CONF</td></tr>
-          <tr><td><b>ER</b></td><td>n=10</td><td>Stesso parametro</td></tr>
+          <tr><td><b>Volume Ratio</b></td><td style="color:#1a7f37;font-weight:700">≥ 2.0x</td><td>Conferma interesse reale del mercato</td></tr>
+          <tr><td><b>Baffetti AO</b></td><td style="color:#1a7f37;font-weight:700">≥ 3 consecutive</td><td>Momentum continuativo, non rimbalzo</td></tr>
+          <tr><td><b>ER (Efficiency Ratio)</b></td><td style="color:#1a7f37;font-weight:700">≥ 0.35</td><td>Filtra i mercati laterali</td></tr>
+          <tr><td><b>Gap KAMA Fast/Slow</b></td><td style="color:#1a7f37;font-weight:700">≥ 0.3%</td><td>Evita crossover marginali e falsi segnali</td></tr>
+          <tr><td><b>Score minimo</b></td><td style="color:#1a7f37;font-weight:700">≥ 65</td><td>Soglia qualità complessiva</td></tr>
         </tbody>
       </table>
-      <h3>🌡️ Regime VIX</h3>
+      <h3>📊 Indicatori</h3>
       <table>
-        <thead><tr><th>VIX medio</th><th>Regime</th><th>Score mult</th></tr></thead>
+        <thead><tr><th>Indicatore</th><th>Parametri leva</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td>&lt;15</td><td style="color:#1a7f37;font-weight:700">CALMA</td><td>×1.00</td></tr>
-          <tr><td>15–20</td><td style="color:#7d4e00;font-weight:700">NORMALE</td><td>×0.95</td></tr>
-          <tr><td>20–25</td><td style="color:#bc4c00;font-weight:700">ATTENZIONE</td><td>×0.85</td></tr>
-          <tr><td>25–30</td><td style="color:#cf222e;font-weight:700">STRESS</td><td>×0.70</td></tr>
-          <tr><td>&gt;30</td><td style="color:#a40000;font-weight:700">PAURA</td><td>×0.50</td></tr>
+          <tr><td><b>AO Veloce</b></td><td>EMA3 − EMA13 midpoint H+L</td><td>Più reattivo del classico EMA5-EMA34</td></tr>
+          <tr><td><b>Vol Ratio</b></td><td>&gt;2.0x media 20gg</td><td>Obbligatorio per LONG_CONF e LONG_EARLY</td></tr>
+          <tr><td><b>ER</b></td><td>n=10, soglia 0.35</td><td>Misura efficienza del movimento direzionale</td></tr>
+        </tbody>
+      </table>
+      <h3>🌡️ Regime VIX e impatto segnali</h3>
+      <table>
+        <thead><tr><th>VIX medio</th><th>Regime</th><th>Score mult</th><th>Segnali attivi</th></tr></thead>
+        <tbody>
+          <tr><td>&lt;15</td><td style="color:#1a7f37;font-weight:700">🟢 CALMA</td><td>×1.00</td><td>LONG_CONF + LONG_EARLY</td></tr>
+          <tr><td>15–20</td><td style="color:#7d4e00;font-weight:700">🟡 NORMALE</td><td>×0.95</td><td>LONG_CONF + LONG_EARLY</td></tr>
+          <tr><td>20–25</td><td style="color:#bc4c00;font-weight:700">🟠 ATTENZIONE</td><td>×0.85</td><td>Solo LONG_CONF (no Early)</td></tr>
+          <tr><td>25–28</td><td style="color:#cf222e;font-weight:700">🔴 STRESS</td><td>×0.70</td><td style="color:#cf222e;font-weight:700">❌ Blocco totale Long</td></tr>
+          <tr><td>&gt;28</td><td style="color:#a40000;font-weight:700">⛔ PAURA</td><td>×0.50</td><td style="color:#a40000;font-weight:700">❌ Solo USCITA e STOP</td></tr>
+        </tbody>
+      </table>
+      <h3>📧 Email Alert</h3>
+      <table>
+        <thead><tr><th>Trigger</th><th>Condizione aggiuntiva</th></tr></thead>
+        <tbody>
+          <tr><td>Qualsiasi → 🟢 LONG_CONF</td><td>Score ≥ 65 + tutti i filtri qualità</td></tr>
+          <tr><td>Qualsiasi → 🔵 LONG_EARLY</td><td>Score ≥ 65 + tutti i filtri qualità</td></tr>
+          <tr><td>LONG → 🔴 USCITA / ⛔ STOP</td><td>Sempre — uscita prioritaria</td></tr>
+          <tr><td>⚠️ Cambio regime VIX</td><td>Email indipendente con banner avviso</td></tr>
         </tbody>
       </table>
       <p style="font-size:10px;color:#57606a;margin-top:8px">⚠️ Strumenti a leva amplificano guadagni E perdite. Solo uso educativo — non consulenza finanziaria.</p>
