@@ -207,6 +207,8 @@ tr:hover td{background:#fef2f2}
         <th onclick="sortBy('rsi')">RSI</th>
         <th onclick="sortBy('perfSett')">Sett%</th>
         <th onclick="sortBy('perfMese')">Mese%</th>
+        <th onclick="sortBy('entryDate')">🕐 Segnale</th>
+        <th onclick="sortBy('sar')">SAR</th>
         <th>📈</th>
       </tr>
     </thead>
@@ -325,7 +327,7 @@ tr:hover td{background:#fef2f2}
 <script>
 
 const JSON_URL='https://raw.githubusercontent.com/Giorgiogoldoni/raptor-leva/main/raptor_leva.json';
-const CHART_JSON_URL='https://raw.githubusercontent.com/Giorgiogoldoni/fixed/main/raptor_chart.json';
+const CHART_JSON_URL='https://raw.githubusercontent.com/Giorgiogoldoni/raptor-leva/main/raptor_chart_leva.json';
 let chartJsonCache=null;
 let currentChartTicker=null;
 let currentChartTF='1m';
@@ -346,6 +348,26 @@ function calcKAMA(close,n,fast,slow){
   }
   return k;
 }
+function calcSAR(high,low,step,maxAf){
+  const n=high.length; const sar=new Array(n).fill(null);
+  if(n<5)return sar;
+  let bull=high[1]>high[0],af=step,ep=bull?Math.max(high[0],high[1]):Math.min(low[0],low[1]);
+  sar[1]=bull?Math.min(low[0],low[1]):Math.max(high[0],high[1]);
+  for(let i=2;i<n;i++){
+    const ps=sar[i-1];
+    if(bull){
+      sar[i]=Math.min(ps+af*(ep-ps),low[i-1],i>=2?low[i-2]:low[i-1]);
+      if(low[i]<sar[i]){bull=false;af=step;sar[i]=ep;ep=low[i];}
+      else if(high[i]>ep){ep=high[i];af=Math.min(af+step,maxAf);}
+    }else{
+      sar[i]=Math.max(ps+af*(ep-ps),high[i-1],i>=2?high[i-2]:high[i-1]);
+      if(high[i]>sar[i]){bull=true;af=step;sar[i]=ep;ep=high[i];}
+      else if(low[i]<ep){ep=low[i];af=Math.min(af+step,maxAf);}
+    }
+  }
+  return sar;
+}
+
 function calcAOFast(high,low){
   const mid=high.map((h,i)=>(h+low[i])/2);
   if(mid.length<13)return new Array(mid.length).fill(0);
@@ -409,6 +431,7 @@ async function loadChartData(){
   const kf=calcKAMA(closes,5,3,20);
   const ks=calcKAMA(closes,20,2,40);
   const ao=calcAOFast(highs,lows);
+  const sarArr=calcSAR(highs,lows,0.03,0.25);
 
   // aggiorna stats bar
   const lc=closes[closes.length-1];
@@ -433,6 +456,7 @@ async function loadChartData(){
       {label:'Prezzo',data:closes.map(v=>+v.toFixed(3)),borderColor:'#e2e8f0',borderWidth:2.5,pointRadius:0,tension:0},
       {label:'KAMA Fast',data:kf.map(v=>v!=null?+v.toFixed(3):null),borderColor:'#f85149',borderWidth:2,pointRadius:0,tension:0.2,spanGaps:true},
       {label:'KAMA Slow',data:ks.map(v=>v!=null?+v.toFixed(3):null),borderColor:'#a78bfa',borderWidth:2,pointRadius:0,tension:0.3,spanGaps:true,borderDash:[5,3]},
+      {label:'SAR',data:sarArr.map(v=>v!=null?+v.toFixed(3):null),borderColor:'#f97316',borderWidth:0,pointRadius:3,pointBackgroundColor:sarArr.map((v,i)=>v!=null&&closes[i]>v?'#22c55e':'#ef4444'),pointBorderColor:'transparent',showLine:false,spanGaps:false},
     ]},
     options:{responsive:true,maintainAspectRatio:false,animation:false,
       interaction:{mode:'index',intersect:false},
@@ -580,6 +604,8 @@ function renderTable(){
       <td>${r.rsi!=null?r.rsi.toFixed(1):'—'}</td>
       <td class="${pc}">${ps}</td>
       <td class="${mc}">${pm}</td>
+      <td style="font-size:10px;color:var(--text2)">${r.entryDate||'—'}</td>
+      <td>${r.sar!=null?'<span style="color:'+(r.sarBull?'#1a7f37':'#cf222e')+';font-weight:700;font-size:10px">'+(r.sarBull?'▲':'▼')+' '+r.sar.toFixed(3)+'</span>':'—'}</td>
       <td><button class="btn-chart" onclick="openChart('${r.yahoo||r.ticker}')">📈</button></td>
     </tr>`;
   }).join('');
