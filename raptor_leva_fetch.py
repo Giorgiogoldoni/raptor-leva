@@ -80,6 +80,38 @@ def calc_baffetti_fast(high, low):
         else: break
     return n
 
+def calc_sar(high, low, step=0.03, max_af=0.25):
+    """Parabolic SAR — parametri aggressivi per leva"""
+    if len(high) < 5: return [None]*len(high)
+    sar = [None]*len(high)
+    # Init: inizia bearish se prima barra è ribassista
+    bull = high[1] > high[0]
+    af = step
+    ep = max(high[:2]) if bull else min(low[:2])
+    sar[1] = min(low[:2]) if bull else max(high[:2])
+
+    for i in range(2, len(high)):
+        prev_sar = sar[i-1]
+        if bull:
+            sar[i] = prev_sar + af * (ep - prev_sar)
+            sar[i] = min(sar[i], low[i-1], low[i-2] if i>=2 else low[i-1])
+            if low[i] < sar[i]:
+                bull = False; af = step
+                sar[i] = ep; ep = low[i]
+            else:
+                if high[i] > ep:
+                    ep = high[i]; af = min(af + step, max_af)
+        else:
+            sar[i] = prev_sar + af * (ep - prev_sar)
+            sar[i] = max(sar[i], high[i-1], high[i-2] if i>=2 else high[i-1])
+            if high[i] > sar[i]:
+                bull = True; af = step
+                sar[i] = ep; ep = high[i]
+            else:
+                if low[i] < ep:
+                    ep = low[i]; af = min(af + step, max_af)
+    return sar
+
 def get_zona(price, kama_fast, kama_slow):
     """
     Zona operativa doppia KAMA:
@@ -112,7 +144,7 @@ SCORE_MIN     = 65    # score minimo per comparire come segnale
 VIX_BLOCK     = 28    # sopra questa soglia: blocco totale Long
 VIX_ONLY_CONF = 22    # tra 22 e 28: solo LONG_CONF (no EARLY)
 
-def get_segnale_leva(zona, ao, vol_ratio, er, baf, kama_fast=None, kama_slow=None, regime='NORMALE'):
+def get_segnale_leva(zona, ao, vol_ratio, er, baf, kama_fast=None, kama_slow=None, regime='NORMALE', sar_bull=True):
     """Segnale leva v2 — filtri qualità stretti"""
     # Blocco VIX in STRESS/PAURA
     if regime in ('STRESS','PAURA'):
@@ -125,7 +157,7 @@ def get_segnale_leva(zona, ao, vol_ratio, er, baf, kama_fast=None, kama_slow=Non
     if kama_fast and kama_slow and kama_slow > 0:
         kama_gap_ok = abs(kama_fast - kama_slow) / kama_slow >= KAMA_GAP_MIN
 
-    if zona == 'LONG_CONF' and ao > 0 and vol_ratio >= VOL_MIN_CONF and baf >= BAF_MIN_CONF and er >= ER_MIN and kama_gap_ok:
+    if zona == 'LONG_CONF' and ao > 0 and vol_ratio >= VOL_MIN_CONF and baf >= BAF_MIN_CONF and er >= ER_MIN and kama_gap_ok and sar_bull:
         return 'LONG'
     elif zona == 'LONG_EARLY' and ao > 0 and vol_ratio >= VOL_MIN_EARLY and baf >= BAF_MIN_EARLY and er >= ER_MIN and kama_gap_ok and regime not in ('ATTENZIONE',):
         # In ATTENZIONE solo LONG_CONF
@@ -207,8 +239,11 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
         er       = calc_er(close)
         rsi      = calc_rsi(close)
         baf      = calc_baffetti_fast(high, low)
+        sar_arr  = calc_sar(high, low, step=0.03, max_af=0.25)
+        sar_val  = sar_arr[-1] if sar_arr[-1] is not None else None
+        sar_bull = sar_val is not None and lc > sar_val  # prezzo sopra SAR = rialzista
         zona     = get_zona(lc, kf, ks)
-        segnale  = get_segnale_leva(zona, ao, vol_r, er, baf, kf, ks, regime_name)
+        segnale  = get_segnale_leva(zona, ao, vol_r, er, baf, kf, ks, regime_name, sar_bull)
         score    = calc_score_leva(zona, ao, vol_r, er, baf, regime_mult)
 
         perf5  = round((lc/close[-6]-1)*100,2)  if len(close)>6  else 0
@@ -226,7 +261,7 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
             for idx in range(len(zona_series)-2, max(0, len(zona_series)-60), -1):
                 if zona_series[idx] != current_z:
                     dt = datetime.datetime.fromtimestamp(timestamps[idx+1])
-                    entry_date = dt.strftime('%d/%m/%Y')
+                    entry_date = dt.strftime('%d/%m %H:%M')
                     break
         except: pass
 
@@ -249,6 +284,8 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
             'perfSett':  perf5,
             'perfMese':  perf20,
             'entryDate': entry_date,
+            'sar':       round(sar_val, 4) if sar_val else None,
+            'sarBull':   sar_bull,
             'quality':   segnale in ('LONG','EARLY'),
         }
     except Exception:
