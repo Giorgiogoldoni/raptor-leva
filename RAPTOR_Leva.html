@@ -424,7 +424,7 @@ async function openChart(sym){
   currentChartTicker=sym;
   const row=allData.find(r=>r.yahoo===sym||r.ticker===sym);
   document.getElementById('cmTitle').textContent=sym+(row&&row.nome?' — '+row.nome.slice(0,50):'');
-  document.getElementById('cmSub').textContent='Doppia KAMA · AO EMA3-EMA13 · Dati da raptor_chart.json';
+  document.getElementById('cmSub').textContent='Doppia KAMA · AO EMA3-EMA13 · SAR · RSI · Dati da raptor_chart_leva.json';
   document.getElementById('chartModal').style.display='block';
   document.body.style.overflow='hidden';
   await loadChartData();
@@ -453,18 +453,24 @@ async function loadChartData(){
       if(!r.ok)throw new Error('HTTP '+r.status);
       chartJsonCache=await r.json();
     }catch(e){
-      document.getElementById('cmSub').textContent='⚠️ raptor_chart.json non disponibile: '+e.message;
+      document.getElementById('cmSub').textContent='⚠️ raptor_chart_leva.json non ancora disponibile — Lanciare: Actions → RAPTOR Chart Leva Fetch → Run workflow (prima esecuzione ~5 min)';
       return;
     }
   }
   const bars_n={'1m':21,'3m':63,'6m':126,'1y':252}[currentChartTF]||21;
   const sym=currentChartTicker;
-  const key=Object.keys(chartJsonCache.data||{}).find(k=>k.toLowerCase()===sym.toLowerCase());
+  // Cerca per simbolo Yahoo esatto, poi senza suffisso borsa
+  const key=Object.keys(chartJsonCache.data||{}).find(k=>
+    k.toLowerCase()===sym.toLowerCase() ||
+    k.toLowerCase()===sym.toLowerCase().replace('.mi','').replace('.de','').replace('.l','').replace('.pa','')
+  );
   if(!key){
     document.getElementById('cmSub').textContent='⚠️ Dati non disponibili per '+sym+' in raptor_chart.json';
     return;
   }
-  const raw=(chartJsonCache.data[key].d||[]).slice(-bars_n);
+  // raptor_chart_leva.json: data[key] = array diretto di barre
+  const rawData=chartJsonCache.data[key];
+  const raw=(Array.isArray(rawData)?rawData:(rawData.d||rawData||[])).slice(-bars_n);
   if(raw.length<10){
     document.getElementById('cmSub').textContent='⚠️ Dati insufficienti ('+raw.length+' barre)';
     return;
