@@ -118,8 +118,9 @@ tr:hover td{background:#fef2f2}
 .mi td{padding:4px 9px;border:1px solid #fca5a5}
 
 /* CHART MODAL */
-#chartModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:4000;overflow-y:auto;padding:20px;cursor:default}
-.cm{background:#ffffff;max-width:1080px;margin:0 auto;border-radius:12px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.3)}
+#chartModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:4000;overflow:hidden;padding:16px;cursor:default;display:none;align-items:center;justify-content:center}
+#chartModal.open{display:flex}
+.cm{background:#ffffff;width:100%;max-width:1100px;max-height:calc(100vh - 32px);border-radius:12px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.4);display:flex;flex-direction:column}
 .cmh{background:#dc2626;color:#fff;padding:10px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ef4444}
 .cmh .ctitle{font-size:15px;font-weight:700;color:#fff}
 .cmh .csub{font-size:10px;color:rgba(255,255,255,.8);margin-top:2px}
@@ -127,14 +128,14 @@ tr:hover td{background:#fef2f2}
 .cmtf{display:flex;gap:4px;padding:6px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0}
 .cmtf button{background:#fff;border:1px solid #d0d7de;color:#57606a;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:10px;font-family:inherit}
 .cmtf button:hover,.cmtf button.act{background:#dc2626;border-color:#dc2626;color:#fff}
-.cmbody{padding:10px 14px;background:#ffffff}
+.cmbody{padding:8px 12px;background:#ffffff;overflow-y:auto;flex:1}
 .cpanel{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;margin-bottom:6px;padding:6px 10px}
 .cplbl{font-size:9px;color:#dc2626;letter-spacing:1px;margin-bottom:3px;font-weight:700}
 .cpanel canvas{width:100%!important;display:block}
 .cstats{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px;background:#f8fafc;border-top:1px solid #e2e8f0}
 .cstat{background:#fff;border:1px solid #e2e8f0;border-radius:5px;padding:4px 10px;text-align:center}
 .cstat .sl{font-size:8px;color:#94a3b8}
-.cstat .sv{font-size:13px;font-weight:700;color:#1f2328}
+.cstat .sv{font-size:12px;font-weight:700;color:#1f2328}
 
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:var(--bg)}
@@ -313,19 +314,19 @@ tr:hover td{background:#fef2f2}
     <div class="cmbody">
       <div class="cpanel">
         <div class="cplbl">PREZZO · KAMA VELOCE (rossa) · KAMA LENTA (viola) · SAR (•)</div>
-        <canvas id="cChart1" height="200"></canvas>
+        <canvas id="cChart1" height="160"></canvas>
       </div>
       <div class="cpanel">
         <div class="cplbl">BAFFETTINI AO — 🟢 ACQUISTO · 🔴 VENDITA/USCITA</div>
-        <canvas id="cChart2" height="55"></canvas>
+        <canvas id="cChart2" height="40"></canvas>
       </div>
       <div class="cpanel">
         <div class="cplbl">AO VELOCE (EMA3−EMA13)</div>
-        <canvas id="cChart3" height="60"></canvas>
+        <canvas id="cChart3" height="50"></canvas>
       </div>
       <div class="cpanel">
         <div class="cplbl">RSI 14</div>
-        <canvas id="cChart4" height="60"></canvas>
+        <canvas id="cChart4" height="50"></canvas>
       </div>
     </div>
     <div class="cstats" id="cStatsBar"></div>
@@ -425,12 +426,12 @@ async function openChart(sym){
   const row=allData.find(r=>r.yahoo===sym||r.ticker===sym);
   document.getElementById('cmTitle').textContent=sym+(row&&row.nome?' — '+row.nome.slice(0,50):'');
   document.getElementById('cmSub').textContent='Doppia KAMA · AO EMA3-EMA13 · SAR · RSI · Dati da raptor_chart_leva.json';
-  document.getElementById('chartModal').style.display='block';
+  document.getElementById('chartModal').classList.add('open');
   document.body.style.overflow='hidden';
   await loadChartData();
 }
 function closeChartModal(){
-  document.getElementById('chartModal').style.display='none';
+  document.getElementById('chartModal').classList.remove('open');
   document.body.style.overflow='';
   if(chartInst1){chartInst1.destroy();chartInst1=null;}
   if(chartInst2){chartInst2.destroy();chartInst2=null;}
@@ -459,13 +460,15 @@ async function loadChartData(){
   }
   const bars_n={'1m':21,'3m':63,'6m':126,'1y':252}[currentChartTF]||21;
   const sym=currentChartTicker;
-  // Cerca per simbolo Yahoo esatto, poi senza suffisso borsa
-  const key=Object.keys(chartJsonCache.data||{}).find(k=>
-    k.toLowerCase()===sym.toLowerCase() ||
-    k.toLowerCase()===sym.toLowerCase().replace('.mi','').replace('.de','').replace('.l','').replace('.pa','')
-  );
+  // Cerca per simbolo Yahoo — varie varianti
+  const dataKeys = Object.keys(chartJsonCache.data||{});
+  const symL = sym.toLowerCase();
+  const key = dataKeys.find(k=>k.toLowerCase()===symL) ||
+              dataKeys.find(k=>k.toLowerCase()===symL.replace('.mi','').replace('.de','').replace('.l','').replace('.pa','').replace('.as','').replace('.sw','')) ||
+              dataKeys.find(k=>k.toLowerCase().replace('.mi','')===symL.replace('.mi',''));
+  console.log('Cercando:', sym, '→ trovato:', key, '| Chiavi disponibili:', dataKeys.slice(0,5));
   if(!key){
-    document.getElementById('cmSub').textContent='⚠️ Dati non disponibili per '+sym+' in raptor_chart.json';
+    document.getElementById('cmSub').textContent='⚠️ Ticker '+sym+' non trovato in raptor_chart_leva.json — verificare che il workflow chart abbia incluso questo simbolo';
     return;
   }
   // raptor_chart_leva.json: data[key] = array diretto di barre
