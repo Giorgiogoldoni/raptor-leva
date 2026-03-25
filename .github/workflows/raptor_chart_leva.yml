@@ -1,4 +1,4 @@
-name: RAPTOR Leva Fetch
+name: RAPTOR Chart Leva Fetch
 
 on:
   schedule:
