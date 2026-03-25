@@ -614,9 +614,8 @@ function renderTable(){
   document.getElementById('empty').style.display='none';
 }
 
-function openChart(sym){
-  window.open('https://giorgiogoldoni.github.io/fixed/RAPTOR_Advanced.html?ticker='+encodeURIComponent(sym),'_blank');
-}
+// openChart → usa il modal interno dedicato ai leva
+// (la funzione async openChart sopra gestisce il modal)
 
 function exportExcel(){
   const data=filteredData.length?filteredData:allData;
