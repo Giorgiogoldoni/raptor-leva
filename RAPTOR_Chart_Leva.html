@@ -27,13 +27,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1f232
 .stat .sl{font-size:8px;color:#94a3b8;letter-spacing:0.5px}
 .stat .sv{font-size:13px;font-weight:700;color:#1f2328;margin-top:1px}
 
-/* CHARTS */
-#chartsWrap{flex:1;display:flex;flex-direction:column;gap:4px;padding:8px;overflow:hidden}
-.cpanel{background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;display:flex;flex-direction:column}
-.cpanel.main{flex:3}
-.cpanel.sub{flex:1}
-.cplbl{font-size:8px;color:#dc2626;letter-spacing:1px;margin-bottom:3px;font-weight:600}
-.cpanel canvas{flex:1;width:100%!important}
+/* CHARTS — FIX: min-height:0 su ogni livello flex per evitare espansione infinita */
+#chartsWrap{flex:1;min-height:0;display:flex;flex-direction:column;gap:4px;padding:8px;overflow:hidden}
+.cpanel{background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;display:flex;flex-direction:column;min-height:0}
+.cpanel.main{flex:3;min-height:0}
+.cpanel.sub{flex:1;min-height:0}
+.cplbl{font-size:8px;color:#dc2626;letter-spacing:1px;margin-bottom:3px;font-weight:600;flex-shrink:0}
+.cpanel canvas{flex:1;width:100%!important;height:0;min-height:0}
 
 /* ERROR */
 #errBox{display:none;background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:16px 20px;margin:20px;border-radius:8px;font-size:12px}
@@ -153,9 +153,8 @@ function calcRSI(c,n=14){
   return r;
 }
 function calcBaf(h,l){
-  const mid=h.map((v,i)=>(v+l[i])/2);
   const ao=calcAO(h,l);
-  const vals=ao.map((v,i)=>v!=null?Math.abs(v):0);
+  const vals=ao.map(v=>v!=null?Math.abs(v):0);
   const cols=ao.map((v,i)=>{
     if(v==null)return 'transparent';
     const up=v>=(ao[i-1]??v);
@@ -262,7 +261,6 @@ function render(){
   });
 
   // P4 — RSI
-  const rsiColors=rsi.map(v=>v==null?'transparent':v>=70?'#ef4444':v<=30?'#22c55e':'#94a3b8');
   const rsiPlugin={id:'rsiLines',afterDraw(chart){
     const {ctx,chartArea:{left,right},scales:{y}}=chart;
     ctx.save();
