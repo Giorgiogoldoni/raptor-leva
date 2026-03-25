@@ -421,14 +421,8 @@ function calcAOFast(high,low){
 }
 
 // ── OPEN CHART ──────────────────────────────────────────────────
-async function openChart(sym){
-  currentChartTicker=sym;
-  const row=allData.find(r=>r.yahoo===sym||r.ticker===sym);
-  document.getElementById('cmTitle').textContent=sym+(row&&row.nome?' — '+row.nome.slice(0,50):'');
-  document.getElementById('cmSub').textContent='Doppia KAMA · AO EMA3-EMA13 · SAR · RSI · Dati da raptor_chart_leva.json';
-  document.getElementById('chartModal').classList.add('open');
-  document.body.style.overflow='hidden';
-  await loadChartData();
+function openChart(sym){
+  window.open('RAPTOR_Chart_Leva.html?ticker='+encodeURIComponent(sym),'_blank');
 }
 function closeChartModal(){
   document.getElementById('chartModal').classList.remove('open');
