@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>⚡ RAPTOR Leva</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;800&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff;--bg2:#f8f9fa;--bg3:#f1f3f5;
+  --border:#dee2e6;--border2:#ced4da;
+  --text:#212529;--text2:#495057;--text3:#868e96;
+  --accent:#1971c2;
+  --lc:#2f9e44;--le:#1971c2;--gr:#e67700;--ex:#c92a2a;--st:#862e2e;
+  --font-mono:'Space Mono',monospace;
+  --font-cond:'Barlow Condensed',sans-serif;
+  --font-body:'Barlow',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:13px}
+
+/* TOPBAR */
+.topbar{background:var(--bg);border-bottom:2px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 20px;height:52px;position:sticky;top:0;z-index:100}
+.logo{font-family:var(--font-cond);font-weight:800;font-size:22px;letter-spacing:3px;color:var(--accent)}
+.logo span{color:var(--text3);font-weight:300}
+.spacer{flex:1}
+.meta{font-size:10px;color:var(--text3);font-family:var(--font-cond);letter-spacing:.5px}
+
+/* REGIME BANNER */
+.regime-bar{display:flex;align-items:center;gap:10px;padding:6px 20px;font-size:11px;font-family:var(--font-cond);font-weight:600;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.regime-bar.calma   {background:#d3f9d8;color:#2f9e44}
+.regime-bar.normale {background:#fff9db;color:#e67700}
+.regime-bar.attenzione{background:#ffe8cc;color:#d9480f}
+.regime-bar.stress  {background:#ffe3e3;color:#c92a2a}
+.regime-bar.paura   {background:#f8d7da;color:#7f1d1d}
+.vix-info{display:flex;gap:16px}
+
+/* CONTROLS */
+.controls{display:flex;align-items:center;gap:8px;padding:8px 20px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.ctrl-label{font-size:10px;color:var(--text3);font-family:var(--font-cond);letter-spacing:.5px;font-weight:600}
+select,input[type=text]{background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:4px 8px;border-radius:4px;font-size:11px;font-family:var(--font-body)}
+select:focus,input:focus{outline:none;border-color:var(--accent)}
+.btn-reset{background:var(--bg3);border:1px solid var(--border);color:var(--text3);padding:4px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:var(--font-cond);font-weight:600;letter-spacing:.5px}
+.btn-reset:hover{border-color:var(--accent);color:var(--accent)}
+.count-badge{background:var(--accent);color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;font-family:var(--font-mono)}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--border);padding:0 20px;background:var(--bg)}
+.tab{padding:10px 20px;font-family:var(--font-cond);font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--text3);transition:all .12s;display:flex;align-items:center;gap:6px}
+.tab:hover{color:var(--text)}
+.tab.act{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-cnt{background:var(--bg3);color:var(--text3);padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700}
+.tab.act .tab-cnt{background:var(--accent);color:#fff}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;padding:0 20px 40px}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:0}
+thead th{position:sticky;top:0;background:var(--bg2);border-bottom:2px solid var(--border);padding:7px 8px;text-align:left;font-family:var(--font-cond);font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--text2);white-space:nowrap;cursor:pointer;user-select:none;z-index:10}
+thead th:hover{color:var(--accent)}
+thead th.sort-asc::after{content:' ↑'}
+thead th.sort-desc::after{content:' ↓'}
+tbody tr{border-bottom:1px solid var(--bg3);transition:background .08s}
+tbody tr:hover{background:var(--bg2)}
+tbody tr.hidden{display:none}
+td{padding:6px 8px;vertical-align:middle;white-space:nowrap}
+td.nome{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2);font-size:11px}
+td.ticker{font-family:var(--font-mono);font-size:11px;font-weight:700;cursor:pointer;color:var(--accent)}
+td.ticker:hover{text-decoration:underline}
+td.num{font-family:var(--font-mono);font-size:11px;text-align:right}
+td.score{font-family:var(--font-mono);font-size:12px;font-weight:700;text-align:right}
+
+/* ZONA pills */
+.pill{display:inline-block;padding:2px 7px;border-radius:3px;font-size:9px;font-weight:700;font-family:var(--font-cond);letter-spacing:.5px;white-space:nowrap}
+.pill-lc{background:#d3f9d8;color:var(--lc)}
+.pill-le{background:#dbe4ff;color:var(--le)}
+.pill-gr{background:#fff3bf;color:var(--gr)}
+.pill-ex{background:#ffe3e3;color:var(--ex)}
+.pill-st{background:#ffe3e3;color:var(--st);border:1px solid #fca5a5}
+
+/* RSI cross indicator */
+.rsi-cross{font-size:10px;font-weight:700;font-family:var(--font-mono)}
+.rsi-bull{color:var(--lc)}
+.rsi-bear{color:var(--ex)}
+
+/* SCORE bar */
+.score-bar{display:inline-block;width:40px;height:4px;background:var(--bg3);border-radius:2px;vertical-align:middle;margin-left:4px;overflow:hidden}
+.score-fill{height:100%;border-radius:2px}
+
+/* LEVA badge */
+.leva-badge{display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;font-family:var(--font-cond)}
+.leva-5{background:#fff9db;color:#e67700}
+.leva-4{background:#ffe8cc;color:#d9480f}
+.leva-3{background:#ffe3e3;color:#c92a2a}
+.leva-2{background:#dbe4ff;color:#1971c2}
+.leva-1{background:var(--bg3);color:var(--text3)}
+
+/* CHART LINK */
+.chart-btn{display:inline-block;padding:2px 7px;border-radius:3px;font-size:9px;font-weight:700;font-family:var(--font-cond);background:var(--bg3);color:var(--text3);cursor:pointer;border:1px solid var(--border);transition:all .1s;text-decoration:none}
+.chart-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* LOADING */
+.loading{text-align:center;padding:60px 20px;color:var(--text3);font-family:var(--font-cond);font-size:14px;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">⚡ RAPTOR<span> LEVA</span></div>
+  <div class="spacer"></div>
+  <div class="meta" id="metaTs">—</div>
+</div>
+
+<div class="regime-bar normale" id="regimeBar">
+  <span id="regimeLabel">⏳ Caricamento...</span>
+  <div class="vix-info">
+    <span>VIX: <b id="vixVal">—</b></span>
+    <span>VSTOXX: <b id="vstoxxVal">—</b></span>
+    <span>Regime: <b id="regimeNome">—</b></span>
+  </div>
+</div>
+
+<div class="controls">
+  <span class="ctrl-label">ZONA</span>
+  <select id="filterZona" onchange="applyFilters()">
+    <option value="">Tutte</option>
+    <option value="LONG_CONF">🟢 LONG CONF</option>
+    <option value="LONG_EARLY">🔵 LONG EARLY</option>
+    <option value="GRIGIA">🟡 GRIGIA</option>
+    <option value="USCITA">🔴 USCITA</option>
+    <option value="STOP">⛔ STOP</option>
+  </select>
+  <span class="ctrl-label">PROVIDER</span>
+  <select id="filterProvider" onchange="applyFilters()">
+    <option value="">Tutti</option>
+    <option value="WisdomTree">WisdomTree</option>
+    <option value="GraniteShares">GraniteShares</option>
+    <option value="Leverage Shares">Leverage Shares</option>
+    <option value="SG">SG</option>
+    <option value="Xtrackers">Xtrackers</option>
+  </select>
+  <span class="ctrl-label">RSI CROSS</span>
+  <select id="filterRSI" onchange="applyFilters()">
+    <option value="">Tutti</option>
+    <option value="1">↑ Bull</option>
+    <option value="-1">↓ Bear</option>
+    <option value="0">Neutro</option>
+  </select>
+  <span class="ctrl-label">CERCA</span>
+  <input type="text" id="filterSearch" placeholder="ticker / nome..." oninput="applyFilters()" style="width:140px">
+  <button class="btn-reset" onclick="resetFilters()">✕ Reset</button>
+  <span class="count-badge" id="countBadge">—</span>
+</div>
+
+<div class="tabs" id="tabsBar">
+  <div class="tab act" onclick="setTab('all')" id="tab-all">TUTTI <span class="tab-cnt" id="cnt-all">—</span></div>
+  <div class="tab" onclick="setTab('35')"  id="tab-35">⚡ 3x–5x <span class="tab-cnt" id="cnt-35">—</span></div>
+  <div class="tab" onclick="setTab('2')"   id="tab-2">📊 2x <span class="tab-cnt" id="cnt-2">—</span></div>
+  <div class="tab" onclick="setTab('1')"   id="tab-1">🔄 1x <span class="tab-cnt" id="cnt-1">—</span></div>
+</div>
+
+<div class="table-wrap">
+  <div class="loading" id="loadingMsg">⏳ Caricamento dati RAPTOR Leva...</div>
+  <table id="mainTable" style="display:none">
+    <thead>
+      <tr>
+        <th data-col="leva">Leva</th>
+        <th data-col="ticker">Ticker</th>
+        <th data-col="nome">Nome</th>
+        <th data-col="zona">Zona</th>
+        <th data-col="score">Score ↓</th>
+        <th data-col="prezzo">Prezzo</th>
+        <th data-col="kama_fast">KAMA F</th>
+        <th data-col="kama_slow">KAMA S</th>
+        <th data-col="er">ER</th>
+        <th data-col="baff">Baff</th>
+        <th data-col="ao">AO</th>
+        <th data-col="volRatio">Vol×</th>
+        <th data-col="rsi">RSI14</th>
+        <th data-col="rsi5">RSI5</th>
+        <th data-col="rsi_cross">Cross</th>
+        <th data-col="perfSett">Sett%</th>
+        <th data-col="perfMese">Mese%</th>
+        <th>📈</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<script>
+const DATA_URL = 'https://raw.githubusercontent.com/Giorgiogoldoni/raptor-leva/main/raptor_leva.json';
+const CHART_PAGE = 'RAPTOR_Chart_Leva.html';
+
+let allData = [];
+let currentTab = 'all';
+let sortCol = 'score';
+let sortDir = -1; // -1 desc, 1 asc
+
+// ─── INIT ─────────────────────────────────────────────
+async function init() {
+  try {
+    const r = await fetch(DATA_URL + '?t=' + Date.now());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const json = await r.json();
+    renderRegime(json);
+    allData = json.data || [];
+    renderTable();
+    updateTabCounts();
+    document.getElementById('loadingMsg').style.display = 'none';
+    document.getElementById('mainTable').style.display = 'table';
+    document.getElementById('metaTs').textContent = json.timestamp_it || '';
+  } catch(e) {
+    document.getElementById('loadingMsg').textContent = '❌ Errore: ' + e.message;
+  }
+}
+
+// ─── REGIME ───────────────────────────────────────────
+function renderRegime(json) {
+  const reg  = (json.regime||'NORMALE').toLowerCase();
+  const bar  = document.getElementById('regimeBar');
+  bar.className = 'regime-bar ' + reg;
+  const icons = {calma:'🟢',normale:'🟡',attenzione:'🟠',stress:'🔴',paura:'⛔'};
+  const icon = icons[reg]||'🟡';
+  document.getElementById('regimeLabel').textContent = icon + ' VIX REGIME ' + (json.regime||'—');
+  document.getElementById('vixVal').textContent    = json.vix    != null ? json.vix    : '—';
+  document.getElementById('vstoxxVal').textContent = json.vstoxx != null ? json.vstoxx : '—';
+  document.getElementById('regimeNome').textContent = json.regime || '—';
+}
+
+// ─── TABS ─────────────────────────────────────────────
+function setTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('act'));
+  document.getElementById('tab-'+tab)?.classList.add('act');
+  applyFilters();
+}
+
+function updateTabCounts() {
+  const counts = {all:0, '35':0, '2':0, '1':0};
+  allData.forEach(d=>{
+    const lv = d.leva||1;
+    counts.all++;
+    if(lv>=3) counts['35']++;
+    else if(lv===2) counts['2']++;
+    else counts['1']++;
+  });
+  document.getElementById('cnt-all').textContent = counts.all;
+  document.getElementById('cnt-35').textContent  = counts['35'];
+  document.getElementById('cnt-2').textContent   = counts['2'];
+  document.getElementById('cnt-1').textContent   = counts['1'];
+}
+
+function tabMatch(d) {
+  const lv = d.leva||1;
+  if(currentTab==='all') return true;
+  if(currentTab==='35')  return lv>=3;
+  if(currentTab==='2')   return lv===2;
+  if(currentTab==='1')   return lv<=1;
+  return true;
+}
+
+// ─── FILTERS ──────────────────────────────────────────
+function applyFilters() {
+  const zona     = document.getElementById('filterZona').value;
+  const provider = document.getElementById('filterProvider').value;
+  const rsiCross = document.getElementById('filterRSI').value;
+  const search   = document.getElementById('filterSearch').value.toLowerCase();
+
+  let visible = 0;
+  document.querySelectorAll('#tableBody tr').forEach(tr=>{
+    const d = JSON.parse(tr.dataset.row||'{}');
+    let show = true;
+    if(!tabMatch(d)) show=false;
+    if(zona && d.zona!==zona) show=false;
+    if(provider && d.provider!==provider) show=false;
+    if(rsiCross!=='' && String(d.rsi_cross||0)!==rsiCross) show=false;
+    if(search) {
+      const hay=(d.ticker+' '+(d.nome||'')).toLowerCase();
+      if(!hay.includes(search)) show=false;
+    }
+    tr.classList.toggle('hidden', !show);
+    if(show) visible++;
+  });
+  document.getElementById('countBadge').textContent = visible;
+}
+
+function resetFilters() {
+  document.getElementById('filterZona').value='';
+  document.getElementById('filterProvider').value='';
+  document.getElementById('filterRSI').value='';
+  document.getElementById('filterSearch').value='';
+  applyFilters();
+}
+
+// ─── SORT ─────────────────────────────────────────────
+document.addEventListener('click', e=>{
+  const th = e.target.closest('thead th[data-col]');
+  if(!th) return;
+  const col = th.dataset.col;
+  if(sortCol===col) sortDir*=-1; else { sortCol=col; sortDir=-1; }
+  document.querySelectorAll('thead th').forEach(t=>t.classList.remove('sort-asc','sort-desc'));
+  th.classList.add(sortDir===-1?'sort-desc':'sort-asc');
+  renderTable();
+});
+
+// ─── RENDER TABLE ─────────────────────────────────────
+function renderTable() {
+  const sorted = [...allData].sort((a,b)=>{
+    const va=a[sortCol]??0, vb=b[sortCol]??0;
+    return typeof va==='string' ? va.localeCompare(vb)*sortDir : (va-vb)*sortDir;
+  });
+
+  const body = document.getElementById('tableBody');
+  body.innerHTML = '';
+
+  sorted.forEach(d=>{
+    const tr = document.createElement('tr');
+    tr.dataset.row = JSON.stringify(d);
+
+    const zona = d.zona||'ND';
+    const zonaPill = {
+      'LONG_CONF':  `<span class="pill pill-lc">LONG CONF</span>`,
+      'LONG_EARLY': `<span class="pill pill-le">LONG EARLY</span>`,
+      'GRIGIA':     `<span class="pill pill-gr">GRIGIA</span>`,
+      'USCITA':     `<span class="pill pill-ex">USCITA</span>`,
+      'STOP':       `<span class="pill pill-st">⛔ STOP</span>`,
+    }[zona] || `<span class="pill">${zona}</span>`;
+
+    const lv = d.leva||1;
+    const levaBadge = `<span class="leva-badge leva-${lv<=1?1:lv>=5?5:lv}">${lv}x</span>`;
+
+    const score = d.score||0;
+    const scoreColor = score>=90?'#2f9e44':score>=70?'#1971c2':score>=50?'#e67700':'#c92a2a';
+    const scoreFill  = Math.min(100,score)/100*40;
+    const scoreHtml = `<span style="color:${scoreColor};font-weight:700">${score}</span>`+
+      `<span class="score-bar"><span class="score-fill" style="width:${scoreFill.toFixed(1)}px;background:${scoreColor}"></span></span>`;
+
+    const rsiCross = d.rsi_cross||0;
+    const crossHtml = rsiCross===1
+      ? `<span class="rsi-cross rsi-bull">↑</span>`
+      : rsiCross===-1
+        ? `<span class="rsi-cross rsi-bear">↓</span>`
+        : `<span style="color:var(--text3)">—</span>`;
+
+    const fmtN = (v,dec=2) => v!=null ? Number(v).toFixed(dec) : '—';
+    const fmtP = v => v!=null ? `<span style="color:${v>=0?'var(--lc)':'var(--ex)'}">${v>=0?'+':''}${Number(v).toFixed(2)}%</span>` : '—';
+
+    const ao = d.ao||0;
+    const aoHtml = `<span style="color:${ao>0?'var(--lc)':'var(--ex)'}">${ao>0?'+':''}${Number(ao).toFixed(4)}</span>`;
+
+    const yahooChr = (d.yahoo||d.ticker+'.MI').replace('.','_');
+    const chartLink = `<a class="chart-btn" href="${CHART_PAGE}?t=${yahooChr}" target="_blank">▶</a>`;
+
+    tr.innerHTML = `
+      <td>${levaBadge}</td>
+      <td class="ticker" onclick="openChart('${yahooChr}')">${d.ticker||'—'}</td>
+      <td class="nome" title="${d.nome||''}">${d.nome||'—'}</td>
+      <td>${zonaPill}</td>
+      <td class="score">${scoreHtml}</td>
+      <td class="num">${fmtN(d.prezzo,4)}</td>
+      <td class="num" style="color:var(--kf,#dc2626)">${fmtN(d.kama_fast,4)}</td>
+      <td class="num" style="color:#7c3aed">${fmtN(d.kama_slow,4)}</td>
+      <td class="num">${fmtN(d.er,3)}</td>
+      <td class="num">${d.baff??'—'}</td>
+      <td class="num">${aoHtml}</td>
+      <td class="num">${fmtN(d.volRatio,2)}×</td>
+      <td class="num">${fmtN(d.rsi,1)}</td>
+      <td class="num" style="color:#1971c2">${fmtN(d.rsi5,1)}</td>
+      <td style="text-align:center">${crossHtml}</td>
+      <td class="num">${fmtP(d.perfSett)}</td>
+      <td class="num">${fmtP(d.perfMese)}</td>
+      <td>${chartLink}</td>
+    `;
+    body.appendChild(tr);
+  });
+
+  applyFilters();
+}
+
+function openChart(yahooTicker) {
+  window.open(CHART_PAGE + '?t=' + yahooTicker, '_blank');
+}
+
+init();
+</script>
+</body>
+</html>
