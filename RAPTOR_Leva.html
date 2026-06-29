@@ -176,6 +176,10 @@ td.score{font-family:var(--font-mono);font-size:12px;font-weight:700;text-align:
   <div class="bb-cards" id="bb-cards"><div class="bb-empty">⏳ Caricamento...</div></div>
 </div>
 
+<div class="bb-section">
+  <div class="bb-title">🎯 BEST BUY <span id="bb-subtitle">caricamento...</span></div>
+  <div class="bb-cards" id="bb-cards"><div class="bb-empty">⏳ Caricamento...</div></div>
+</div>
 <div class="controls">
   <span class="ctrl-label">ZONA</span>
   <select id="filterZona" onchange="applyFilters()">
@@ -694,28 +698,330 @@ function btRenderTable(data) {
   ).join('');
 }
 
+
+// ═══════════════════════════════════════════════
+// BEST BUY
+// ═══════════════════════════════════════════════
+function renderBestBuy(data) {
+  const rows = data.data || [];
+  const CHART_PAGE = 'RAPTOR_Chart_Leva.html';
+  const candidates = rows.filter(r =>
+    (r.leva||1) >= 2 &&
+    ['LONG_CONF','LONG_EARLY'].includes(r.zona) &&
+    (r.score||0) >= 75 &&
+    (r.rsi_cross||0) === 1
+  ).sort((a,b) => {
+    const aOk = (a.volRatio||0)>=2 && (a.rsi||0)<85 && (a.er||0)>=0.35 ? 1 : 0;
+    const bOk = (b.volRatio||0)>=2 && (b.rsi||0)<85 && (b.er||0)>=0.35 ? 1 : 0;
+    return bOk !== aOk ? bOk - aOk : (b.score||0) - (a.score||0);
+  }).slice(0, 8);
+
+  const container = document.getElementById('bb-cards');
+  const subtitle  = document.getElementById('bb-subtitle');
+  if (!candidates.length) {
+    container.innerHTML = '<div class="bb-empty">Nessun candidato — RSI Cross ↑ + Score≥75 + Zona Long + Leva≥2</div>';
+    subtitle.textContent = 'nessun candidato oggi';
+    return;
+  }
+  const allOk = candidates.filter(r => (r.volRatio||0)>=2 && (r.rsi||0)<85 && (r.er||0)>=0.35).length;
+  subtitle.textContent = candidates.length + ' candidati · ' + allOk + ' senza warning · RSI Cross ↑';
+
+  container.innerHTML = candidates.map(r => {
+    const lv = r.leva||1;
+    const lvCls = lv>=5?'leva-5':lv>=3?'leva-3':lv===2?'leva-2':'leva-1';
+    const volOk = (r.volRatio||0)>=2, rsiOk = (r.rsi||0)<85, erOk = (r.er||0)>=0.35;
+    const hasWarn = !volOk||!rsiOk||!erOk;
+    const zonaCls = r.zona==='LONG_CONF'?'lc':'le';
+    const zonaLabel = r.zona==='LONG_CONF'?'LONG CONF':'LONG EARLY';
+    const mese = r.perfMese!=null ? (r.perfMese>=0?'+':'')+r.perfMese.toFixed(1)+'%' : '—';
+    const meseCol = (r.perfMese||0)>=0 ? 'var(--buy3)' : 'var(--sell)';
+    const entry = (r.entryDate||'—').split(' ')[0];
+    const yahoo = (r.yahoo||r.ticker+'.MI').replace('.','_');
+    return `<div class="bb-card${hasWarn?' warn':''}" onclick="window.open('${CHART_PAGE}?t=${yahoo}','_blank')" title="Apri grafico ${r.ticker}">
+      <div class="bb-card-top">
+        <div><div class="bb-ticker">${r.ticker}</div><div class="bb-nome" title="${r.nome||''}">${r.nome||'—'}</div></div>
+        <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
+          <span class="bb-leva ${lvCls}">${lv}x</span>
+          <span class="bb-zona ${zonaCls}">${zonaLabel}</span>
+        </div>
+      </div>
+      <div class="bb-metrics">
+        <span class="bb-m${volOk?' ok':' warn'}">Vol ${(r.volRatio||0).toFixed(1)}x${volOk?' ✓':' ⚠'}</span>
+        <span class="bb-m${erOk?' ok':' warn'}">ER ${(r.er||0).toFixed(2)}${erOk?' ✓':' ⚠'}</span>
+        <span class="bb-m${rsiOk?' ok':' warn'}">RSI14 ${(r.rsi||0).toFixed(0)}${rsiOk?' ✓':' ⚠'}</span>
+        <span class="bb-m ok">RSI5 ${(r.rsi5||0).toFixed(0)} ↑</span>
+        <span class="bb-m" style="color:${meseCol}">${mese} mese</span>
+        <span class="bb-m" style="font-weight:700">Score ${r.score}</span>
+      </div>
+      <div class="bb-date">📅 Segnale dal ${entry}${hasWarn?' · <span style="color:#e67700">⚠ verifica filtri</span>':' · <span style="color:var(--buy3)">✅ tutti ok</span>'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// SETAB — sovrascrive quella originale
+// ═══════════════════════════════════════════════
+function setTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('act'));
+  document.getElementById('tab-' + tab)?.classList.add('act');
+  const mainTable = document.getElementById('mainTable');
+  const btPanel   = document.getElementById('bt-panel');
+  if (tab === 'bt') {
+    if (mainTable) mainTable.style.display = 'none';
+    if (btPanel)   btPanel.classList.add('visible');
+    if (!btDone)   runBacktest();
+  } else {
+    if (mainTable) mainTable.style.display = 'table';
+    if (btPanel)   btPanel.classList.remove('visible');
+    applyFilters();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// BACKTEST ENGINE
+// ═══════════════════════════════════════════════
+const CHARTS_BASE = 'https://raw.githubusercontent.com/Giorgiogoldoni/raptor-leva/main/data/charts/';
+let btDone = false;
+let btSortCol = 'wr10', btSortDir = -1;
+
+function calcKAMA(closes, n, fast, slow) {
+  const fsc=2/(fast+1), ssc=2/(slow+1), kama=new Array(closes.length).fill(null);
+  if(closes.length<=n) return kama;
+  kama[n]=closes[n];
+  for(let i=n+1;i<closes.length;i++){
+    const d=Math.abs(closes[i]-closes[i-n]);
+    let v=0; for(let j=i-n+1;j<=i;j++) v+=Math.abs(closes[j]-closes[j-1]);
+    const er=v?d/v:0, sc=Math.pow(er*(fsc-ssc)+ssc,2);
+    kama[i]=kama[i-1]+sc*(closes[i]-kama[i-1]);
+  }
+  return kama;
+}
+function calcRSI(closes, n) {
+  const res=new Array(closes.length).fill(null);
+  for(let i=n+1;i<closes.length;i++){
+    let g=0,l=0;
+    for(let j=i-n;j<=i;j++){const d=closes[j]-closes[j-1];g+=Math.max(d,0);l+=Math.max(-d,0);}
+    g/=n; l/=n; res[i]=l?100-100/(1+g/l):100;
+  }
+  return res;
+}
+function calcAO(highs,lows){
+  const mid=highs.map((h,i)=>(h+lows[i])/2);
+  const ema=(arr,p)=>{const k=2/(p+1);let e=arr[0];return arr.map(v=>{e=v*k+e*(1-k);return e;});};
+  const e3=ema(mid,3),e13=ema(mid,13); return e3.map((v,i)=>v-e13[i]);
+}
+function calcER(closes,n){
+  return closes.map((c,i)=>{
+    if(i<n) return 0;
+    const d=Math.abs(closes[i]-closes[i-n]); let v=0;
+    for(let j=i-n+1;j<=i;j++) v+=Math.abs(closes[j]-closes[j-1]);
+    return v?d/v:0;
+  });
+}
+function calcBaff(closes,kama){
+  let s=0;
+  return closes.map((c,i)=>{
+    if(kama[i]==null){s=0;return 0;}
+    s=c>kama[i]?(s>0?s+1:1):(s<0?s-1:-1); return s;
+  });
+}
+function getZonaJS(p,kf,ks){
+  if(kf==null||ks==null) return 'ND';
+  if(p>kf&&kf>ks) return 'LONG_CONF';
+  if(p>kf&&p>ks)  return 'LONG_EARLY';
+  if(p<ks) return ((ks-p)/ks*100)>2?'STOP':'USCITA';
+  return 'GRIGIA';
+}
+function computeSignals(d){
+  const {closes,highs,lows,volumes}=d, N=closes.length;
+  const kf=calcKAMA(closes,5,3,20), ks=calcKAMA(closes,20,2,40);
+  const r14=calcRSI(closes,14), r5=calcRSI(closes,5);
+  const ao=calcAO(highs,lows), er=calcER(closes,10), bf=calcBaff(closes,kf);
+  const avgVol=volumes.slice(-21,-1).reduce((s,v)=>s+v,0)/20||1;
+  const sigs=[];
+  for(let i=25;i<N;i++){
+    if(kf[i]==null||ks[i]==null){sigs.push(null);continue;}
+    const zona=getZonaJS(closes[i],kf[i],ks[i]);
+    const vr=volumes[i]/avgVol, gapOk=ks[i]>0&&Math.abs(kf[i]-ks[i])/ks[i]>=0.003;
+    let rsi_cross=0;
+    if(r14[i]&&r5[i]&&r14[i-1]&&r5[i-1]){
+      if(r5[i-1]<=r14[i-1]&&r5[i]>r14[i]) rsi_cross=1;
+      else if(r5[i-1]>=r14[i-1]&&r5[i]<r14[i]) rsi_cross=-1;
+    }
+    let sig=null;
+    if(zona==='LONG_CONF'&&ao[i]>0&&vr>=2&&bf[i]>=3&&er[i]>=0.35&&gapOk) sig='BUY3';
+    else if(zona==='LONG_EARLY'&&ao[i]>0&&vr>=1.5&&bf[i]>=3&&er[i]>=0.35&&gapOk) sig='BUY2';
+    else if(zona==='STOP'||zona==='USCITA') sig='SELL';
+    sigs.push({i,sig,rsi_cross});
+  }
+  return {sigs,closes,dates:d.dates||[]};
+}
+
+async function runBacktest(){
+  document.getElementById('bt-loading').style.display='block';
+  document.getElementById('bt-content').style.display='none';
+  const idx=await fetch(CHARTS_BASE+'index.json?t='+Date.now()).then(r=>r.json());
+  const tickers=idx.index||[];
+  const allResults=[]; let done=0;
+  for(let i=0;i<tickers.length;i+=10){
+    const batch=tickers.slice(i,i+10);
+    await Promise.all(batch.map(async info=>{
+      try{
+        const d=await fetch(CHARTS_BASE+info.f+'?t='+Date.now()).then(r=>r.json());
+        const {sigs,closes,dates}=computeSignals(d); const N=closes.length;
+        let prevSig=null;
+        sigs.forEach(s=>{
+          if(!s||!['BUY3','BUY2'].includes(s.sig)) return;
+          if(s.sig===prevSig) return; prevSig=s.sig;
+          const ix=s.i, entry=closes[ix];
+          const ret=h=>{const j=Math.min(ix+h,N-1);return j>ix?+((closes[j]-entry)/entry*100).toFixed(2):null;};
+          const future=closes.slice(ix+1,Math.min(ix+21,N));
+          const mdd=future.length?+((Math.min(...future)-entry)/entry*100).toFixed(2):null;
+          const dateLabel=dates[ix]||'—';
+          allResults.push({ticker:info.t,leva:info.leva||1,sig:s.sig,rsi_cross:s.rsi_cross,
+            date:dateLabel,ret5:ret(5),ret10:ret(10),ret20:ret(20),mdd});
+        });
+      }catch(e){}
+      done++;
+      if(done%30===0) document.getElementById('bt-loading').textContent=`⏳ Calcolo... ${done}/${tickers.length} ticker`;
+    }));
+  }
+  btDone=true; renderBT(allResults);
+}
+
+function renderBT(results){
+  document.getElementById('bt-loading').style.display='none';
+  document.getElementById('bt-content').style.display='block';
+  const r10all=results.map(r=>r.ret10).filter(v=>v!=null);
+  const wr=arr=>{const v=arr.filter(v=>v!=null);return v.length?(v.filter(v=>v>0).length/v.length*100).toFixed(1)+'%':'—';};
+  const avg=arr=>{const v=arr.filter(v=>v!=null);if(!v.length)return'—';const a=(v.reduce((s,x)=>s+x,0)/v.length).toFixed(2);return(+a>=0?'+':'')+a+'%';};
+  const buy3=results.filter(r=>r.sig==='BUY3'), buy2=results.filter(r=>r.sig==='BUY2');
+  const mddAll=results.map(r=>r.mdd).filter(v=>v!=null);
+  const avgMDD=mddAll.length?(mddAll.reduce((s,v)=>s+v,0)/mddAll.length).toFixed(2)+'%':'—';
+  const kpis=[
+    {l:'Segnali',v:results.length,s:'totali',c:'blue'},
+    {l:'Ticker',v:new Set(results.map(r=>r.ticker)).size,s:'con segnali',c:'blue'},
+    {l:'WR 10gg',v:wr(r10all),s:'globale',c:parseFloat(wr(r10all))>=55?'green':'orange'},
+    {l:'Avg 10gg',v:avg(r10all),s:'BUY3+BUY2',c:parseFloat(avg(r10all))>=0?'green':'red'},
+    {l:'BUY3 WR',v:wr(buy3.map(r=>r.ret10)),s:buy3.length+' segnali',c:'red'},
+    {l:'BUY2 WR',v:wr(buy2.map(r=>r.ret10)),s:buy2.length+' segnali',c:'blue'},
+    {l:'Avg MDD',v:avgMDD,s:'20gg',c:'red'},
+  ];
+  document.getElementById('bt-kpis').innerHTML=kpis.map(k=>
+    `<div class="bt-kpi"><div class="kl">${k.l}</div><div class="kv ${k.c}">${k.v}</div><div class="ks">${k.s}</div></div>`
+  ).join('');
+  const cdata=[{v:1,icon:'↑',lbl:'Bull Cross',col:'var(--buy3)'},{v:0,icon:'—',lbl:'Neutro',col:'var(--text3)'},{v:-1,icon:'↓',lbl:'Bear Cross',col:'var(--sell)'}];
+  document.getElementById('bt-cross').innerHTML=cdata.map(c=>{
+    const sub=results.filter(r=>r.rsi_cross===c.v);
+    const vals=sub.map(r=>r.ret10).filter(v=>v!=null);
+    const w=vals.length?(vals.filter(v=>v>0).length/vals.length*100).toFixed(1):'—';
+    const a=vals.length?(vals.reduce((s,v)=>s+v,0)/vals.length).toFixed(2):'—';
+    return `<div class="bt-cross-card"><div class="cc-icon" style="color:${c.col}">${c.icon}</div><div class="cc-wr" style="color:${c.col}">${w}%</div><div class="cc-lbl">${c.lbl}</div><div class="cc-det">n=${sub.length} · avg=${+a>=0?'+':''}${a}%</div></div>`;
+  }).join('');
+  const byT={};
+  results.forEach(r=>{if(!byT[r.ticker])byT[r.ticker]={rows:[],leva:r.leva};byT[r.ticker].rows.push(r);});
+  const tdata=Object.entries(byT).map(([t,{rows,leva}])=>{
+    const wrf=arr=>{const v=arr.filter(v=>v!=null);return v.length?+(v.filter(v=>v>0).length/v.length*100).toFixed(1):null;};
+    const avgf=arr=>{const v=arr.filter(v=>v!=null);return v.length?+(v.reduce((s,v)=>s+v,0)/v.length).toFixed(2):null;};
+    const rb=rows.filter(r=>r.rsi_cross===1).map(r=>r.ret10);
+    return {ticker:t,leva,n:rows.length,
+      buy3:rows.filter(r=>r.sig==='BUY3').length,buy2:rows.filter(r=>r.sig==='BUY2').length,
+      wr5:wrf(rows.map(r=>r.ret5)),wr10:wrf(rows.map(r=>r.ret10)),wr20:wrf(rows.map(r=>r.ret20)),
+      avg10:avgf(rows.map(r=>r.ret10)),mdd:avgf(rows.map(r=>r.mdd)),rsi_bwr:wrf(rb)};
+  });
+  window._btData=tdata; btRenderTable(tdata);
+  document.querySelectorAll('#bt-table thead th[data-btc]').forEach(th=>{
+    th.onclick=()=>{
+      const col=th.dataset.btc;
+      if(btSortCol===col) btSortDir*=-1; else{btSortCol=col;btSortDir=-1;}
+      document.querySelectorAll('#bt-table thead th').forEach(t=>t.classList.remove('sd','sa'));
+      th.classList.add(btSortDir===-1?'sd':'sa');
+      btRenderTable(window._btData);
+    };
+  });
+  const buckets=[[-99,-20],[-20,-10],[-10,-5],[-5,0],[0,5],[5,10],[10,20],[20,99]];
+  const total=r10all.length, max=Math.max(...buckets.map(([lo,hi])=>r10all.filter(v=>v>=lo&&v<hi).length));
+  let svg='<svg width="580" height="'+(buckets.length*32)+'" style="overflow:visible">';
+  buckets.forEach(([lo,hi],i)=>{
+    const cnt=r10all.filter(v=>v>=lo&&v<hi).length, y=i*32;
+    const bw=cnt?Math.max(4,cnt/max*400):0, col=lo>=0?'var(--buy3)':'var(--sell)';
+    const pct=(cnt/total*100).toFixed(1);
+    svg+=`<text x="100" y="${y+20}" font-family="Space Mono,monospace" font-size="9" fill="var(--text3)" text-anchor="end">${lo}% / ${hi}%</text>`;
+    if(bw) svg+=`<rect x="104" y="${y+4}" width="${bw}" height="22" fill="${col}" opacity="0.7" rx="2"/>`;
+    svg+=`<text x="${108+bw}" y="${y+20}" font-family="Space Mono,monospace" font-size="9" fill="var(--text2)">${cnt} (${pct}%)</text>`;
+  });
+  svg+='</svg>';
+  document.getElementById('bt-dist').innerHTML=svg;
+}
+
+function btRenderTable(data){
+  const sorted=[...data].sort((a,b)=>{const va=a[btSortCol]??-999,vb=b[btSortCol]??-999;return typeof va==='string'?va.localeCompare(vb)*btSortDir:(va-vb)*btSortDir;});
+  const wrc=wr=>wr>=65?'var(--buy3)':wr>=50?'var(--text)':'var(--sell)';
+  const wrb=wr=>`<span class="bwr"><span class="bwf" style="width:${wr/2}px;background:${wr>=65?'var(--buy3)':wr>=50?'#e67700':'var(--sell)'}"></span></span>`;
+  const rf=v=>v==null?'—':`<span style="color:${v>=0?'var(--buy3)':'var(--sell)'}">${v>=0?'+':''}${v}%</span>`;
+  const lbcls=lv=>lv>=5?'leva-5':lv>=3?'leva-3':lv===2?'leva-2':'leva-1';
+  document.getElementById('bt-tbody').innerHTML=sorted.map(d=>
+    `<tr><td><span class="leva-badge ${lbcls(d.leva||1)}">${d.leva||1}x</span></td>
+    <td style="font-family:var(--font-mono);font-weight:700;color:var(--accent)">${d.ticker}</td>
+    <td style="text-align:right">${d.n}</td>
+    <td style="text-align:right;color:var(--sell)">${d.buy3}</td>
+    <td style="text-align:right;color:var(--accent)">${d.buy2}</td>
+    <td style="text-align:right"><span style="color:${wrc(d.wr5??0)}">${d.wr5??'—'}%</span>${d.wr5?wrb(d.wr5):''}</td>
+    <td style="text-align:right"><span style="color:${wrc(d.wr10??0)};font-weight:700">${d.wr10??'—'}%</span>${d.wr10?wrb(d.wr10):''}</td>
+    <td style="text-align:right"><span style="color:${wrc(d.wr20??0)}">${d.wr20??'—'}%</span>${d.wr20?wrb(d.wr20):''}</td>
+    <td style="text-align:right">${rf(d.avg10)}</td>
+    <td style="text-align:right;color:var(--sell)">${d.mdd??'—'}%</td>
+    <td style="text-align:right">${d.rsi_bwr!=null?`<span style="color:var(--buy3);font-weight:700">${d.rsi_bwr}%</span>`:'—'}</td>
+    </tr>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════
+// INIT PRINCIPALE
+// ═══════════════════════════════════════════════
+async function init() {
+  try {
+    const r = await fetch(DATA_URL + '?t=' + Date.now());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const json = await r.json();
+    renderRegime(json);
+    renderBestBuy(json);
+    allData = json.data || [];
+    renderTable();
+    updateTabCounts();
+    document.getElementById('loadingMsg').style.display = 'none';
+    document.getElementById('mainTable').style.display = 'table';
+    document.getElementById('metaTs').textContent = json.timestamp_it || '';
+  } catch(e) {
+    document.getElementById('loadingMsg').textContent = '❌ Errore: ' + e.message;
+  }
+}
+
+init();
+
 </script>
 
 <div id="bt-panel">
-  <div class="bt-alert">&#9888;&#65039; Backtest rolling ~6 mesi, segnali calcolati progressivi (no look-ahead). Rendimenti su close N+5/10/20. Indicazione statistica.</div>
-  <div id="bt-loading" class="bt-loading">&#8987; Calcolo backtest... (primo caricamento ~10 secondi)</div>
+  <div class="bt-alert">⚠️ Backtest rolling ~6 mesi, segnali calcolati progressivi (no look-ahead). Rendimenti su close N+5/10/20. Indicazione statistica.</div>
+  <div id="bt-loading" class="bt-loading">⏳ Calcolo backtest... (~15 secondi)</div>
   <div id="bt-content" style="display:none">
     <div class="bt-kpi-row" id="bt-kpis"></div>
-    <div class="bt-section">&#128256; Impatto RSI5 Cross sul Win Rate @10gg</div>
+    <div class="bt-section">🔀 Impatto RSI5 Cross @10gg</div>
     <div class="bt-cross-grid" id="bt-cross"></div>
-    <div class="bt-section">&#128203; Statistiche per ticker</div>
+    <div class="bt-section">📋 Statistiche per ticker</div>
     <div style="overflow-x:auto">
     <table id="bt-table">
       <thead><tr>
         <th data-btc="leva">Leva</th><th data-btc="ticker">Ticker</th>
         <th data-btc="n">N</th><th data-btc="buy3">BUY3</th><th data-btc="buy2">BUY2</th>
         <th data-btc="wr5">WR 5gg</th><th data-btc="wr10">WR 10gg</th><th data-btc="wr20">WR 20gg</th>
-        <th data-btc="avg10">Avg 10gg</th><th data-btc="mdd">Avg MDD</th><th data-btc="rsi_bwr">WR RSI&#8593;</th>
+        <th data-btc="avg10">Avg 10gg</th><th data-btc="mdd">Avg MDD</th><th data-btc="rsi_bwr">WR RSI↑</th>
       </tr></thead>
       <tbody id="bt-tbody"></tbody>
     </table>
     </div>
-    <div class="bt-section" style="margin-top:20px">&#128202; Distribuzione rendimenti @10gg</div>
+    <div class="bt-section" style="margin-top:20px">📊 Distribuzione @10gg</div>
     <div id="bt-dist" style="padding:8px 0 20px"></div>
   </div>
 </div>
