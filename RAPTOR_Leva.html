@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>⚡ RAPTOR Leva</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;800&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -198,6 +199,7 @@ td.score{font-family:var(--font-mono);font-size:12px;font-weight:700;text-align:
   <span class="ctrl-label">CERCA</span>
   <input type="text" id="filterSearch" placeholder="ticker / nome..." oninput="applyFilters()" style="width:140px">
   <button class="btn-reset" onclick="resetFilters()">✕ Reset</button>
+  <button class="btn-reset" onclick="exportExcel()" style="background:#d3f9d8;color:#2f9e44;border-color:#2f9e44">📥 Esporta Excel</button>
   <span class="count-badge" id="countBadge">—</span>
 </div>
 
@@ -430,6 +432,86 @@ function renderTable() {
 
 function openChart(yahooTicker) {
   window.open(CHART_PAGE + '?t=' + yahooTicker, '_blank');
+}
+
+// ═══ EXPORT EXCEL ═══════════════════════════════════
+function exportExcel() {
+  const wb = XLSX.utils.book_new();
+
+  // Foglio 1: Tutti i ticker correnti
+  const mainRows = allData.map(d => ({
+    'Leva': (d.leva||1)+'x',
+    'Ticker': d.ticker,
+    'Nome': d.nome||'',
+    'Provider': d.provider||'',
+    'Zona': d.zona||'',
+    'Score': d.score||0,
+    'Prezzo': d.prezzo,
+    'KAMA Fast': d.kama_fast,
+    'KAMA Slow': d.kama_slow,
+    'ER': d.er,
+    'Baff': d.baff,
+    'AO': d.ao,
+    'Vol Ratio': d.volRatio,
+    'RSI14': d.rsi,
+    'RSI5': d.rsi5,
+    'RSI Cross': d.rsi_cross===1?'Bull':d.rsi_cross===-1?'Bear':'Neutro',
+    'Perf Sett%': d.perfSett,
+    'Perf Mese%': d.perfMese,
+    'Segnale dal': d.entryDate||'',
+  }));
+  const ws1 = XLSX.utils.json_to_sheet(mainRows);
+  ws1['!cols'] = [{wch:6},{wch:10},{wch:35},{wch:16},{wch:12},{wch:8},{wch:10},{wch:10},{wch:10},{wch:7},{wch:6},{wch:9},{wch:9},{wch:7},{wch:7},{wch:9},{wch:10},{wch:10},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws1, 'Tutti i Ticker');
+
+  // Foglio 2: Best Buy candidati (stessa logica della dashboard)
+  const bbRows = allData.filter(d =>
+    (d.leva||1)>=2 && ['LONG_CONF','LONG_EARLY'].includes(d.zona) &&
+    (d.score||0)>=75 && (d.rsi_cross||0)===1
+  ).sort((a,b)=>(b.score||0)-(a.score||0)).map(d => ({
+    'Leva': (d.leva||1)+'x',
+    'Ticker': d.ticker,
+    'Nome': d.nome||'',
+    'Zona': d.zona,
+    'Score': d.score,
+    'Vol Ratio': d.volRatio,
+    'Vol OK (≥2x)': (d.volRatio||0)>=2 ? 'SI':'NO',
+    'ER': d.er,
+    'ER OK (≥0.35)': (d.er||0)>=0.35 ? 'SI':'NO',
+    'RSI14': d.rsi,
+    'RSI14 OK (<85)': (d.rsi||0)<85 ? 'SI':'NO',
+    'RSI5': d.rsi5,
+    'Perf Mese%': d.perfMese,
+    'Segnale dal': d.entryDate||'',
+    'Tutti filtri OK': ((d.volRatio||0)>=2 && (d.er||0)>=0.35 && (d.rsi||0)<85) ? 'SI':'NO — verificare',
+  }));
+  const ws2 = XLSX.utils.json_to_sheet(bbRows);
+  ws2['!cols'] = [{wch:6},{wch:10},{wch:35},{wch:12},{wch:8},{wch:9},{wch:11},{wch:7},{wch:11},{wch:7},{wch:13},{wch:7},{wch:10},{wch:14},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Best Buy Oggi');
+
+  // Foglio 3: Backtest per ticker (se calcolato)
+  if (window._btD && window._btD.length) {
+    const btRows = [...window._btD].sort((a,b)=>(b.wr10||0)-(a.wr10||0)).map(d => ({
+      'Leva': (d.leva||1)+'x',
+      'Ticker': d.ticker,
+      'N Segnali': d.n,
+      'BUY3': d.buy3,
+      'BUY2': d.buy2,
+      'WR 5gg%': d.wr5,
+      'WR 10gg%': d.wr10,
+      'WR 20gg%': d.wr20,
+      'Avg Ret 10gg%': d.avg10,
+      'Avg MDD%': d.mdd,
+      'WR RSI Cross%': d.rsi_bwr,
+    }));
+    const ws3 = XLSX.utils.json_to_sheet(btRows);
+    ws3['!cols'] = [{wch:6},{wch:10},{wch:9},{wch:7},{wch:7},{wch:9},{wch:9},{wch:9},{wch:13},{wch:10},{wch:13}];
+    XLSX.utils.book_append_sheet(wb, ws3, 'Backtest 6 mesi');
+  }
+
+  const now = new Date();
+  const ts = now.toISOString().slice(0,16).replace('T','_').replace(':','');
+  XLSX.writeFile(wb, `RAPTOR_Leva_${ts}.xlsx`);
 }
 
 init();
