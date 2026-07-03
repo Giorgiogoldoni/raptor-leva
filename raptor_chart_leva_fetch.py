@@ -640,7 +640,13 @@ def main():
         if result:
             fname = info['y'].replace('.','_') + '.json'
             with open(f"data/charts/{fname}", 'w', encoding='utf-8') as f:
-                json.dump(result, f, ensure_ascii=False, separators=(',',':'))
+                import math
+                def _san(o):
+                    if isinstance(o,float) and (math.isnan(o) or math.isinf(o)): return None
+                    if isinstance(o,dict): return {k:_san(v) for k,v in o.items()}
+                    if isinstance(o,list): return [_san(v) for v in o]
+                    return o
+                json.dump(_san(result), f, ensure_ascii=False, separators=(',',':'), allow_nan=False)
             index.append({'t': info['t'], 'y': info['y'], 'f': fname,
                           'leva': info.get('leva',1), 'provider': info.get('provider','')})
             ok += 1
