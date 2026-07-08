@@ -103,7 +103,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-si
 </div>
 
 <div class="legend">
-  <div class="leg-item"><div class="leg-line" style="background:#343a40"></div>Prezzo</div>
+  <div class="leg-item"><div class="leg-line" style="background:#2f9e44"></div>HA Verde &nbsp; <div class="leg-item"><div class="leg-line" style="background:#c92a2a"></div>HA Rosso</div>
   <div class="leg-item"><div class="leg-line" style="background:var(--kf)"></div>KAMA Fast</div>
   <div class="leg-item"><div class="leg-line" style="background:var(--ks)"></div>KAMA Slow</div>
   <div class="leg-item"><div class="leg-line" style="background:var(--rsi14)"></div>RSI 14</div>
@@ -343,7 +343,7 @@ function drawChart() {
 
     // ── PRICE PANEL ──────────────────────────────────────
     if(panel.id==='price') {
-      const allP = [...closes,...kf.filter(v=>v!=null),...ks.filter(v=>v!=null)].filter(v=>v!=null);
+      const allP = [...closes,...highs.filter(v=>v!=null),...lows.filter(v=>v!=null),...kf.filter(v=>v!=null),...ks.filter(v=>v!=null)].filter(v=>v!=null);
       const mn = Math.min(...allP)*0.996;
       const mx = Math.max(...allP)*1.004;
       const sy = v => scY(v,mn,mx,yTop,h);
@@ -389,8 +389,43 @@ function drawChart() {
       polyline(ks.map((v,i)=>v!=null?[xPos(i),sy(v)]:null).filter(Boolean),'#7c3aed',1.8);
       // KAMA Fast (rosso)
       polyline(kf.map((v,i)=>v!=null?[xPos(i),sy(v)]:null).filter(Boolean),'#dc2626',1.5);
-      // Prezzo (grigio scuro)
-      polyline(closes.map((v,i)=>v!=null?[xPos(i),sy(v)]:null).filter(Boolean),'#343a40',1.8);
+
+      // ── HEIKIN ASHI candele ──────────────────────────
+      // Calcola HA: ha_o, ha_c, ha_h, ha_l
+      const ha_c=[], ha_o=[], ha_h=[], ha_l=[];
+      for(let i=0;i<N;i++){
+        const o=highs[i]!=null&&lows[i]!=null?(highs[i]+lows[i])/2:closes[i]; // approx open
+        const c=closes[i];
+        const hac = c!=null&&highs[i]!=null&&lows[i]!=null ? (o+c+highs[i]+lows[i])/4 : null;
+        const hao = i===0 ? (o+c)/2 : (ha_o[i-1]+ha_c[i-1])/2;
+        const hah = highs[i]!=null ? Math.max(highs[i], hao, hac??hao) : null;
+        const hal = lows[i]!=null  ? Math.min(lows[i],  hao, hac??hao) : null;
+        ha_c.push(hac); ha_o.push(hao); ha_h.push(hah); ha_l.push(hal);
+      }
+      // Disegna candele HA
+      const candleW = Math.max(1.5, PW/N*0.7);
+      ha_c.forEach((hac,i)=>{
+        if(hac==null||ha_o[i]==null) return;
+        const bull = hac >= ha_o[i];
+        const col  = bull ? '#2f9e44' : '#c92a2a';
+        const cx   = xPos(i);
+        const yHigh = ha_h[i]!=null ? sy(ha_h[i]) : Math.min(sy(hac),sy(ha_o[i]));
+        const yLow  = ha_l[i]!=null ? sy(ha_l[i]) : Math.max(sy(hac),sy(ha_o[i]));
+        const yOpen = sy(ha_o[i]);
+        const yClose= sy(hac);
+        const yBody1= Math.min(yOpen,yClose);
+        const yBody2= Math.max(yOpen,yClose);
+        const bodyH = Math.max(1, yBody2-yBody1);
+        // Wick
+        el('line',{x1:cx.toFixed(1),y1:yHigh.toFixed(1),x2:cx.toFixed(1),y2:yBody1.toFixed(1),
+          stroke:col,'stroke-width':'0.8'});
+        el('line',{x1:cx.toFixed(1),y1:yBody2.toFixed(1),x2:cx.toFixed(1),y2:yLow.toFixed(1),
+          stroke:col,'stroke-width':'0.8'});
+        // Body
+        el('rect',{x:(cx-candleW/2).toFixed(1),y:yBody1.toFixed(1),
+          width:candleW.toFixed(1),height:bodyH.toFixed(1),
+          fill:col,opacity:bull?'0.85':'0.75',stroke:col,'stroke-width':'0.3'});
+      });
 
       // SAR punti
       sar.forEach((v,i)=>{
