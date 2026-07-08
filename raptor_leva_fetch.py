@@ -654,6 +654,19 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
             if r5p <= r14p and rsi5 > rsi:   rsi_cross = 1
             elif r5p >= r14p and rsi5 < rsi: rsi_cross = -1
         baf      = calc_baffetti_fast(high, low)
+
+        # ── PRE-SIGNAL: AO miglioramento 3 barre + RSI cross bullish ──
+        ao_history = []
+        if len(high) >= 16:
+            for ii in range(-4, 0):
+                h_sl = high[:len(high)+ii+1] if ii < -1 else high
+                l_sl = low[:len(low)+ii+1]   if ii < -1 else low
+                ao_history.append(calc_ao_fast(h_sl, l_sl))
+        ao_improving = (len(ao_history) >= 3 and
+                       ao_history[-1] > ao_history[-2] > ao_history[-3])
+        pre_signal = (ao_improving and
+                      rsi_cross == 1 and
+                      zona not in ('STOP', 'USCITA'))
         sar_arr  = calc_sar(high, low, step=0.03, max_af=0.25)
         sar_val  = sar_arr[-1] if sar_arr[-1] is not None else None
         sar_bull = sar_val is not None and lc > sar_val  # prezzo sopra SAR = rialzista
@@ -705,6 +718,8 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
             'rsi5':      round(rsi5, 2),
             'rsi_cross': rsi_cross,
             'leva':      info.get('leva', 1),
+            'pre_signal': pre_signal,
+            'ao_improving': ao_improving,
         }
     except Exception:
         return None
