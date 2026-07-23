@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>⚡ RAPTOR Chart Leva</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;600;700;800&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#ffffff; --bg2:#f8f9fa; --bg3:#f1f3f5;
+  --border:#dee2e6; --border2:#ced4da;
+  --text:#212529; --text2:#495057; --text3:#868e96;
+  --accent:#1971c2;
+  --buy3:#2f9e44; --buy2:#1971c2; --watch:#e67700; --sell:#c92a2a;
+  --kf:#dc2626; --ks:#7c3aed;
+  --rsi14:#e67700; --rsi5:#1971c2;
+  --font-mono:'Space Mono',monospace;
+  --font-cond:'Barlow Condensed',sans-serif;
+  --font-body:'Barlow',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:13px;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:2px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 16px;height:52px;flex-shrink:0}
+.logo{font-family:var(--font-cond);font-weight:800;font-size:20px;letter-spacing:3px;color:var(--accent)}
+.logo span{color:var(--text3);font-weight:300}
+.sym-box{display:flex;flex-direction:column}
+.sym-ticker{font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--text)}
+.sym-nome{font-size:10px;color:var(--text3);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spacer{flex:1}
+.tf-bar{display:flex;gap:4px}
+.tf-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text2);padding:4px 11px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;font-family:var(--font-cond);letter-spacing:1px;transition:all .12s}
+.tf-btn:hover,.tf-btn.act{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-back{background:var(--bg2);border:1px solid var(--border);color:var(--text2);padding:4px 11px;border-radius:4px;cursor:pointer;font-size:11px;font-family:var(--font-cond);letter-spacing:1px;text-decoration:none;transition:all .12s}
+.btn-back:hover{border-color:var(--sell);color:var(--sell)}
+.btn-tv{background:#131722;border:1px solid #131722;color:#fff;padding:4px 11px;border-radius:4px;cursor:pointer;font-size:11px;font-family:var(--font-cond);font-weight:700;letter-spacing:1px;text-decoration:none;transition:all .12s}
+.btn-tv:hover{background:#2962ff;border-color:#2962ff}
+
+/* STATS BAR */
+.statsbar{background:var(--bg);border-bottom:1px solid var(--border);padding:6px 16px;display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;align-items:center}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:3px 9px;min-width:64px;text-align:center}
+.stat .sl{font-size:8px;color:var(--text3);letter-spacing:.5px;font-family:var(--font-cond);font-weight:600;text-transform:uppercase}
+.stat .sv{font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--text);margin-top:1px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:700;font-family:var(--font-cond);letter-spacing:1px}
+.badge.buy3{background:#d3f9d8;color:var(--buy3)}
+.badge.buy2{background:#dbe4ff;color:var(--accent)}
+.badge.watch{background:#fff3bf;color:var(--watch)}
+.badge.sell{background:#ffe3e3;color:var(--sell)}
+.badge.rsi-bull{background:#d3f9d8;color:var(--buy3)}
+.badge.rsi-bear{background:#ffe3e3;color:var(--sell)}
+.badge.rsi-neu{background:var(--bg3);color:var(--text3)}
+.sep{width:1px;height:28px;background:var(--border);flex-shrink:0}
+.stat.aggiornato{background:#e7f5ff;border-color:#a5d8ff}
+.stat.aggiornato .sv{color:var(--accent);font-size:11px}
+
+/* LEGEND — barra compatta sopra il grafico */
+.legend{display:flex;gap:14px;align-items:center;padding:5px 16px;font-size:10px;color:var(--text2);font-family:var(--font-cond);flex-wrap:wrap;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+.leg-item{display:flex;align-items:center;gap:4px;white-space:nowrap}
+.leg-line{width:16px;height:2px;border-radius:1px;flex-shrink:0}
+
+/* CHART AREA — in primo piano, larghezza piena */
+.chart-wrap{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 8px;background:var(--bg2);min-height:0}
+#chart-container{background:var(--bg);border:1px solid var(--border);border-radius:6px;overflow:hidden;height:100%}
+
+/* ZONA pill */
+.zona-pill{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-weight:700;font-family:var(--font-cond);letter-spacing:1px}
+.zona-lc{background:#d3f9d8;color:#2f9e44}
+.zona-le{background:#dbe4ff;color:#1971c2}
+.zona-gr{background:#fff3bf;color:#e67700}
+.zona-ex{background:#ffe3e3;color:#c92a2a}
+.zona-st{background:#ffe3e3;color:#862e2e;border:1px solid #c92a2a}
+
+/* ACTIONS BAR (PDF regole) */
+.actions-bar{background:var(--bg);border-top:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.btn-pdf{background:#212529;border:none;color:#fff;padding:5px 14px;border-radius:4px;cursor:pointer;font-size:11px;font-family:var(--font-cond);font-weight:700;letter-spacing:1px;margin-left:auto;transition:all .12s}
+.btn-pdf:hover{background:var(--accent)}
+.actions-note{font-size:10px;color:var(--text3);font-family:var(--font-cond)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">⚡RAPTOR<span> LEVA</span></div>
+  <div class="sym-box">
+    <div class="sym-ticker" id="symTicker">—</div>
+    <div class="sym-nome" id="symNome">—</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="tf-bar">
+    <button class="tf-btn" onclick="setTF(21)"  id="tf1m">1M</button>
+    <button class="tf-btn act" onclick="setTF(63)"  id="tf3m">3M</button>
+    <button class="tf-btn" onclick="setTF(126)" id="tf6m">6M</button>
+  </div>
+  <a class="btn-tv" id="btnTV" href="#" target="_blank" rel="noopener">📊 TradingView</a>
+  <a class="btn-back" href="javascript:window.close()">✕ Chiudi</a>
+</div>
+
+<div class="statsbar" id="statsbar">
+  <div class="stat"><div class="sl">Prezzo</div><div class="sv" id="sPrezzo">—</div></div>
+  <div class="stat"><div class="sl">KAMA Fast</div><div class="sv" id="sKF" style="color:var(--kf)">—</div></div>
+  <div class="stat"><div class="sl">KAMA Slow</div><div class="sv" id="sKS" style="color:var(--ks)">—</div></div>
+  <div class="stat"><div class="sl">SAR</div><div class="sv" id="sSAR">—</div></div>
+  <div class="stat"><div class="sl">AO</div><div class="sv" id="sAO">—</div></div>
+  <div class="stat"><div class="sl">RSI 14</div><div class="sv" id="sRSI14" style="color:var(--rsi14)">—</div></div>
+  <div class="stat"><div class="sl">RSI 5</div><div class="sv" id="sRSI5" style="color:var(--rsi5)">—</div></div>
+  <div class="sep"></div>
+  <span id="badgeZona">—</span>
+  <span id="badgeSegnale">—</span>
+  <span id="badgeRSICross">—</span>
+  <div class="sep"></div>
+  <div class="stat"><div class="sl">Leva</div><div class="sv" id="sLeva">—</div></div>
+  <div class="stat"><div class="sl">Provider</div><div class="sv" id="sProvider" style="font-size:10px">—</div></div>
+  <div class="sep"></div>
+  <div class="stat aggiornato"><div class="sl">🕐 Aggiornato</div><div class="sv" id="sAggiornato">—</div></div>
+</div>
+
+<div class="legend">
+  <div class="leg-item"><div class="leg-line" style="background:#2f9e44"></div>HA Verde</div>
+  <div class="leg-item"><div class="leg-line" style="background:#c92a2a"></div>HA Rosso</div>
+  <div class="leg-item"><div class="leg-line" style="background:var(--kf)"></div>KAMA Fast</div>
+  <div class="leg-item"><div class="leg-line" style="background:var(--ks)"></div>KAMA Slow</div>
+  <div class="leg-item"><div class="leg-line" style="background:var(--rsi14)"></div>RSI 14</div>
+  <div class="leg-item"><div class="leg-line" style="height:1.5px;border-top:2px dashed var(--rsi5);background:none"></div>RSI 5</div>
+  <div class="leg-item">▲ BUY3 &nbsp;△ BUY2 &nbsp;▽ WATCH &nbsp;▼ SELL</div>
+  <div class="leg-item">🟢🔴 SAR</div>
+</div>
+
+<div class="chart-wrap">
+  <div id="chart-container">
+    <div id="chart-inner" style="padding:20px;text-align:center;color:var(--text3);font-size:12px">
+      Caricamento grafico...
+    </div>
+  </div>
+</div>
+
+<div class="actions-bar">
+  <span class="actions-note">⚠️ Solo uso educativo — verificare sempre prima di operare</span>
+  <button class="btn-pdf" onclick="downloadPDF()">📄 Regole PDF</button>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────
+const CHART_BASE = 'https://raw.githubusercontent.com/Giorgiogoldoni/raptor-leva/main/data/charts/';
+const SIG_COL = { BUY3:'#2f9e44', BUY2:'#1971c2', WATCH:'#e67700', SELL:'#c92a2a' };
+
+let currentData = null;
+let currentTF   = 63;
+
+// ─────────────────────────────────────────────────────
+// INIT — legge ticker da URL ?t=3BAL_MI
+// ─────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  const params = new URLSearchParams(window.location.search);
+  const ticker = params.get('t') || params.get('ticker') || '';
+  if (!ticker) {
+    document.getElementById('chart-inner').textContent = 'Nessun ticker specificato — aggiungi ?t=TICKER_MI all\'URL';
+    return;
+  }
+  await loadChart(ticker);
+});
+
+// ─────────────────────────────────────────────────────
+// Suffisso borsa per link TradingView
+// ─────────────────────────────────────────────────────
+function tvSymbol(yahoo) {
+  if (!yahoo) return '';
+  const m = yahoo.match(/^(.+)\.([A-Za-z]+)$/);
+  if (!m) return yahoo.toUpperCase();
+  const sym = m[1].toUpperCase().replace(/[^A-Z0-9]/g,'');
+  const suf = m[2].toUpperCase();
+  const map = { MI:'MIL', DE:'XETR', PA:'EURONEXT', L:'LSE' };
+  const pre = map[suf] || suf;
+  return pre + ':' + sym;
+}
+
+async function loadChart(ticker) {
+  document.getElementById('chart-inner').textContent = 'Caricamento ' + ticker + '...';
+  const fname = ticker.replace(/\./g,'_') + '.json';
+  try {
+    const r = await fetch(CHART_BASE + fname + '?t=' + Date.now());
+    if (r.status === 404) {
+      document.getElementById('chart-inner').innerHTML =
+        '⚠️ <strong>Ticker non tracciato</strong> — nessun file dati generato per <code>' + ticker + '</code>.<br>' +
+        'Verificare che il ticker sia incluso nella lista TICKERS di <code>raptor_chart_leva_fetch.py</code> e che il workflow sia stato eseguito almeno una volta.';
+      return;
+    }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    currentData = await r.json();
+    updateStats();
+    drawChart();
+    const tvBtn = document.getElementById('btnTV');
+    tvBtn.href = 'https://www.tradingview.com/symbols/' + encodeURIComponent(tvSymbol(currentData.yahoo)) + '/';
+  } catch(e) {
+    document.getElementById('chart-inner').textContent = 'Errore caricamento: ' + e.message + ' — riprovare più tardi o verificare la connessione';
+  }
+}
+
+function setTF(bars) {
+  currentTF = bars;
+  document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('act'));
+  const map = {21:'tf1m', 63:'tf3m', 126:'tf6m'};
+  if(map[bars]) document.getElementById(map[bars]).classList.add('act');
+  if(currentData) drawChart();
+}
+
+// ─────────────────────────────────────────────────────
+// STATS BAR
+// ─────────────────────────────────────────────────────
+function updateStats() {
+  const d = currentData;
+  if (!d) return;
+
+  document.getElementById('symTicker').textContent = d.ticker || '—';
+  document.getElementById('symNome').textContent   = d.nome   || '—';
+  document.title = '⚡ ' + (d.ticker||'') + ' — RAPTOR Leva';
+
+  const lc  = d.closes?.at(-1);
+  const kf  = d.kama_fast?.filter(v=>v!=null).at(-1);
+  const ks  = d.kama_slow?.filter(v=>v!=null).at(-1);
+  const sar = d.sar?.filter(v=>v!=null).at(-1);
+  const ao  = d.ao?.at(-1);
+  const r14 = d.rsi14?.filter(v=>v!=null).at(-1);
+  const r5  = d.rsi5?.filter(v=>v!=null).at(-1);
+
+  const fmt = (v, dec=3) => v!=null ? (+v).toFixed(dec) : '—';
+  document.getElementById('sPrezzo').textContent  = fmt(lc);
+  document.getElementById('sKF').textContent      = fmt(kf);
+  document.getElementById('sKS').textContent      = fmt(ks);
+  document.getElementById('sSAR').textContent     = fmt(sar);
+  document.getElementById('sAO').textContent      = ao!=null ? (ao>0?'+':'')+ao.toFixed(4) : '—';
+  document.getElementById('sRSI14').textContent   = fmt(r14,1);
+  document.getElementById('sRSI5').textContent    = fmt(r5,1);
+  document.getElementById('sLeva').textContent    = (d.leva||1) + 'x';
+  document.getElementById('sProvider').textContent = (d.provider||'—').replace('WisdomTree','WT').replace('GraniteShares','GS').replace('Leverage Shares','LS');
+  document.getElementById('sAggiornato').textContent = d.timestamp_it || '—';
+
+  // Zona
+  const zona = getZona(lc, kf, ks);
+  const zonaMap = {
+    'LONG_CONF': ['LONG CONF','zona-lc'],
+    'LONG_EARLY':['LONG EARLY','zona-le'],
+    'GRIGIA':    ['GRIGIA','zona-gr'],
+    'USCITA':    ['USCITA','zona-ex'],
+    'STOP':      ['⛔ STOP','zona-st'],
+    'ND':        ['—','']
+  };
+  const [zlabel, zcls] = zonaMap[zona]||['—',''];
+  document.getElementById('badgeZona').innerHTML = `<span class="zona-pill ${zcls}">${zlabel}</span>`;
+
+  // Segnale — ultimo non-null
+  const lastSig = [...(d.signals||[])].reverse().find(s=>s!=null);
+  if(lastSig) {
+    const cls = {BUY3:'buy3',BUY2:'buy2',WATCH:'watch',SELL:'sell'}[lastSig]||'';
+    document.getElementById('badgeSegnale').innerHTML = `<span class="badge ${cls}">${lastSig}</span>`;
+  }
+
+  // RSI Cross
+  const lx = d.last_cross;
+  if(lx) {
+    const dir = lx.dir===1 ? '↑ RSI BULL' : '↓ RSI BEAR';
+    const cls = lx.dir===1 ? 'rsi-bull' : 'rsi-bear';
+    document.getElementById('badgeRSICross').innerHTML = `<span class="badge ${cls}">${dir} <span style="font-weight:400;font-size:9px">${lx.d||''}</span></span>`;
+  } else {
+    document.getElementById('badgeRSICross').innerHTML = `<span class="badge rsi-neu">RSI —</span>`;
+  }
+}
+
+function getZona(price, kf, ks) {
+  if(kf==null||ks==null) return 'ND';
+  if(price>kf && kf>ks) return 'LONG_CONF';
+  if(price>kf && price>ks) return 'LONG_EARLY';
+  if(price>ks && price<kf) return 'GRIGIA';
+  if(price<ks) {
+    const gap=(ks-price)/ks*100;
+    return gap>2 ? 'STOP' : 'USCITA';
+  }
+  return 'GRIGIA';
+}
+
+// ─────────────────────────────────────────────────────
+// SVG CHART
+// ─────────────────────────────────────────────────────
+function drawChart() {
+  const d = currentData;
+  if(!d || !d.closes) return;
+
+  const n    = Math.min(currentTF, d.closes.length);
+  const sl   = d.closes.length - n;
+  const slice = arr => (arr||[]).slice(sl);
+
+  const closes  = slice(d.closes);
+  const opens   = slice(d.opens);
+  const highs   = slice(d.highs);
+  const lows    = slice(d.lows);
+  const volumes = slice(d.volumes);
+  const kf      = slice(d.kama_fast);
+  const ks      = slice(d.kama_slow);
+  const sar     = slice(d.sar);
+  const ao      = slice(d.ao);
+  const r14     = slice(d.rsi14);
+  const r5      = slice(d.rsi5);
+  const baff    = slice(d.baff);
+  const sigs    = slice(d.signals);
+  const dates   = slice(d.dates);
+  const N       = closes.length;
+
+  const hasOpens = Array.isArray(opens) && opens.some(v=>v!=null);
+
+  const wrap = document.getElementById('chart-container');
+  const W    = Math.max(wrap.clientWidth - 2, 500);
+  const PAD  = {l:52, r:24, top:6, bot:20};
+  const PW   = W - PAD.l - PAD.r;
+
+  // Pannelli: [altezza, label] — prezzo maggiorato (grafico in primo piano)
+  const panels = [
+    {h:260, id:'price',  label:'Prezzo · KAMA Fast (rosso) · KAMA Slow (viola) · SAR (punti) · Segnali'},
+    {h:55,  id:'vol',    label:'Volume'},
+    {h:55,  id:'baff',   label:'BAFF — barre consecutive sopra/sotto KAMA Fast'},
+    {h:60,  id:'ao',     label:'AO Veloce (EMA3−EMA13)'},
+    {h:75,  id:'rsi',    label:'RSI 14 (arancio) · RSI 5 (blu tratteggiato) · Cross ▲▼'},
+  ];
+  const GAP = 18;
+  const totalH = panels.reduce((s,p)=>s+p.h+GAP,0) + PAD.top + PAD.bot;
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns,'svg');
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', totalH);
+  svg.style.display = 'block';
+  svg.style.background = '#ffffff';
+
+  function xPos(i) { return PAD.l + (i/Math.max(N-1,1))*PW; }
+  function scY(v,mn,mx,yTop,h) {
+    if(mx===mn) return yTop+h/2;
+    return yTop + h - ((v-mn)/(mx-mn))*h;
+  }
+  function validArr(arr) { return (arr||[]).filter(v=>v!=null&&!isNaN(v)); }
+  function minMax(arr) { const v=validArr(arr); return v.length?[Math.min(...v),Math.max(...v)]:[0,1]; }
+
+  function el(tag,attrs,parent) {
+    const e=document.createElementNS(ns,tag);
+    for(const [k,v] of Object.entries(attrs)) e.setAttribute(k,v);
+    (parent||svg).appendChild(e); return e;
+  }
+  function line(x1,y1,x2,y2,stroke,sw=0.5,dash='') {
+    el('line',{x1:x1.toFixed(1),y1:y1.toFixed(1),x2:x2.toFixed(1),y2:y2.toFixed(1),
+      stroke,['stroke-width']:sw,...(dash?{['stroke-dasharray']:dash}:{})});
+  }
+  function polyline(pts,stroke,sw=1.5,dash='') {
+    if(pts.length<2) return;
+    el('polyline',{points:pts.map(([x,y])=>`${x.toFixed(1)},${y.toFixed(1)}`).join(' '),
+      stroke,['stroke-width']:sw,fill:'none',['stroke-linejoin']:'round',
+      ...(dash?{['stroke-dasharray']:dash}:{})});
+  }
+  function rect(x,y,w,h,fill,opacity=1) {
+    if(w<=0||h<=0) return;
+    el('rect',{x:x.toFixed(1),y:y.toFixed(1),width:Math.max(0,w).toFixed(1),height:Math.max(0,h).toFixed(1),fill,opacity});
+  }
+  function txt(x,y,str,fill,size=8,anchor='middle',weight='normal') {
+    const e=el('text',{x:x.toFixed(1),y:y.toFixed(1),fill,['font-size']:size,
+      ['font-family']:'Space Mono,monospace',['text-anchor']:anchor,['font-weight']:weight});
+    e.textContent=str; return e;
+  }
+  function tri(cx,cy,sz,up,fill) {
+    const pts = up
+      ? `${cx},${cy-sz} ${cx-sz},${cy+sz} ${cx+sz},${cy+sz}`
+      : `${cx},${cy+sz} ${cx-sz},${cy-sz} ${cx+sz},${cy-sz}`;
+    el('polygon',{points:pts,fill});
+  }
+
+  let yOff = PAD.top;
+
+  panels.forEach(panel => {
+    // Label pannello
+    txt(PAD.l, yOff+9, panel.label, '#adb5bd', 7.5, 'start');
+    const yTop = yOff + 12;
+    const h    = panel.h;
+
+    // Sfondo e griglia
+    rect(PAD.l, yTop, PW, h, '#f8f9fa');
+    for(let g=0;g<=4;g++) {
+      const gy = yTop + h/4*g;
+      line(PAD.l, gy, PAD.l+PW, gy, g===0||g===4?'#ced4da':'#e9ecef', g===0||g===4?0.8:0.4);
+    }
+
+    // ── PRICE PANEL ──────────────────────────────────────
+    if(panel.id==='price') {
+      const allP = [...closes,...highs.filter(v=>v!=null),...lows.filter(v=>v!=null),...kf.filter(v=>v!=null),...ks.filter(v=>v!=null)].filter(v=>v!=null);
+      const mn = Math.min(...allP)*0.996;
+      const mx = Math.max(...allP)*1.004;
+      const sy = v => scY(v,mn,mx,yTop,h);
+
+      // Linee prezzo livelli
+      for(let g=0;g<=4;g++) {
+        const v=mn+(mx-mn)/4*g;
+        txt(PAD.l-3, sy(v)+3, v<1?v.toFixed(4):v<10?v.toFixed(3):v<100?v.toFixed(2):v.toFixed(1), '#adb5bd',7,'end');
+      }
+
+      // Area fill tra KAMA Fast e Slow (colorata per zona)
+      const fillPts = [];
+      for(let i=0;i<N;i++) {
+        if(kf[i]!=null&&ks[i]!=null) fillPts.push(i);
+      }
+      if(fillPts.length>1) {
+        let segStart=fillPts[0], prevAbove=(kf[fillPts[0]]>ks[fillPts[0]]);
+        const drawFill=(from,to,above)=>{
+          const topPts=[],botPts=[];
+          for(let i=from;i<=to;i++) {
+            if(kf[i]==null||ks[i]==null) continue;
+            const top=above?kf[i]:ks[i], bot=above?ks[i]:kf[i];
+            topPts.push([xPos(i),sy(top)]);
+            botPts.unshift([xPos(i),sy(bot)]);
+          }
+          const pts=[...topPts,...botPts];
+          if(pts.length<3) return;
+          el('polygon',{points:pts.map(([x,y])=>`${x.toFixed(1)},${y.toFixed(1)}`).join(' '),
+            fill:above?'#2f9e44':'#c92a2a',opacity:'0.07'});
+        };
+        for(let ii=1;ii<fillPts.length;ii++) {
+          const i=fillPts[ii];
+          const above=(kf[i]>ks[i]);
+          if(above!==prevAbove||ii===fillPts.length-1) {
+            drawFill(segStart,fillPts[ii-1+(ii===fillPts.length-1?1:0)],prevAbove);
+            segStart=i; prevAbove=above;
+          }
+        }
+      }
+
+      // KAMA Slow (viola)
+      polyline(ks.map((v,i)=>v!=null?[xPos(i),sy(v)]:null).filter(Boolean),'#7c3aed',1.8);
+      // KAMA Fast (rosso)
+      polyline(kf.map((v,i)=>v!=null?[xPos(i),sy(v)]:null).filter(Boolean),'#dc2626',1.5);
+
+      // ── HEIKIN ASHI candele — usa Open reale se disponibile ──────────────────────────
+      const ha_c=[], ha_o=[], ha_h=[], ha_l=[];
+      for(let i=0;i<N;i++){
+        const realOpen = hasOpens && opens[i]!=null
+          ? opens[i]
+          : (highs[i]!=null&&lows[i]!=null?(highs[i]+lows[i])/2:closes[i]); // fallback se open non disponibile
+        const c=closes[i];
+        const hac = c!=null&&highs[i]!=null&&lows[i]!=null ? (realOpen+c+highs[i]+lows[i])/4 : null;
+        const hao = i===0 ? (realOpen+c)/2 : (ha_o[i-1]+ha_c[i-1])/2;
+        const hah = highs[i]!=null ? Math.max(highs[i], hao, hac??hao) : null;
+        const hal = lows[i]!=null  ? Math.min(lows[i],  hao, hac??hao) : null;
+        ha_c.push(hac); ha_o.push(hao); ha_h.push(hah); ha_l.push(hal);
+      }
+      // Disegna candele HA
+      const candleW = Math.max(1.5, PW/N*0.7);
+      ha_c.forEach((hac,i)=>{
+        if(hac==null||ha_o[i]==null) return;
+        const bull = hac >= ha_o[i];
+        const col  = bull ? '#2f9e44' : '#c92a2a';
+        const cx   = xPos(i);
+        const yHigh = ha_h[i]!=null ? sy(ha_h[i]) : Math.min(sy(hac),sy(ha_o[i]));
+        const yLow  = ha_l[i]!=null ? sy(ha_l[i]) : Math.max(sy(hac),sy(ha_o[i]));
+        const yOpen = sy(ha_o[i]);
+        const yClose= sy(hac);
+        const yBody1= Math.min(yOpen,yClose);
+        const yBody2= Math.max(yOpen,yClose);
+        const bodyH = Math.max(1, yBody2-yBody1);
+        // Wick
+        el('line',{x1:cx.toFixed(1),y1:yHigh.toFixed(1),x2:cx.toFixed(1),y2:yBody1.toFixed(1),
+          stroke:col,'stroke-width':'0.8'});
+        el('line',{x1:cx.toFixed(1),y1:yBody2.toFixed(1),x2:cx.toFixed(1),y2:yLow.toFixed(1),
+          stroke:col,'stroke-width':'0.8'});
+        // Body
+        el('rect',{x:(cx-candleW/2).toFixed(1),y:yBody1.toFixed(1),
+          width:candleW.toFixed(1),height:bodyH.toFixed(1),
+          fill:col,opacity:bull?'0.85':'0.75',stroke:col,'stroke-width':'0.3'});
+      });
+
+      // SAR punti
+      sar.forEach((v,i)=>{
+        if(v==null||closes[i]==null) return;
+        const sarBull=closes[i]>v;
+        el('circle',{cx:xPos(i).toFixed(1),cy:sy(v).toFixed(1),r:1.8,
+          fill:sarBull?'#2f9e44':'#c92a2a'});
+      });
+
+      // Segnali
+      let prevSig=null;
+      sigs.forEach((sig,i)=>{
+        if(!sig||sig===prevSig||closes[i]==null) return;
+        const col=SIG_COL[sig]||'#868e96';
+        const isBuy=sig==='BUY3'||sig==='BUY2';
+        const isWatch=sig==='WATCH';
+        const cx=xPos(i), cy=sy(closes[i])+(isBuy?12:(isWatch?-8:-12));
+        const sz=isBuy?5:isWatch?4:5;
+        tri(cx,cy,sz,isBuy,col);
+        prevSig=sig;
+      });
+
+      // Ultimo prezzo label
+      const lc=closes.filter(v=>v!=null).at(-1);
+      const ly=sy(lc);
+      const lf=lc<1?lc.toFixed(4):lc<10?lc.toFixed(3):lc<100?lc.toFixed(2):lc.toFixed(1);
+      rect(PAD.l+PW+2,ly-7,40,13,'#1971c2');
+      txt(PAD.l+PW+22,ly+3,lf,'#ffffff',7.5);
+    }
+
+    // ── VOLUME PANEL ─────────────────────────────────────
+    if(panel.id==='vol') {
+      const vmax=Math.max(...volumes.filter(v=>v>0),1);
+      const barW=Math.max(1,PW/N-0.5);
+      const avg=volumes.reduce((s,v)=>s+v,0)/volumes.length;
+      // Linea media volume
+      const avgY=yTop+h-(avg/vmax)*h;
+      line(PAD.l,avgY,PAD.l+PW,avgY,'#ced4da',0.8,'4,3');
+      volumes.forEach((v,i)=>{
+        if(v<=0) return;
+        const vh=(v/vmax)*h;
+        const col=v>=avg*2?'#1971c2':closes[i]>=(closes[i-1]||closes[i])?'#74c0fc':'#ffa8a8';
+        rect(xPos(i)-barW/2, yTop+h-vh, barW, vh, col, 0.7);
+      });
+      txt(PAD.l-3,avgY+3,'avg','#ced4da',6,'end');
+    }
+
+    // ── BAFF PANEL ───────────────────────────────────────
+    if(panel.id==='baff') {
+      const mid=yTop+h/2;
+      const bmax=Math.max(...baff.map(Math.abs),1);
+      const barW=Math.max(1,PW/N-0.5);
+      baff.forEach((v,i)=>{
+        if(v===0||v==null) return;
+        const bh=Math.abs(v)/bmax*(h/2-2);
+        const col=v>0?'#2f9e44':'#c92a2a';
+        const op=Math.min(1,0.3+Math.abs(v)/bmax*0.7);
+        rect(xPos(i)-barW/2, v>0?mid-bh:mid, barW, bh||1, col, op);
+      });
+      line(PAD.l,mid,PAD.l+PW,mid,'#ced4da',1);
+    }
+
+    // ── AO PANEL ─────────────────────────────────────────
+    if(panel.id==='ao') {
+      const vals=ao.filter(v=>v!=null);
+      if(vals.length) {
+        const [mn,mx]=minMax(ao);
+        const zero=scY(0,Math.min(mn,0),Math.max(mx,0),yTop,h);
+        const barW=Math.max(1,PW/N-0.5);
+        line(PAD.l,zero,PAD.l+PW,zero,'#ced4da',1);
+        ao.forEach((v,i)=>{
+          if(v==null) return;
+          const prev=ao[i-1]??v;
+          const col=v>=prev?'#2f9e44':'#c92a2a';
+          const y0=scY(v,Math.min(mn,0),Math.max(mx,0),yTop,h);
+          const bh=Math.abs(y0-zero)||1;
+          rect(xPos(i)-barW/2,Math.min(y0,zero),barW,bh,col,0.85);
+        });
+        txt(PAD.l-3,yTop+4,mx.toFixed(3),'#adb5bd',6.5,'end');
+        txt(PAD.l-3,yTop+h,mn.toFixed(3),'#adb5bd',6.5,'end');
+      }
+    }
+
+    // ── RSI PANEL ────────────────────────────────────────
+    if(panel.id==='rsi') {
+      const sy=v=>scY(v,0,100,yTop,h);
+
+      // Bande overbought/oversold
+      rect(PAD.l,sy(70),PW,sy(30)-sy(70),'#fff9e6',0.5);
+
+      // Livelli
+      [70,50,30].forEach(lvl=>{
+        line(PAD.l,sy(lvl),PAD.l+PW,sy(lvl),lvl===50?'#ced4da':'#dee2e6',0.8,lvl!==50?'3,3':'');
+        txt(PAD.l-3,sy(lvl)+3,lvl,'#adb5bd',7,'end');
+      });
+
+      // Area fill tra RSI14 e RSI5
+      const rsiPts=[];
+      for(let i=0;i<N;i++) {
+        if(r14[i]!=null&&r5[i]!=null) rsiPts.push(i);
+      }
+      if(rsiPts.length>1) {
+        let segStart=rsiPts[0], prevBull=(r5[rsiPts[0]]>r14[rsiPts[0]]);
+        const drawRsiFill=(from,to,bull)=>{
+          const topPts=[],botPts=[];
+          for(let i=from;i<=to;i++) {
+            if(r14[i]==null||r5[i]==null) continue;
+            const top=bull?r5[i]:r14[i], bot=bull?r14[i]:r5[i];
+            topPts.push([xPos(i),sy(top)]);
+            botPts.unshift([xPos(i),sy(bot)]);
+          }
+          const pts=[...topPts,...botPts];
+          if(pts.length<3) return;
+          el('polygon',{points:pts.map(([x,y])=>`${x.toFixed(1)},${y.toFixed(1)}`).join(' '),
+            fill:bull?'#2f9e44':'#c92a2a',opacity:'0.08'});
+        };
+        for(let ii=1;ii<rsiPts.length;ii++) {
+          const i=rsiPts[ii];
+          const bull=(r5[i]>r14[i]);
+          if(bull!==prevBull||ii===rsiPts.length-1) {
+            drawRsiFill(segStart,rsiPts[ii-1+(ii===rsiPts.length-1?1:0)],prevBull);
+            segStart=i; prevBull=bull;
+          }
+        }
+      }
+
+      // RSI 14 (arancio, solida)
+      polyline(r14.map((v,i)=>v!=null?[xPos(i),sy(v)]:null).filter(Boolean),'#e67700',1.5);
+      // RSI 5 (blu, tratteggiata)
+      polyline(r5.map((v,i)=>v!=null?[xPos(i),sy(v)]:null).filter(Boolean),'#1971c2',1.2,'4,2');
+
+      // Cross markers — triangolini
+      for(let i=1;i<N;i++) {
+        if(r14[i]==null||r5[i]==null||r14[i-1]==null||r5[i-1]==null) continue;
+        const cross5up   = r5[i-1]<=r14[i-1] && r5[i]>r14[i];
+        const cross5down = r5[i-1]>=r14[i-1] && r5[i]<r14[i];
+        if(cross5up) {
+          const cy=sy((r5[i]+r14[i])/2);
+          tri(xPos(i),cy+6,4,true,'#2f9e44');
+          el('circle',{cx:xPos(i).toFixed(1),cy:cy.toFixed(1),r:2,fill:'#2f9e44',opacity:'0.6'});
+        }
+        if(cross5down) {
+          const cy=sy((r5[i]+r14[i])/2);
+          tri(xPos(i),cy-6,4,false,'#c92a2a');
+          el('circle',{cx:xPos(i).toFixed(1),cy:cy.toFixed(1),r:2,fill:'#c92a2a',opacity:'0.6'});
+        }
+      }
+
+      // Valori attuali
+      const lr14=r14.filter(v=>v!=null).at(-1);
+      const lr5 =r5.filter(v=>v!=null).at(-1);
+      if(lr14!=null) {
+        rect(PAD.l+PW+2,sy(lr14)-5,26,10,'#e67700');
+        txt(PAD.l+PW+15,sy(lr14)+3,lr14.toFixed(1),'#fff',6.5);
+      }
+      if(lr5!=null) {
+        rect(PAD.l+PW+2,sy(lr5)-5,26,10,'#1971c2');
+        txt(PAD.l+PW+15,sy(lr5)+3,lr5.toFixed(1),'#fff',6.5);
+      }
+    }
+
+    yOff += h + GAP;
+  });
+
+  // Date asse X
+  const step=Math.max(1,Math.floor(N/7));
+  for(let i=0;i<N;i+=step) {
+    if(dates[i]) txt(xPos(i),totalH-4,dates[i].slice(5),'#adb5bd',7.5);
+  }
+
+  const inner=document.getElementById('chart-inner');
+  inner.innerHTML='';
+  inner.style.padding='0';
+  inner.appendChild(svg);
+}
+
+// ─────────────────────────────────────────────────────
+// PDF REGOLE — generico, con soglie reali del sistema RAPTOR Leva
+// ─────────────────────────────────────────────────────
+function downloadPDF() {
+  const d = currentData;
+  if (!d) return;
+  const lc  = d.closes?.filter(v=>v!=null).at(-1);
+  const kf  = d.kama_fast?.filter(v=>v!=null).at(-1);
+  const ks  = d.kama_slow?.filter(v=>v!=null).at(-1);
+  const r14 = d.rsi14?.filter(v=>v!=null).at(-1);
+  const r5  = d.rsi5?.filter(v=>v!=null).at(-1);
+  const ao  = d.ao?.at(-1);
+  const zona = getZona(lc, kf, ks);
+  const zonaLabel = {LONG_CONF:'LONG CONF',LONG_EARLY:'LONG EARLY',GRIGIA:'GRIGIA',USCITA:'USCITA',STOP:'⛔ STOP',ND:'—'}[zona]||'—';
+
+  const html2 = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+  body{font-family:'Segoe UI',sans-serif;max-width:680px;margin:40px auto;color:#212529;font-size:13px;line-height:1.6}
+  h1{color:#1971c2;font-size:22px;border-bottom:3px solid #1971c2;padding-bottom:8px;margin-bottom:20px}
+  h2{color:#495057;font-size:15px;margin:24px 0 8px;padding-left:10px;border-left:3px solid #1971c2}
+  table{width:100%;border-collapse:collapse;margin:10px 0 20px;font-size:12px}
+  thead th{background:#212529;color:#fff;padding:7px 10px;text-align:left;font-weight:700}
+  tbody tr{border-bottom:1px solid #dee2e6}
+  tbody tr:nth-child(even){background:#f8f9fa}
+  td{padding:6px 10px}
+  .buy3{color:#2f9e44;font-weight:700} .buy2{color:#1971c2;font-weight:700}
+  .sell{color:#c92a2a;font-weight:700} .warn{color:#e67700;font-weight:700}
+  .box{background:#fff9db;border:1px solid #ffd43b;border-radius:5px;padding:12px 16px;margin:12px 0;font-size:12px;color:#7a5c00}
+  .stato{background:#f8f9fa;border-radius:5px;padding:12px 16px;margin:12px 0;font-size:12px}
+  .footer{margin-top:40px;padding-top:12px;border-top:1px solid #dee2e6;font-size:10px;color:#868e96}
+</style></head><body>
+
+<h1>⚡ ${d.ticker||'—'} — Regole Operative RAPTOR Leva</h1>
+<p style="color:#868e96;font-size:11px">Generato il ${new Date().toLocaleString('it-IT')} · ${d.nome||''} · Dati aggiornati al ${d.timestamp_it||'—'}</p>
+
+<div class="stato">
+  <strong>📊 Stato attuale</strong><br>
+  Prezzo: <strong>${lc?.toFixed(4)||'—'}</strong> · KAMA Fast: ${kf?.toFixed(4)||'—'} · KAMA Slow: ${ks?.toFixed(4)||'—'}<br>
+  RSI14: ${r14?.toFixed(1)||'—'} · RSI5: ${r5?.toFixed(1)||'—'} · AO: ${ao?.toFixed(4)||'—'}<br>
+  Zona: <strong>${zonaLabel}</strong> · Leva: <strong>${d.leva||1}x</strong> · Provider: ${d.provider||'—'}
+</div>
+
+<h2>🟢 BUY3 — Entrata confermata</h2>
+<table><thead><tr><th>Condizione</th><th>Soglia</th><th>Significato</th></tr></thead><tbody>
+<tr><td>Zona</td><td class="buy3">LONG_CONF</td><td>Prezzo &gt; KAMA Fast &gt; KAMA Slow</td></tr>
+<tr><td>AO (EMA3−EMA13)</td><td class="buy3">&gt; 0</td><td>Momentum positivo</td></tr>
+<tr><td>Volume Ratio</td><td class="buy3">≥ 2.0x</td><td>Interesse reale del mercato</td></tr>
+<tr><td>Baff (barre sopra KAMA)</td><td class="buy3">≥ 3</td><td>Momentum continuativo</td></tr>
+<tr><td>ER (Efficiency Ratio)</td><td class="buy3">≥ 0.35</td><td>Mercato direzionale, non laterale</td></tr>
+<tr><td>Gap KAMA Fast/Slow</td><td class="buy3">≥ 0.3%</td><td>Evita falsi crossover marginali</td></tr>
+<tr><td>SAR</td><td class="buy3">Rialzista</td><td>Prezzo sopra il Parabolic SAR</td></tr>
+</tbody></table>
+
+<h2>🔵 BUY2 — Entrata anticipata</h2>
+<table><thead><tr><th>Condizione</th><th>Soglia</th><th>Significato</th></tr></thead><tbody>
+<tr><td>Zona</td><td class="buy2">LONG_EARLY</td><td>Prezzo &gt; KAMA Fast ma sotto KAMA Slow</td></tr>
+<tr><td>AO</td><td class="buy2">&gt; 0</td><td>Momentum positivo</td></tr>
+<tr><td>Volume Ratio</td><td class="buy2">≥ 1.5x</td><td>Soglia ridotta rispetto a BUY3</td></tr>
+<tr><td>Baff</td><td class="buy2">≥ 3</td><td>Barre consecutive sopra KAMA</td></tr>
+<tr><td>ER</td><td class="buy2">≥ 0.35</td><td>Mercato direzionale</td></tr>
+</tbody></table>
+
+<h2>🔴 SELL — Uscita</h2>
+<table><thead><tr><th>Condizione</th><th>Soglia</th><th>Azione</th></tr></thead><tbody>
+<tr><td>Zona USCITA</td><td class="sell">Prezzo &lt; KAMA Slow (&lt;2%)</td><td>Valutare uscita</td></tr>
+<tr><td>Zona STOP</td><td class="sell">Prezzo &gt;2% sotto KAMA Slow</td><td>Uscita immediata</td></tr>
+</tbody></table>
+
+<h2>⚡ RSI Cross — Filtro qualità</h2>
+<table><thead><tr><th>Segnale</th><th>Condizione</th></tr></thead><tbody>
+<tr><td class="buy3">↑ Bull Cross</td><td>RSI5 supera RSI14 dal basso</td></tr>
+<tr><td class="sell">↓ Bear Cross</td><td>RSI5 scende sotto RSI14</td></tr>
+</tbody></table>
+
+<h2>🚀 Super Best Buy — Flip SAR</h2>
+<table><thead><tr><th>Condizione</th><th>Soglia</th><th>Significato</th></tr></thead><tbody>
+<tr><td>Primo pallino SAR</td><td class="buy3">Flip entro 2 barre</td><td>Cambio di direzione recente del SAR</td></tr>
+<tr><td>AO</td><td class="buy3">&gt; 0 e in miglioramento (3 barre)</td><td>Momentum in accelerazione</td></tr>
+<tr><td>Volume Ratio</td><td class="buy3">≥ 1.5x</td><td>Filtro alleggerito rispetto a Best Buy standard</td></tr>
+<tr><td>Movimento giornaliero</td><td class="warn">entro ±4%</td><td>Sanità — evita ingressi dopo spike già avvenuto</td></tr>
+</tbody></table>
+
+<div class="box">
+  <strong>⚠️ Avvertenza:</strong> ETP a leva. Il volatility decay erode il capitale in mercati laterali.
+  Non operare mai contro il trend confermato (zona STOP). I segnali BUY3/BUY2/Super Best Buy sono indicazioni tecniche, non consigli di investimento.
+</div>
+
+<div class="footer">RAPTOR Leva · giorgiogoldoni.github.io/raptor-leva · Solo uso educativo — verificare sempre prima di operare</div>
+</body></html>`;
+
+  const blob = new Blob([html2], {type:'text/html'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download=(d.ticker||'RAPTOR')+'_Regole_RAPTOR.html';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// Resize
+window.addEventListener('resize', ()=>{ if(currentData) drawChart(); });
+</script>
+</body>
+</html>
