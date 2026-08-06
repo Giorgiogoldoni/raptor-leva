@@ -563,11 +563,16 @@ def process_ticker(info):
 
         # Segnali per ogni barra
         signals = []
+        zone_arr = []
+        vol_r_arr = []
+        er_arr = []
         avg_vol = sum(volumes[-21:-1])/20 if len(volumes)>21 else 1
         for i in range(len(closes)):
             kf=kf_arr[i]; ks=ks_arr[i]; sar=sar_arr[i]
             if kf is None or ks is None:
-                signals.append(None); continue
+                signals.append(None); zone_arr.append(None)
+                vol_r_arr.append(None); er_arr.append(None)
+                continue
             zona = get_zona(closes[i], kf, ks)
             vol_r = volumes[i]/avg_vol if avg_vol>0 else 1
             baf = baff_arr[i]
@@ -580,6 +585,9 @@ def process_ticker(info):
             ao = ao_arr[i] if i<len(ao_arr) else 0
             sig = get_signal(zona, ao, vol_r, er_val, baf, kf, ks, sar_bull)
             signals.append(sig)
+            zone_arr.append(zona)
+            vol_r_arr.append(round(vol_r,3))
+            er_arr.append(round(er_val,4))
 
         # RSI cross storici
         rsi_crosses = calc_rsi_crosses(r14_arr, r5_arr, dates)
@@ -610,6 +618,9 @@ def process_ticker(info):
             'rsi5':      fmt(r5_arr),
             'baff':      baff_arr,
             'signals':   signals,
+            'zona':      zone_arr,
+            'vol_ratio': vol_r_arr,
+            'er':        er_arr,
             'rsi_crosses': rsi_crosses,
             'last_cross': last_cross,
         }
