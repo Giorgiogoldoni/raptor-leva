@@ -6,7 +6,7 @@ Doppia KAMA (veloce=entrata, lenta=uscita) + AO veloce (EMA3-EMA13) + volume
 Gira ogni 30 min 7-19 lun-ven
 """
 
-import json, time, datetime, statistics
+import json, time, datetime, statistics, math
 import yfinance as yf
 
 # ═══════════════════════════════════════════════════════
@@ -698,9 +698,12 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
         segnale  = get_segnale_leva(zona, ao, vol_r, er, baf, kf, ks, regime_name, sar_bull)
         score    = calc_score_leva(zona, ao, vol_r, er, baf, regime_mult)
 
-        perf1  = round((lc/close[-2]-1)*100,2)  if len(close)>2  else 0
-        perf5  = round((lc/close[-6]-1)*100,2)  if len(close)>6  else 0
-        perf20 = round((lc/close[-21]-1)*100,2) if len(close)>21 else 0
+        def _safe_perf(base):
+            v = (lc/base-1)*100 if base else float('nan')
+            return round(v,2) if math.isfinite(v) else 0
+        perf1  = _safe_perf(close[-2])  if len(close)>2  else 0
+        perf5  = _safe_perf(close[-6])  if len(close)>6  else 0
+        perf20 = _safe_perf(close[-21]) if len(close)>21 else 0
 
         # ── SUPER BEST BUY: primo pallino SAR rialzista + AO>0 + AO in miglioramento ──
         sar_flip, bars_since_flip = calc_sar_flip(close, sar_arr, window=SAR_FLIP_WINDOW)
@@ -1020,9 +1023,10 @@ def check_explosive_movers(results, hist, now):
         reasons = []
         z_sett = z_mese = None
 
-        if len(past) >= MIN_HIST_DAYS:
-            sett_vals = [x[1] for x in past]
-            mese_vals = [x[2] for x in past]
+        sett_vals = [x[1] for x in past if math.isfinite(x[1])]
+        mese_vals = [x[2] for x in past if math.isfinite(x[2])]
+
+        if len(sett_vals) >= MIN_HIST_DAYS and len(mese_vals) >= MIN_HIST_DAYS:
             mu_s, sd_s = statistics.mean(sett_vals), statistics.pstdev(sett_vals)
             mu_m, sd_m = statistics.mean(mese_vals), statistics.pstdev(mese_vals)
             if sd_s > 0:
@@ -1202,17 +1206,24 @@ def main():
                         prev_regime if regime_changed else None)
 
     # 3b. Mover esplosivo (z-score storico per ticker / soglia assoluta di fallback)
-    perf_hist = update_perf_history(results, now)
-    movers = check_explosive_movers(results, perf_hist, now)
-    print("Mover esplosivi: {}".format(len(movers)))
-    if movers:
-        send_explosive_alert_email(movers, now)
+    # Isolato in try/except: un errore qui non deve impedire il salvataggio del JSON principale.
+    try:
+        perf_hist = update_perf_history(results, now)
+        movers = check_explosive_movers(results, perf_hist, now)
+        print("Mover esplosivi: {}".format(len(movers)))
+        if movers:
+            send_explosive_alert_email(movers, now)
+    except Exception as e:
+        print(f"Errore sezione mover esplosivi (non bloccante): {e}")
 
     # 3c. Super Best Buy — log a console + libro storico flip (sbb_flip_log.json)
-    sbb_list = [r for r in results if r.get('super_best_buy')]
-    print("Super Best Buy (flip SAR): {}".format(len(sbb_list)))
-    update_sbb_flip_log(results, now)
-    update_sbb2_flip_log(results, now)
+    try:
+        sbb_list = [r for r in results if r.get('super_best_buy')]
+        print("Super Best Buy (flip SAR): {}".format(len(sbb_list)))
+        update_sbb_flip_log(results, now)
+        update_sbb2_flip_log(results, now)
+    except Exception as e:
+        print(f"Errore sezione Super Best Buy log (non bloccante): {e}")
 
     # 3. Salva
     output = {
