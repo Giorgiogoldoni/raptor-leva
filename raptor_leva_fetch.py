@@ -775,7 +775,6 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
     except Exception:
         return None
 
-
 # ═══════════════════════════════════════════════════════
 # EMAIL ALERT
 # ═══════════════════════════════════════════════════════
@@ -916,7 +915,15 @@ def _update_flip_log(results, now, signal_field, log_file):
     """Log generico riutilizzato per Super Best Buy e Super Best Buy 2: apre una riga
     al flip BULL del segnale indicato (signal_field), aggiorna l'ultimo prezzo finché
     resta BULL, chiude al flip opposto con rendimento%. Retention SBB_LOG_RETENTION_D
-    giorni solo sulle righe chiuse."""
+    giorni solo sulle righe chiuse.
+
+    FIX v2 (16/10/2026):
+      - Non chiude più una posizione se il prezzo corrente è None/NaN/≤0
+        (evita rendimento_pct=NaN).
+      - Aspetta la prossima run con dati validi per chiudere correttamente.
+      - Non aggiorna ultimo_prezzo con valori non validi.
+      - Non apre una posizione se il prezzo di ingresso non è valido.
+    """
     try:
         with open(log_file, 'r', encoding='utf-8') as f:
             log = json.load(f)
@@ -932,6 +939,10 @@ def _update_flip_log(results, now, signal_field, log_file):
         if e.get('stato') == 'aperto':
             open_idx[e['ticker']] = i
 
+    def _valid_price(p):
+        """True se p è un numero finito > 0."""
+        return isinstance(p, (int, float)) and math.isfinite(p) and p > 0
+
     for r in results:
         t = r['ticker']
         prezzo = r.get('prezzo')
@@ -939,6 +950,9 @@ def _update_flip_log(results, now, signal_field, log_file):
         is_new_flip = r.get(signal_field) and t not in open_idx
 
         if is_new_flip:
+            # Per aprire una posizione serve un prezzo di ingresso valido
+            if not _valid_price(prezzo):
+                continue
             log.append({
                 'ticker':        t,
                 'nome':          r.get('nome', ''),
@@ -956,14 +970,20 @@ def _update_flip_log(results, now, signal_field, log_file):
                 'sar_max_af':    0.25,
             })
             open_idx[t] = len(log) - 1
+
         elif t in open_idx:
             e = log[open_idx[t]]
+
+            # Se il prezzo è invalido → salta l'aggiornamento (aspetta prossima run)
+            if not _valid_price(prezzo):
+                continue
+
             if sar_bull is False:
                 # Flip opposto (BEAR) → chiude la posizione
                 e['stato'] = 'chiuso'
                 e['chiusura_ts_it'] = ts_it
                 e['prezzo_chiusura'] = prezzo
-                if e.get('prezzo_ingresso'):
+                if _valid_price(e.get('prezzo_ingresso')):
                     e['rendimento_pct'] = round((prezzo / e['prezzo_ingresso'] - 1) * 100, 2)
             else:
                 # Ancora in trend BULL → aggiorna ultimo prezzo
