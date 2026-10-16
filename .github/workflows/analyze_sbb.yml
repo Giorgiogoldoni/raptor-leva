@@ -1,0 +1,31 @@
+name: Analyze SBB Log
+
+on:
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Esegui analisi SBB
+        run: python analyze_sbb_log.py
+
+      - name: Commit report
+        run: |
+          git config user.name  "RAPTOR Bot"
+          git config user.email "raptor-bot@noreply.github.com"
+          git add sbb_report.json sbb_report.txt
+          git diff --staged --quiet || git commit -m "📊 SBB report $(date +'%d/%m/%Y %H:%M')"
+          git pull --rebase origin main
+          git push
