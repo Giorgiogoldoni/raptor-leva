@@ -1,0 +1,127 @@
+======================================================================
+RAPTOR — Report Super Best Buy
+Generato: 16/10/2026 16:39
+======================================================================
+
+── SBB  (sbb_flip_log.json) ──
+  Record totali:       184
+  Aperti:              16
+  Chiusi:              168
+    - con rendimento:  78
+    - con NaN:         90  (53.6%)
+
+  PERFORMANCE (su 78 trade chiusi validi)
+    Win rate:          25.64%   (20W / 58L)
+    Rendimento medio:  -2.41%
+    Rendimento mediano:-1.62%
+    Migliore:          +8.30%
+    Peggiore:          -25.93%
+    Std dev:           5.01
+    Profit factor:     0.19
+    P/L cumulato:      -187.99%
+    Max drawdown:      -187.99%
+    Durata media:      8.36 gg (mediana 6.51 gg)
+
+  BREAKDOWN PER LEVA
+    1x  ->   56 trade | WR  28.6% | avg  -1.44% | cum  -80.84%
+    2x  ->    3 trade | WR  33.3% | avg  -3.05% | cum   -9.14%
+    3x  ->   14 trade | WR  21.4% | avg  -5.75% | cum  -80.48%
+    5x  ->    5 trade | WR   0.0% | avg  -3.51% | cum  -17.53%
+
+  TICKER PIU FREQUENTI
+    COPR     4x
+    WGRO     3x
+    WWRD     3x
+    NTSX     3x
+    PHPM     3x
+    EFCM     3x
+    5BTS     3x
+    EUGB     3x
+    UGAS     3x
+    ECRN     3x
+
+  TRADE CHIUSI CON NaN (primi 20)
+    WTVU     flip 27/07/2026 17:38 -> chiuso 20/08/2026 06:35 (ingresso 25.32, ultimo 26.355)
+    GGRA     flip 29/07/2026 15:27 -> chiuso 06/08/2026 22:09 (ingresso 43.345, ultimo 45.195)
+    EUJP     flip 30/07/2026 14:40 -> chiuso 06/08/2026 22:09 (ingresso 26.545, ultimo 26.58)
+    5MIB     flip 31/07/2026 13:12 -> chiuso 06/08/2026 22:09 (ingresso 255.0, ultimo 295.89)
+    EJP3     flip 31/07/2026 15:35 -> chiuso 06/08/2026 22:09 (ingresso 4.396, ultimo 4.3925)
+    3HCL     flip 03/08/2026 12:52 -> chiuso 06/08/2026 22:09 (ingresso 16.378, ultimo 18.794)
+    ESUG     flip 03/08/2026 15:39 -> chiuso 06/08/2026 22:09 (ingresso 3.1825, ultimo 3.2095)
+    WS5X     flip 04/08/2026 15:43 -> chiuso 06/08/2026 22:09 (ingresso 47.42, ultimo 47.64)
+    WWRD     flip 04/08/2026 15:43 -> chiuso 06/08/2026 22:09 (ingresso 25.315, ultimo 25.425)
+    WMIB     flip 04/08/2026 15:43 -> chiuso 06/08/2026 22:09 (ingresso 63.2, ultimo 63.67)
+    XSOE     flip 05/08/2026 08:26 -> chiuso 06/08/2026 22:09 (ingresso 28.235, ultimo 27.69)
+    QGRW     flip 05/08/2026 08:26 -> chiuso 06/08/2026 22:09 (ingresso 36.655, ultimo 37.47)
+    WGRO     flip 05/08/2026 08:26 -> chiuso 18/08/2026 06:32 (ingresso 27.305, ultimo 27.935)
+    WRNW     flip 05/08/2026 10:59 -> chiuso 06/08/2026 22:09 (ingresso 25.06, ultimo 24.54)
+    NTSX     flip 05/08/2026 12:58 -> chiuso 06/08/2026 22:09 (ingresso 38.45, ultimo 38.13)
+    SUGA     flip 05/08/2026 15:14 -> chiuso 06/08/2026 22:09 (ingresso 8.6, ultimo 8.55)
+    3MG7     flip 05/08/2026 15:14 -> chiuso 18/08/2026 06:32 (ingresso 38.385, ultimo 36.295)
+    WSPX     flip 05/08/2026 15:14 -> chiuso 06/08/2026 22:09 (ingresso 40.845, ultimo 40.745)
+    WNAS     flip 05/08/2026 15:14 -> chiuso 06/08/2026 22:09 (ingresso 37.64, ultimo 37.23)
+    3GOO     flip 05/08/2026 16:58 -> chiuso 06/08/2026 22:09 (ingresso 207.4, ultimo 178.02)
+
+
+── SBB2  (sbb2_flip_log.json) ──
+  Record totali:       254
+  Aperti:              22
+  Chiusi:              232
+    - con rendimento:  112
+    - con NaN:         120  (51.7%)
+
+  PERFORMANCE (su 112 trade chiusi validi)
+    Win rate:          22.32%   (25W / 87L)
+    Rendimento medio:  -2.20%
+    Rendimento mediano:-1.44%
+    Migliore:          +19.69%
+    Peggiore:          -25.93%
+    Std dev:           5.12
+    Profit factor:     0.24
+    P/L cumulato:      -246.11%
+    Max drawdown:      -246.11%
+    Durata media:      7.42 gg (mediana 5.93 gg)
+
+  BREAKDOWN PER LEVA
+    1x  ->   74 trade | WR  24.3% | avg  -1.34% | cum  -99.40%
+    2x  ->    5 trade | WR  20.0% | avg  -3.78% | cum  -18.90%
+    3x  ->   26 trade | WR  23.1% | avg  -4.00% | cum -104.12%
+    5x  ->    7 trade | WR   0.0% | avg  -3.38% | cum  -23.69%
+
+  TICKER PIU FREQUENTI
+    1MCS     6x
+    COPR     4x
+    SCOP     4x
+    WGRO     3x
+    WWRD     3x
+    WRNW     3x
+    NTSX     3x
+    PHPM     3x
+    EFCM     3x
+    5BTS     3x
+
+  TRADE CHIUSI CON NaN (primi 20)
+    SBRT     flip 27/07/2026 12:52 -> chiuso 06/08/2026 22:09 (ingresso 7.722, ultimo 8.074)
+    SOIL     flip 27/07/2026 12:52 -> chiuso 06/08/2026 22:09 (ingresso 8.19, ultimo 8.624)
+    WTVU     flip 27/07/2026 17:38 -> chiuso 20/08/2026 06:35 (ingresso 25.32, ultimo 26.355)
+    3BTL     flip 28/07/2026 16:56 -> chiuso 06/08/2026 22:09 (ingresso 124.36, ultimo 124.75)
+    GGRA     flip 29/07/2026 15:27 -> chiuso 06/08/2026 22:09 (ingresso 43.345, ultimo 45.195)
+    EUJP     flip 30/07/2026 14:40 -> chiuso 06/08/2026 22:09 (ingresso 26.545, ultimo 26.58)
+    5MIB     flip 31/07/2026 13:12 -> chiuso 06/08/2026 22:09 (ingresso 255.0, ultimo 295.89)
+    EJP3     flip 31/07/2026 15:35 -> chiuso 06/08/2026 22:09 (ingresso 4.396, ultimo 4.3925)
+    WTAI     flip 31/07/2026 15:35 -> chiuso 06/08/2026 22:09 (ingresso 94.88, ultimo 99.52)
+    ESUG     flip 03/08/2026 12:52 -> chiuso 06/08/2026 22:09 (ingresso 3.149, ultimo 3.2095)
+    3HCL     flip 03/08/2026 12:52 -> chiuso 06/08/2026 22:09 (ingresso 16.378, ultimo 18.794)
+    DGSE     flip 03/08/2026 15:39 -> chiuso 06/08/2026 22:09 (ingresso 20.18, ultimo 20.785)
+    3EML     flip 03/08/2026 15:39 -> chiuso 06/08/2026 22:09 (ingresso 138.2, ultimo 143.0)
+    WS5X     flip 04/08/2026 15:43 -> chiuso 06/08/2026 22:09 (ingresso 47.42, ultimo 47.64)
+    WWRD     flip 04/08/2026 15:43 -> chiuso 06/08/2026 22:09 (ingresso 25.315, ultimo 25.425)
+    WMIB     flip 04/08/2026 15:43 -> chiuso 06/08/2026 22:09 (ingresso 63.2, ultimo 63.67)
+    XSOE     flip 05/08/2026 08:26 -> chiuso 06/08/2026 22:09 (ingresso 28.235, ultimo 27.69)
+    QGRW     flip 05/08/2026 08:26 -> chiuso 06/08/2026 22:09 (ingresso 36.655, ultimo 37.47)
+    WGRO     flip 05/08/2026 08:26 -> chiuso 18/08/2026 06:32 (ingresso 27.305, ultimo 27.935)
+    WRNW     flip 05/08/2026 10:59 -> chiuso 06/08/2026 22:09 (ingresso 25.06, ultimo 24.54)
+
+======================================================================
+FINE REPORT
+======================================================================

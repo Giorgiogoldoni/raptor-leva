@@ -1,0 +1,1677 @@
+{
+  "generated_at": "2026-10-16T16:39:41.324337",
+  "reports": [
+    {
+      "label": "SBB",
+      "file": "sbb_flip_log.json",
+      "total_records": 184,
+      "aperti": 16,
+      "chiusi": 168,
+      "chiusi_validi": 78,
+      "chiusi_nan": 90,
+      "pct_nan_su_chiusi": 53.6,
+      "stats": {
+        "trades": 78,
+        "wins": 20,
+        "losses": 58,
+        "win_rate": 25.64,
+        "avg_return": -2.41,
+        "median_return": -1.62,
+        "best": 8.3,
+        "worst": -25.93,
+        "profit_factor": 0.19,
+        "cum_return_simple": -187.99,
+        "std_dev": 5.01
+      },
+      "by_leva": {
+        "1": {
+          "trades": 56,
+          "wins": 16,
+          "losses": 40,
+          "win_rate": 28.57,
+          "avg_return": -1.44,
+          "median_return": -0.99,
+          "best": 8.11,
+          "worst": -12.68,
+          "profit_factor": 0.27,
+          "cum_return_simple": -80.84,
+          "std_dev": 3.15
+        },
+        "2": {
+          "trades": 3,
+          "wins": 1,
+          "losses": 2,
+          "win_rate": 33.33,
+          "avg_return": -3.05,
+          "median_return": -2.37,
+          "best": 1.57,
+          "worst": -8.34,
+          "profit_factor": 0.15,
+          "cum_return_simple": -9.14,
+          "std_dev": 4.07
+        },
+        "3": {
+          "trades": 14,
+          "wins": 3,
+          "losses": 11,
+          "win_rate": 21.43,
+          "avg_return": -5.75,
+          "median_return": -2.26,
+          "best": 8.3,
+          "worst": -25.93,
+          "profit_factor": 0.14,
+          "cum_return_simple": -80.48,
+          "std_dev": 8.97
+        },
+        "5": {
+          "trades": 5,
+          "wins": 0,
+          "losses": 5,
+          "win_rate": 0.0,
+          "avg_return": -3.51,
+          "median_return": -3.26,
+          "best": -1.8,
+          "worst": -6.32,
+          "profit_factor": 0.0,
+          "cum_return_simple": -17.53,
+          "std_dev": 1.53
+        }
+      },
+      "max_drawdown": 187.99,
+      "avg_duration_days": 8.36,
+      "median_duration_days": 6.51,
+      "top_tickers": [
+        [
+          "COPR",
+          4
+        ],
+        [
+          "WGRO",
+          3
+        ],
+        [
+          "WWRD",
+          3
+        ],
+        [
+          "NTSX",
+          3
+        ],
+        [
+          "PHPM",
+          3
+        ],
+        [
+          "EFCM",
+          3
+        ],
+        [
+          "5BTS",
+          3
+        ],
+        [
+          "EUGB",
+          3
+        ],
+        [
+          "UGAS",
+          3
+        ],
+        [
+          "ECRN",
+          3
+        ]
+      ],
+      "nan_details": [
+        {
+          "ticker": "WTVU",
+          "flip_ts_it": "27/07/2026 17:38",
+          "chiusura_ts_it": "20/08/2026 06:35",
+          "ultimo_prezzo": 26.355,
+          "prezzo_ingresso": 25.32
+        },
+        {
+          "ticker": "GGRA",
+          "flip_ts_it": "29/07/2026 15:27",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 45.195,
+          "prezzo_ingresso": 43.345
+        },
+        {
+          "ticker": "EUJP",
+          "flip_ts_it": "30/07/2026 14:40",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 26.58,
+          "prezzo_ingresso": 26.545
+        },
+        {
+          "ticker": "5MIB",
+          "flip_ts_it": "31/07/2026 13:12",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 295.89,
+          "prezzo_ingresso": 255.0
+        },
+        {
+          "ticker": "EJP3",
+          "flip_ts_it": "31/07/2026 15:35",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 4.3925,
+          "prezzo_ingresso": 4.396
+        },
+        {
+          "ticker": "3HCL",
+          "flip_ts_it": "03/08/2026 12:52",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 18.794,
+          "prezzo_ingresso": 16.378
+        },
+        {
+          "ticker": "ESUG",
+          "flip_ts_it": "03/08/2026 15:39",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 3.2095,
+          "prezzo_ingresso": 3.1825
+        },
+        {
+          "ticker": "WS5X",
+          "flip_ts_it": "04/08/2026 15:43",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 47.64,
+          "prezzo_ingresso": 47.42
+        },
+        {
+          "ticker": "WWRD",
+          "flip_ts_it": "04/08/2026 15:43",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 25.425,
+          "prezzo_ingresso": 25.315
+        },
+        {
+          "ticker": "WMIB",
+          "flip_ts_it": "04/08/2026 15:43",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 63.67,
+          "prezzo_ingresso": 63.2
+        },
+        {
+          "ticker": "XSOE",
+          "flip_ts_it": "05/08/2026 08:26",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 27.69,
+          "prezzo_ingresso": 28.235
+        },
+        {
+          "ticker": "QGRW",
+          "flip_ts_it": "05/08/2026 08:26",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 37.47,
+          "prezzo_ingresso": 36.655
+        },
+        {
+          "ticker": "WGRO",
+          "flip_ts_it": "05/08/2026 08:26",
+          "chiusura_ts_it": "18/08/2026 06:32",
+          "ultimo_prezzo": 27.935,
+          "prezzo_ingresso": 27.305
+        },
+        {
+          "ticker": "WRNW",
+          "flip_ts_it": "05/08/2026 10:59",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 24.54,
+          "prezzo_ingresso": 25.06
+        },
+        {
+          "ticker": "NTSX",
+          "flip_ts_it": "05/08/2026 12:58",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 38.13,
+          "prezzo_ingresso": 38.45
+        },
+        {
+          "ticker": "SUGA",
+          "flip_ts_it": "05/08/2026 15:14",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 8.55,
+          "prezzo_ingresso": 8.6
+        },
+        {
+          "ticker": "3MG7",
+          "flip_ts_it": "05/08/2026 15:14",
+          "chiusura_ts_it": "18/08/2026 06:32",
+          "ultimo_prezzo": 36.295,
+          "prezzo_ingresso": 38.385
+        },
+        {
+          "ticker": "WSPX",
+          "flip_ts_it": "05/08/2026 15:14",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 40.745,
+          "prezzo_ingresso": 40.845
+        },
+        {
+          "ticker": "WNAS",
+          "flip_ts_it": "05/08/2026 15:14",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 37.23,
+          "prezzo_ingresso": 37.64
+        },
+        {
+          "ticker": "3GOO",
+          "flip_ts_it": "05/08/2026 16:58",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 178.02,
+          "prezzo_ingresso": 207.4
+        }
+      ],
+      "equity_curve": [
+        {
+          "ticker": "1PAS",
+          "chiusura": "30/07/2026 16:22",
+          "rendimento": -3.39,
+          "cumulato": -3.39
+        },
+        {
+          "ticker": "3AAP",
+          "chiusura": "31/07/2026 08:40",
+          "rendimento": -25.93,
+          "cumulato": -29.32
+        },
+        {
+          "ticker": "LSUG",
+          "chiusura": "04/08/2026 08:27",
+          "rendimento": -2.37,
+          "cumulato": -31.69
+        },
+        {
+          "ticker": "QGRW",
+          "chiusura": "04/08/2026 08:27",
+          "rendimento": -2.86,
+          "cumulato": -34.55
+        },
+        {
+          "ticker": "WGRO",
+          "chiusura": "04/08/2026 08:27",
+          "rendimento": -2.58,
+          "cumulato": -37.13
+        },
+        {
+          "ticker": "EUGB",
+          "chiusura": "12/08/2026 07:15",
+          "rendimento": -0.22,
+          "cumulato": -37.35
+        },
+        {
+          "ticker": "ECRD",
+          "chiusura": "12/08/2026 07:15",
+          "rendimento": -0.94,
+          "cumulato": -38.29
+        },
+        {
+          "ticker": "5BTS",
+          "chiusura": "12/08/2026 08:44",
+          "rendimento": -1.8,
+          "cumulato": -40.09
+        },
+        {
+          "ticker": "DOTW",
+          "chiusura": "13/08/2026 16:25",
+          "rendimento": -5.53,
+          "cumulato": -45.62
+        },
+        {
+          "ticker": "COPR",
+          "chiusura": "14/08/2026 07:15",
+          "rendimento": 1.72,
+          "cumulato": -43.9
+        },
+        {
+          "ticker": "ECRN",
+          "chiusura": "14/08/2026 07:15",
+          "rendimento": -0.94,
+          "cumulato": -44.84
+        },
+        {
+          "ticker": "3BUL",
+          "chiusura": "14/08/2026 16:13",
+          "rendimento": -2.23,
+          "cumulato": -47.07
+        },
+        {
+          "ticker": "WTIG",
+          "chiusura": "17/08/2026 06:40",
+          "rendimento": -0.42,
+          "cumulato": -47.49
+        },
+        {
+          "ticker": "HEDK",
+          "chiusura": "17/08/2026 15:48",
+          "rendimento": 0.24,
+          "cumulato": -47.25
+        },
+        {
+          "ticker": "NCLR",
+          "chiusura": "20/08/2026 06:35",
+          "rendimento": 1.5,
+          "cumulato": -45.75
+        },
+        {
+          "ticker": "CRRE",
+          "chiusura": "20/08/2026 11:20",
+          "rendimento": -4.52,
+          "cumulato": -50.27
+        },
+        {
+          "ticker": "XUSA",
+          "chiusura": "21/08/2026 06:35",
+          "rendimento": -0.68,
+          "cumulato": -50.95
+        },
+        {
+          "ticker": "EUGB",
+          "chiusura": "02/09/2026 18:40",
+          "rendimento": -0.26,
+          "cumulato": -51.21
+        },
+        {
+          "ticker": "ADAW",
+          "chiusura": "02/09/2026 18:40",
+          "rendimento": -12.68,
+          "cumulato": -63.89
+        },
+        {
+          "ticker": "UGRW",
+          "chiusura": "02/09/2026 18:40",
+          "rendimento": -1.44,
+          "cumulato": -65.33
+        },
+        {
+          "ticker": "WBLK",
+          "chiusura": "03/09/2026 10:32",
+          "rendimento": -0.95,
+          "cumulato": -66.28
+        },
+        {
+          "ticker": "SCOP",
+          "chiusura": "03/09/2026 10:32",
+          "rendimento": 0.24,
+          "cumulato": -66.04
+        },
+        {
+          "ticker": "SC3S",
+          "chiusura": "03/09/2026 10:32",
+          "rendimento": 0.98,
+          "cumulato": -65.06
+        },
+        {
+          "ticker": "PCOM",
+          "chiusura": "07/09/2026 11:20",
+          "rendimento": 5.79,
+          "cumulato": -59.27
+        },
+        {
+          "ticker": "SC3S",
+          "chiusura": "07/09/2026 11:20",
+          "rendimento": -13.39,
+          "cumulato": -72.66
+        },
+        {
+          "ticker": "COPR",
+          "chiusura": "09/09/2026 10:36",
+          "rendimento": -2.09,
+          "cumulato": -74.75
+        },
+        {
+          "ticker": "3UKL",
+          "chiusura": "10/09/2026 10:24",
+          "rendimento": -6.04,
+          "cumulato": -80.79
+        },
+        {
+          "ticker": "SCOP",
+          "chiusura": "10/09/2026 10:24",
+          "rendimento": -2.15,
+          "cumulato": -82.94
+        },
+        {
+          "ticker": "LCOP",
+          "chiusura": "10/09/2026 14:32",
+          "rendimento": -8.34,
+          "cumulato": -91.28
+        },
+        {
+          "ticker": "ECOP",
+          "chiusura": "10/09/2026 17:59",
+          "rendimento": -4.25,
+          "cumulato": -95.53
+        },
+        {
+          "ticker": "COPR",
+          "chiusura": "10/09/2026 17:59",
+          "rendimento": -3.86,
+          "cumulato": -99.39
+        },
+        {
+          "ticker": "GBE3",
+          "chiusura": "11/09/2026 10:26",
+          "rendimento": -0.73,
+          "cumulato": -100.12
+        },
+        {
+          "ticker": "3USS",
+          "chiusura": "11/09/2026 10:26",
+          "rendimento": -0.81,
+          "cumulato": -100.93
+        },
+        {
+          "ticker": "WENG",
+          "chiusura": "14/09/2026 11:30",
+          "rendimento": -3.54,
+          "cumulato": -104.47
+        },
+        {
+          "ticker": "DEM",
+          "chiusura": "15/09/2026 10:51",
+          "rendimento": 1.9,
+          "cumulato": -102.57
+        },
+        {
+          "ticker": "EUS5",
+          "chiusura": "15/09/2026 10:51",
+          "rendimento": -2.63,
+          "cumulato": -105.2
+        },
+        {
+          "ticker": "GAS",
+          "chiusura": "17/09/2026 10:48",
+          "rendimento": -0.71,
+          "cumulato": -105.91
+        },
+        {
+          "ticker": "SUK1",
+          "chiusura": "17/09/2026 15:24",
+          "rendimento": -4.19,
+          "cumulato": -110.1
+        },
+        {
+          "ticker": "EJP3",
+          "chiusura": "18/09/2026 10:24",
+          "rendimento": 3.88,
+          "cumulato": -106.22
+        },
+        {
+          "ticker": "EUJP",
+          "chiusura": "18/09/2026 14:34",
+          "rendimento": 0.82,
+          "cumulato": -105.4
+        },
+        {
+          "ticker": "UGAS",
+          "chiusura": "21/09/2026 11:44",
+          "rendimento": 8.11,
+          "cumulato": -97.29
+        },
+        {
+          "ticker": "WCOG",
+          "chiusura": "21/09/2026 11:44",
+          "rendimento": 1.68,
+          "cumulato": -95.61
+        },
+        {
+          "ticker": "1MCS",
+          "chiusura": "21/09/2026 11:44",
+          "rendimento": 1.43,
+          "cumulato": -94.18
+        },
+        {
+          "ticker": "SC3S",
+          "chiusura": "21/09/2026 11:44",
+          "rendimento": -18.87,
+          "cumulato": -113.05
+        },
+        {
+          "ticker": "3USS",
+          "chiusura": "21/09/2026 17:40",
+          "rendimento": -1.16,
+          "cumulato": -114.21
+        },
+        {
+          "ticker": "SCOP",
+          "chiusura": "21/09/2026 17:40",
+          "rendimento": -4.32,
+          "cumulato": -118.53
+        },
+        {
+          "ticker": "XSOE",
+          "chiusura": "22/09/2026 10:47",
+          "rendimento": -2.67,
+          "cumulato": -121.2
+        },
+        {
+          "ticker": "DFEA",
+          "chiusura": "22/09/2026 10:47",
+          "rendimento": -2.02,
+          "cumulato": -123.22
+        },
+        {
+          "ticker": "SNGA",
+          "chiusura": "23/09/2026 19:08",
+          "rendimento": 0.51,
+          "cumulato": -122.71
+        },
+        {
+          "ticker": "3GOO",
+          "chiusura": "23/09/2026 19:08",
+          "rendimento": -2.3,
+          "cumulato": -125.01
+        },
+        {
+          "ticker": "2UKS",
+          "chiusura": "24/09/2026 10:56",
+          "rendimento": 1.57,
+          "cumulato": -123.44
+        },
+        {
+          "ticker": "3AMZ",
+          "chiusura": "24/09/2026 10:56",
+          "rendimento": -10.16,
+          "cumulato": -133.6
+        },
+        {
+          "ticker": "EUGB",
+          "chiusura": "25/09/2026 10:57",
+          "rendimento": -0.41,
+          "cumulato": -134.01
+        },
+        {
+          "ticker": "EFCM",
+          "chiusura": "28/09/2026 12:39",
+          "rendimento": -1.04,
+          "cumulato": -135.05
+        },
+        {
+          "ticker": "PHPM",
+          "chiusura": "28/09/2026 12:39",
+          "rendimento": -4.16,
+          "cumulato": -139.21
+        },
+        {
+          "ticker": "SLVR",
+          "chiusura": "28/09/2026 12:39",
+          "rendimento": -6.49,
+          "cumulato": -145.7
+        },
+        {
+          "ticker": "EGRP",
+          "chiusura": "29/09/2026 11:58",
+          "rendimento": 0.07,
+          "cumulato": -145.63
+        },
+        {
+          "ticker": "NGAS",
+          "chiusura": "29/09/2026 17:48",
+          "rendimento": 2.16,
+          "cumulato": -143.47
+        },
+        {
+          "ticker": "LNGA",
+          "chiusura": "29/09/2026 17:48",
+          "rendimento": -8.65,
+          "cumulato": -152.12
+        },
+        {
+          "ticker": "3NGL",
+          "chiusura": "29/09/2026 17:48",
+          "rendimento": -12.02,
+          "cumulato": -164.14
+        },
+        {
+          "ticker": "3LAP",
+          "chiusura": "29/09/2026 21:45",
+          "rendimento": 8.3,
+          "cumulato": -155.84
+        },
+        {
+          "ticker": "5USL",
+          "chiusura": "30/09/2026 11:46",
+          "rendimento": -3.52,
+          "cumulato": -159.36
+        },
+        {
+          "ticker": "NTSX",
+          "chiusura": "30/09/2026 17:26",
+          "rendimento": 0.96,
+          "cumulato": -158.4
+        },
+        {
+          "ticker": "DEM",
+          "chiusura": "01/10/2026 12:15",
+          "rendimento": -3.37,
+          "cumulato": -161.77
+        },
+        {
+          "ticker": "WENP",
+          "chiusura": "01/10/2026 12:15",
+          "rendimento": -4.88,
+          "cumulato": -166.65
+        },
+        {
+          "ticker": "DFEA",
+          "chiusura": "01/10/2026 12:15",
+          "rendimento": -1.83,
+          "cumulato": -168.48
+        },
+        {
+          "ticker": "5BUS",
+          "chiusura": "02/10/2026 11:44",
+          "rendimento": -6.32,
+          "cumulato": -174.8
+        },
+        {
+          "ticker": "DXJA",
+          "chiusura": "02/10/2026 11:44",
+          "rendimento": 1.15,
+          "cumulato": -173.65
+        },
+        {
+          "ticker": "5SPY",
+          "chiusura": "06/10/2026 12:36",
+          "rendimento": -3.26,
+          "cumulato": -176.91
+        },
+        {
+          "ticker": "EUCH",
+          "chiusura": "06/10/2026 12:36",
+          "rendimento": -1.42,
+          "cumulato": -178.33
+        },
+        {
+          "ticker": "BLOC",
+          "chiusura": "07/10/2026 12:29",
+          "rendimento": -3.5,
+          "cumulato": -181.83
+        },
+        {
+          "ticker": "DXJP",
+          "chiusura": "08/10/2026 12:38",
+          "rendimento": 1.26,
+          "cumulato": -180.57
+        },
+        {
+          "ticker": "WMGT",
+          "chiusura": "09/10/2026 22:47",
+          "rendimento": -0.19,
+          "cumulato": -180.76
+        },
+        {
+          "ticker": "1MCS",
+          "chiusura": "13/10/2026 19:55",
+          "rendimento": -0.65,
+          "cumulato": -181.41
+        },
+        {
+          "ticker": "CHEU",
+          "chiusura": "14/10/2026 15:47",
+          "rendimento": -0.43,
+          "cumulato": -181.84
+        },
+        {
+          "ticker": "COPR",
+          "chiusura": "15/10/2026 10:43",
+          "rendimento": -1.34,
+          "cumulato": -183.18
+        },
+        {
+          "ticker": "EPI",
+          "chiusura": "16/10/2026 10:30",
+          "rendimento": -2.21,
+          "cumulato": -185.39
+        },
+        {
+          "ticker": "WTVG",
+          "chiusura": "16/10/2026 10:30",
+          "rendimento": -2.6,
+          "cumulato": -187.99
+        }
+      ]
+    },
+    {
+      "label": "SBB2",
+      "file": "sbb2_flip_log.json",
+      "total_records": 254,
+      "aperti": 22,
+      "chiusi": 232,
+      "chiusi_validi": 112,
+      "chiusi_nan": 120,
+      "pct_nan_su_chiusi": 51.7,
+      "stats": {
+        "trades": 112,
+        "wins": 25,
+        "losses": 87,
+        "win_rate": 22.32,
+        "avg_return": -2.2,
+        "median_return": -1.44,
+        "best": 19.69,
+        "worst": -25.93,
+        "profit_factor": 0.24,
+        "cum_return_simple": -246.11,
+        "std_dev": 5.12
+      },
+      "by_leva": {
+        "1": {
+          "trades": 74,
+          "wins": 18,
+          "losses": 56,
+          "win_rate": 24.32,
+          "avg_return": -1.34,
+          "median_return": -0.97,
+          "best": 8.11,
+          "worst": -12.68,
+          "profit_factor": 0.25,
+          "cum_return_simple": -99.4,
+          "std_dev": 2.88
+        },
+        "2": {
+          "trades": 5,
+          "wins": 1,
+          "losses": 4,
+          "win_rate": 20.0,
+          "avg_return": -3.78,
+          "median_return": -3.08,
+          "best": 1.57,
+          "worst": -8.34,
+          "profit_factor": 0.08,
+          "cum_return_simple": -18.9,
+          "std_dev": 3.64
+        },
+        "3": {
+          "trades": 26,
+          "wins": 6,
+          "losses": 20,
+          "win_rate": 23.08,
+          "avg_return": -4.0,
+          "median_return": -3.54,
+          "best": 19.69,
+          "worst": -25.93,
+          "profit_factor": 0.29,
+          "cum_return_simple": -104.12,
+          "std_dev": 8.92
+        },
+        "5": {
+          "trades": 7,
+          "wins": 0,
+          "losses": 7,
+          "win_rate": 0.0,
+          "avg_return": -3.38,
+          "median_return": -3.26,
+          "best": -0.4,
+          "worst": -6.32,
+          "profit_factor": 0.0,
+          "cum_return_simple": -23.69,
+          "std_dev": 1.94
+        }
+      },
+      "max_drawdown": 246.11,
+      "avg_duration_days": 7.42,
+      "median_duration_days": 5.93,
+      "top_tickers": [
+        [
+          "1MCS",
+          6
+        ],
+        [
+          "COPR",
+          4
+        ],
+        [
+          "SCOP",
+          4
+        ],
+        [
+          "WGRO",
+          3
+        ],
+        [
+          "WWRD",
+          3
+        ],
+        [
+          "WRNW",
+          3
+        ],
+        [
+          "NTSX",
+          3
+        ],
+        [
+          "PHPM",
+          3
+        ],
+        [
+          "EFCM",
+          3
+        ],
+        [
+          "5BTS",
+          3
+        ]
+      ],
+      "nan_details": [
+        {
+          "ticker": "SBRT",
+          "flip_ts_it": "27/07/2026 12:52",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 8.074,
+          "prezzo_ingresso": 7.722
+        },
+        {
+          "ticker": "SOIL",
+          "flip_ts_it": "27/07/2026 12:52",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 8.624,
+          "prezzo_ingresso": 8.19
+        },
+        {
+          "ticker": "WTVU",
+          "flip_ts_it": "27/07/2026 17:38",
+          "chiusura_ts_it": "20/08/2026 06:35",
+          "ultimo_prezzo": 26.355,
+          "prezzo_ingresso": 25.32
+        },
+        {
+          "ticker": "3BTL",
+          "flip_ts_it": "28/07/2026 16:56",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 124.75,
+          "prezzo_ingresso": 124.36
+        },
+        {
+          "ticker": "GGRA",
+          "flip_ts_it": "29/07/2026 15:27",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 45.195,
+          "prezzo_ingresso": 43.345
+        },
+        {
+          "ticker": "EUJP",
+          "flip_ts_it": "30/07/2026 14:40",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 26.58,
+          "prezzo_ingresso": 26.545
+        },
+        {
+          "ticker": "5MIB",
+          "flip_ts_it": "31/07/2026 13:12",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 295.89,
+          "prezzo_ingresso": 255.0
+        },
+        {
+          "ticker": "EJP3",
+          "flip_ts_it": "31/07/2026 15:35",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 4.3925,
+          "prezzo_ingresso": 4.396
+        },
+        {
+          "ticker": "WTAI",
+          "flip_ts_it": "31/07/2026 15:35",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 99.52,
+          "prezzo_ingresso": 94.88
+        },
+        {
+          "ticker": "ESUG",
+          "flip_ts_it": "03/08/2026 12:52",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 3.2095,
+          "prezzo_ingresso": 3.149
+        },
+        {
+          "ticker": "3HCL",
+          "flip_ts_it": "03/08/2026 12:52",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 18.794,
+          "prezzo_ingresso": 16.378
+        },
+        {
+          "ticker": "DGSE",
+          "flip_ts_it": "03/08/2026 15:39",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 20.785,
+          "prezzo_ingresso": 20.18
+        },
+        {
+          "ticker": "3EML",
+          "flip_ts_it": "03/08/2026 15:39",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 143.0,
+          "prezzo_ingresso": 138.2
+        },
+        {
+          "ticker": "WS5X",
+          "flip_ts_it": "04/08/2026 15:43",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 47.64,
+          "prezzo_ingresso": 47.42
+        },
+        {
+          "ticker": "WWRD",
+          "flip_ts_it": "04/08/2026 15:43",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 25.425,
+          "prezzo_ingresso": 25.315
+        },
+        {
+          "ticker": "WMIB",
+          "flip_ts_it": "04/08/2026 15:43",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 63.67,
+          "prezzo_ingresso": 63.2
+        },
+        {
+          "ticker": "XSOE",
+          "flip_ts_it": "05/08/2026 08:26",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 27.69,
+          "prezzo_ingresso": 28.235
+        },
+        {
+          "ticker": "QGRW",
+          "flip_ts_it": "05/08/2026 08:26",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 37.47,
+          "prezzo_ingresso": 36.655
+        },
+        {
+          "ticker": "WGRO",
+          "flip_ts_it": "05/08/2026 08:26",
+          "chiusura_ts_it": "18/08/2026 06:32",
+          "ultimo_prezzo": 27.935,
+          "prezzo_ingresso": 27.305
+        },
+        {
+          "ticker": "WRNW",
+          "flip_ts_it": "05/08/2026 10:59",
+          "chiusura_ts_it": "06/08/2026 22:09",
+          "ultimo_prezzo": 24.54,
+          "prezzo_ingresso": 25.06
+        }
+      ],
+      "equity_curve": [
+        {
+          "ticker": "NGAS",
+          "chiusura": "27/07/2026 09:39",
+          "rendimento": -5.82,
+          "cumulato": -5.82
+        },
+        {
+          "ticker": "1PAS",
+          "chiusura": "30/07/2026 16:22",
+          "rendimento": -3.39,
+          "cumulato": -9.21
+        },
+        {
+          "ticker": "3AAP",
+          "chiusura": "31/07/2026 08:40",
+          "rendimento": -25.93,
+          "cumulato": -35.14
+        },
+        {
+          "ticker": "3LMO",
+          "chiusura": "03/08/2026 15:39",
+          "rendimento": 7.18,
+          "cumulato": -27.96
+        },
+        {
+          "ticker": "LSUG",
+          "chiusura": "04/08/2026 08:27",
+          "rendimento": -1.75,
+          "cumulato": -29.71
+        },
+        {
+          "ticker": "QGRW",
+          "chiusura": "04/08/2026 08:27",
+          "rendimento": -2.86,
+          "cumulato": -32.57
+        },
+        {
+          "ticker": "WGRO",
+          "chiusura": "04/08/2026 08:27",
+          "rendimento": -2.58,
+          "cumulato": -35.15
+        },
+        {
+          "ticker": "EUAU",
+          "chiusura": "06/08/2026 10:59",
+          "rendimento": -0.61,
+          "cumulato": -35.76
+        },
+        {
+          "ticker": "EUGB",
+          "chiusura": "12/08/2026 07:15",
+          "rendimento": -0.22,
+          "cumulato": -35.98
+        },
+        {
+          "ticker": "ECRD",
+          "chiusura": "12/08/2026 07:15",
+          "rendimento": -0.94,
+          "cumulato": -36.92
+        },
+        {
+          "ticker": "5BTS",
+          "chiusura": "12/08/2026 08:44",
+          "rendimento": -1.8,
+          "cumulato": -38.72
+        },
+        {
+          "ticker": "DOTW",
+          "chiusura": "13/08/2026 16:25",
+          "rendimento": -5.53,
+          "cumulato": -44.25
+        },
+        {
+          "ticker": "COPR",
+          "chiusura": "14/08/2026 07:15",
+          "rendimento": 1.72,
+          "cumulato": -42.53
+        },
+        {
+          "ticker": "ECRN",
+          "chiusura": "14/08/2026 07:15",
+          "rendimento": -0.94,
+          "cumulato": -43.47
+        },
+        {
+          "ticker": "3BUL",
+          "chiusura": "14/08/2026 16:13",
+          "rendimento": -2.23,
+          "cumulato": -45.7
+        },
+        {
+          "ticker": "EUUS",
+          "chiusura": "14/08/2026 16:13",
+          "rendimento": -0.31,
+          "cumulato": -46.01
+        },
+        {
+          "ticker": "WTIG",
+          "chiusura": "17/08/2026 06:40",
+          "rendimento": -0.42,
+          "cumulato": -46.43
+        },
+        {
+          "ticker": "HEDK",
+          "chiusura": "17/08/2026 15:48",
+          "rendimento": 0.24,
+          "cumulato": -46.19
+        },
+        {
+          "ticker": "NCLR",
+          "chiusura": "20/08/2026 06:35",
+          "rendimento": 1.5,
+          "cumulato": -44.69
+        },
+        {
+          "ticker": "CRRE",
+          "chiusura": "20/08/2026 11:20",
+          "rendimento": -4.52,
+          "cumulato": -49.21
+        },
+        {
+          "ticker": "XUSA",
+          "chiusura": "21/08/2026 06:35",
+          "rendimento": -0.68,
+          "cumulato": -49.89
+        },
+        {
+          "ticker": "EUGB",
+          "chiusura": "02/09/2026 18:40",
+          "rendimento": -0.26,
+          "cumulato": -50.15
+        },
+        {
+          "ticker": "ADAW",
+          "chiusura": "02/09/2026 18:40",
+          "rendimento": -12.68,
+          "cumulato": -62.83
+        },
+        {
+          "ticker": "UGRW",
+          "chiusura": "02/09/2026 18:40",
+          "rendimento": -1.44,
+          "cumulato": -64.27
+        },
+        {
+          "ticker": "3GIL",
+          "chiusura": "02/09/2026 18:40",
+          "rendimento": -4.62,
+          "cumulato": -68.89
+        },
+        {
+          "ticker": "WBLK",
+          "chiusura": "03/09/2026 10:32",
+          "rendimento": -0.95,
+          "cumulato": -69.84
+        },
+        {
+          "ticker": "SCOP",
+          "chiusura": "03/09/2026 10:32",
+          "rendimento": 0.24,
+          "cumulato": -69.6
+        },
+        {
+          "ticker": "SC3S",
+          "chiusura": "03/09/2026 10:32",
+          "rendimento": 0.98,
+          "cumulato": -68.62
+        },
+        {
+          "ticker": "3EMS",
+          "chiusura": "04/09/2026 10:22",
+          "rendimento": -3.92,
+          "cumulato": -72.54
+        },
+        {
+          "ticker": "PCOM",
+          "chiusura": "07/09/2026 11:20",
+          "rendimento": 5.79,
+          "cumulato": -66.75
+        },
+        {
+          "ticker": "SC3S",
+          "chiusura": "07/09/2026 11:20",
+          "rendimento": -13.39,
+          "cumulato": -80.14
+        },
+        {
+          "ticker": "WRNW",
+          "chiusura": "08/09/2026 10:26",
+          "rendimento": -1.68,
+          "cumulato": -81.82
+        },
+        {
+          "ticker": "WTAI",
+          "chiusura": "08/09/2026 10:26",
+          "rendimento": 0.21,
+          "cumulato": -81.61
+        },
+        {
+          "ticker": "COPR",
+          "chiusura": "09/09/2026 10:36",
+          "rendimento": -2.09,
+          "cumulato": -83.7
+        },
+        {
+          "ticker": "WTRE",
+          "chiusura": "09/09/2026 10:36",
+          "rendimento": -1.61,
+          "cumulato": -85.31
+        },
+        {
+          "ticker": "3UKL",
+          "chiusura": "10/09/2026 10:24",
+          "rendimento": -6.04,
+          "cumulato": -91.35
+        },
+        {
+          "ticker": "SCOP",
+          "chiusura": "10/09/2026 10:24",
+          "rendimento": -2.15,
+          "cumulato": -93.5
+        },
+        {
+          "ticker": "MAGS",
+          "chiusura": "10/09/2026 10:24",
+          "rendimento": -1.24,
+          "cumulato": -94.74
+        },
+        {
+          "ticker": "LCOP",
+          "chiusura": "10/09/2026 14:32",
+          "rendimento": -8.34,
+          "cumulato": -103.08
+        },
+        {
+          "ticker": "ECOP",
+          "chiusura": "10/09/2026 17:59",
+          "rendimento": -4.25,
+          "cumulato": -107.33
+        },
+        {
+          "ticker": "WTRE",
+          "chiusura": "10/09/2026 17:59",
+          "rendimento": -2.23,
+          "cumulato": -109.56
+        },
+        {
+          "ticker": "COPR",
+          "chiusura": "10/09/2026 17:59",
+          "rendimento": -3.86,
+          "cumulato": -113.42
+        },
+        {
+          "ticker": "GBE3",
+          "chiusura": "11/09/2026 10:26",
+          "rendimento": -0.73,
+          "cumulato": -114.15
+        },
+        {
+          "ticker": "3USS",
+          "chiusura": "11/09/2026 10:26",
+          "rendimento": -0.81,
+          "cumulato": -114.96
+        },
+        {
+          "ticker": "WENG",
+          "chiusura": "14/09/2026 11:30",
+          "rendimento": -3.54,
+          "cumulato": -118.5
+        },
+        {
+          "ticker": "ARM3",
+          "chiusura": "14/09/2026 17:26",
+          "rendimento": -15.64,
+          "cumulato": -134.14
+        },
+        {
+          "ticker": "DEM",
+          "chiusura": "15/09/2026 10:51",
+          "rendimento": 1.9,
+          "cumulato": -132.24
+        },
+        {
+          "ticker": "5MIB",
+          "chiusura": "15/09/2026 10:51",
+          "rendimento": -5.76,
+          "cumulato": -138.0
+        },
+        {
+          "ticker": "EUS5",
+          "chiusura": "15/09/2026 10:51",
+          "rendimento": -2.63,
+          "cumulato": -140.63
+        },
+        {
+          "ticker": "3NIO",
+          "chiusura": "15/09/2026 10:51",
+          "rendimento": -3.59,
+          "cumulato": -144.22
+        },
+        {
+          "ticker": "WQTM",
+          "chiusura": "16/09/2026 10:40",
+          "rendimento": -3.38,
+          "cumulato": -147.6
+        },
+        {
+          "ticker": "GAS",
+          "chiusura": "17/09/2026 10:48",
+          "rendimento": -0.71,
+          "cumulato": -148.31
+        },
+        {
+          "ticker": "SUK1",
+          "chiusura": "17/09/2026 15:24",
+          "rendimento": -4.19,
+          "cumulato": -152.5
+        },
+        {
+          "ticker": "MAGS",
+          "chiusura": "17/09/2026 15:24",
+          "rendimento": -5.93,
+          "cumulato": -158.43
+        },
+        {
+          "ticker": "EJP3",
+          "chiusura": "18/09/2026 10:24",
+          "rendimento": 3.88,
+          "cumulato": -154.55
+        },
+        {
+          "ticker": "EUJP",
+          "chiusura": "18/09/2026 14:34",
+          "rendimento": 0.82,
+          "cumulato": -153.73
+        },
+        {
+          "ticker": "DHS",
+          "chiusura": "18/09/2026 14:34",
+          "rendimento": -1.31,
+          "cumulato": -155.04
+        },
+        {
+          "ticker": "3SAA",
+          "chiusura": "18/09/2026 18:00",
+          "rendimento": 19.69,
+          "cumulato": -135.35
+        },
+        {
+          "ticker": "UGAS",
+          "chiusura": "21/09/2026 11:44",
+          "rendimento": 8.11,
+          "cumulato": -127.24
+        },
+        {
+          "ticker": "WCOG",
+          "chiusura": "21/09/2026 11:44",
+          "rendimento": 1.68,
+          "cumulato": -125.56
+        },
+        {
+          "ticker": "1MCS",
+          "chiusura": "21/09/2026 11:44",
+          "rendimento": 1.43,
+          "cumulato": -124.13
+        },
+        {
+          "ticker": "SC3S",
+          "chiusura": "21/09/2026 11:44",
+          "rendimento": -18.87,
+          "cumulato": -143.0
+        },
+        {
+          "ticker": "3USS",
+          "chiusura": "21/09/2026 17:40",
+          "rendimento": -1.16,
+          "cumulato": -144.16
+        },
+        {
+          "ticker": "SCOP",
+          "chiusura": "21/09/2026 17:40",
+          "rendimento": -4.32,
+          "cumulato": -148.48
+        },
+        {
+          "ticker": "XSOE",
+          "chiusura": "22/09/2026 10:47",
+          "rendimento": -2.67,
+          "cumulato": -151.15
+        },
+        {
+          "ticker": "DFEA",
+          "chiusura": "22/09/2026 10:47",
+          "rendimento": -2.02,
+          "cumulato": -153.17
+        },
+        {
+          "ticker": "NOEU",
+          "chiusura": "23/09/2026 10:37",
+          "rendimento": -0.28,
+          "cumulato": -153.45
+        },
+        {
+          "ticker": "DGRE",
+          "chiusura": "23/09/2026 10:37",
+          "rendimento": -1.02,
+          "cumulato": -154.47
+        },
+        {
+          "ticker": "SNGA",
+          "chiusura": "23/09/2026 19:08",
+          "rendimento": 0.51,
+          "cumulato": -153.96
+        },
+        {
+          "ticker": "3GOO",
+          "chiusura": "23/09/2026 19:08",
+          "rendimento": -3.48,
+          "cumulato": -157.44
+        },
+        {
+          "ticker": "2UKS",
+          "chiusura": "24/09/2026 10:56",
+          "rendimento": 1.57,
+          "cumulato": -155.87
+        },
+        {
+          "ticker": "COBA",
+          "chiusura": "24/09/2026 10:56",
+          "rendimento": -0.99,
+          "cumulato": -156.86
+        },
+        {
+          "ticker": "3LZN",
+          "chiusura": "24/09/2026 10:56",
+          "rendimento": -9.3,
+          "cumulato": -166.16
+        },
+        {
+          "ticker": "3AMZ",
+          "chiusura": "24/09/2026 10:56",
+          "rendimento": -10.16,
+          "cumulato": -176.32
+        },
+        {
+          "ticker": "3GIL",
+          "chiusura": "24/09/2026 19:43",
+          "rendimento": -2.9,
+          "cumulato": -179.22
+        },
+        {
+          "ticker": "DGRW",
+          "chiusura": "25/09/2026 10:57",
+          "rendimento": -0.1,
+          "cumulato": -179.32
+        },
+        {
+          "ticker": "EUGB",
+          "chiusura": "25/09/2026 10:57",
+          "rendimento": -0.41,
+          "cumulato": -179.73
+        },
+        {
+          "ticker": "EUCH",
+          "chiusura": "25/09/2026 10:57",
+          "rendimento": -0.53,
+          "cumulato": -180.26
+        },
+        {
+          "ticker": "EFCM",
+          "chiusura": "28/09/2026 12:39",
+          "rendimento": -1.04,
+          "cumulato": -181.3
+        },
+        {
+          "ticker": "PHPM",
+          "chiusura": "28/09/2026 12:39",
+          "rendimento": -4.16,
+          "cumulato": -185.46
+        },
+        {
+          "ticker": "SLVR",
+          "chiusura": "28/09/2026 12:39",
+          "rendimento": -6.49,
+          "cumulato": -191.95
+        },
+        {
+          "ticker": "EGRP",
+          "chiusura": "29/09/2026 11:58",
+          "rendimento": 0.07,
+          "cumulato": -191.88
+        },
+        {
+          "ticker": "NGAS",
+          "chiusura": "29/09/2026 17:48",
+          "rendimento": 2.16,
+          "cumulato": -189.72
+        },
+        {
+          "ticker": "LNGA",
+          "chiusura": "29/09/2026 17:48",
+          "rendimento": -8.65,
+          "cumulato": -198.37
+        },
+        {
+          "ticker": "3NGL",
+          "chiusura": "29/09/2026 17:48",
+          "rendimento": -12.02,
+          "cumulato": -210.39
+        },
+        {
+          "ticker": "3LAP",
+          "chiusura": "29/09/2026 21:45",
+          "rendimento": 8.3,
+          "cumulato": -202.09
+        },
+        {
+          "ticker": "WTIG",
+          "chiusura": "29/09/2026 21:45",
+          "rendimento": -0.66,
+          "cumulato": -202.75
+        },
+        {
+          "ticker": "3USL",
+          "chiusura": "29/09/2026 21:45",
+          "rendimento": 2.31,
+          "cumulato": -200.44
+        },
+        {
+          "ticker": "5USL",
+          "chiusura": "30/09/2026 11:46",
+          "rendimento": -3.52,
+          "cumulato": -203.96
+        },
+        {
+          "ticker": "DGRE",
+          "chiusura": "30/09/2026 11:46",
+          "rendimento": -1.44,
+          "cumulato": -205.4
+        },
+        {
+          "ticker": "2OIG",
+          "chiusura": "30/09/2026 11:46",
+          "rendimento": -3.08,
+          "cumulato": -208.48
+        },
+        {
+          "ticker": "NTSX",
+          "chiusura": "30/09/2026 17:26",
+          "rendimento": 0.96,
+          "cumulato": -207.52
+        },
+        {
+          "ticker": "5EUL",
+          "chiusura": "01/10/2026 12:15",
+          "rendimento": -0.4,
+          "cumulato": -207.92
+        },
+        {
+          "ticker": "LNIK",
+          "chiusura": "01/10/2026 12:15",
+          "rendimento": -7.3,
+          "cumulato": -215.22
+        },
+        {
+          "ticker": "DEM",
+          "chiusura": "01/10/2026 12:15",
+          "rendimento": -3.37,
+          "cumulato": -218.59
+        },
+        {
+          "ticker": "WENP",
+          "chiusura": "01/10/2026 12:15",
+          "rendimento": -4.88,
+          "cumulato": -223.47
+        },
+        {
+          "ticker": "DFEA",
+          "chiusura": "01/10/2026 12:15",
+          "rendimento": -1.83,
+          "cumulato": -225.3
+        },
+        {
+          "ticker": "5BUS",
+          "chiusura": "02/10/2026 11:44",
+          "rendimento": -6.32,
+          "cumulato": -231.62
+        },
+        {
+          "ticker": "DXJA",
+          "chiusura": "02/10/2026 11:44",
+          "rendimento": 1.15,
+          "cumulato": -230.47
+        },
+        {
+          "ticker": "3EUL",
+          "chiusura": "05/10/2026 13:20",
+          "rendimento": -4.5,
+          "cumulato": -234.97
+        },
+        {
+          "ticker": "5SPY",
+          "chiusura": "06/10/2026 12:36",
+          "rendimento": -3.26,
+          "cumulato": -238.23
+        },
+        {
+          "ticker": "EUCH",
+          "chiusura": "06/10/2026 12:36",
+          "rendimento": -1.42,
+          "cumulato": -239.65
+        },
+        {
+          "ticker": "BLOC",
+          "chiusura": "07/10/2026 12:29",
+          "rendimento": -3.5,
+          "cumulato": -243.15
+        },
+        {
+          "ticker": "DXJP",
+          "chiusura": "08/10/2026 12:38",
+          "rendimento": 1.26,
+          "cumulato": -241.89
+        },
+        {
+          "ticker": "GGRB",
+          "chiusura": "08/10/2026 12:38",
+          "rendimento": -0.49,
+          "cumulato": -242.38
+        },
+        {
+          "ticker": "WMGT",
+          "chiusura": "09/10/2026 22:47",
+          "rendimento": -0.19,
+          "cumulato": -242.57
+        },
+        {
+          "ticker": "1MCS",
+          "chiusura": "13/10/2026 19:55",
+          "rendimento": -0.65,
+          "cumulato": -243.22
+        },
+        {
+          "ticker": "CHEU",
+          "chiusura": "14/10/2026 15:47",
+          "rendimento": -0.43,
+          "cumulato": -243.65
+        },
+        {
+          "ticker": "COPR",
+          "chiusura": "15/10/2026 10:43",
+          "rendimento": -1.34,
+          "cumulato": -244.99
+        },
+        {
+          "ticker": "SALL",
+          "chiusura": "16/10/2026 10:30",
+          "rendimento": 3.69,
+          "cumulato": -241.3
+        },
+        {
+          "ticker": "EPI",
+          "chiusura": "16/10/2026 10:30",
+          "rendimento": -2.21,
+          "cumulato": -243.51
+        },
+        {
+          "ticker": "WTVG",
+          "chiusura": "16/10/2026 10:30",
+          "rendimento": -2.6,
+          "cumulato": -246.11
+        }
+      ]
+    }
+  ]
+}
