@@ -1,0 +1,244 @@
+{
+  "generated_at": "2026-10-17T06:52:39.654253",
+  "results": {
+    "SAR_only": {
+      "config": {
+        "hard_sl": null,
+        "trail_after": null,
+        "trail_dist": null,
+        "take_profit": null
+      },
+      "stats": {
+        "trades": 273,
+        "wins": 123,
+        "losses": 148,
+        "win_rate": 45.05,
+        "avg_return": 1.24,
+        "median": -0.22,
+        "best": 45.48,
+        "worst": -8.73,
+        "std_dev": 7.26,
+        "profit_factor": 2.014,
+        "cum_return": 338.08,
+        "max_dd": 27.93
+      },
+      "exit_reasons": {
+        "SAR": 273
+      }
+    },
+    "SL5_TP15": {
+      "config": {
+        "hard_sl": -5.0,
+        "trail_after": null,
+        "trail_dist": null,
+        "take_profit": 15.0
+      },
+      "stats": {
+        "trades": 273,
+        "wins": 124,
+        "losses": 148,
+        "win_rate": 45.42,
+        "avg_return": 1.13,
+        "median": -0.22,
+        "best": 34.4,
+        "worst": -8.73,
+        "std_dev": 5.78,
+        "profit_factor": 1.927,
+        "cum_return": 307.67,
+        "max_dd": 27.93
+      },
+      "exit_reasons": {
+        "SAR": 243,
+        "SL": 9,
+        "TP": 21
+      }
+    },
+    "SL7_TP20": {
+      "config": {
+        "hard_sl": -7.0,
+        "trail_after": null,
+        "trail_dist": null,
+        "take_profit": 20.0
+      },
+      "stats": {
+        "trades": 273,
+        "wins": 123,
+        "losses": 148,
+        "win_rate": 45.05,
+        "avg_return": 1.06,
+        "median": -0.22,
+        "best": 34.4,
+        "worst": -8.73,
+        "std_dev": 6.12,
+        "profit_factor": 1.866,
+        "cum_return": 288.79,
+        "max_dd": 27.93
+      },
+      "exit_reasons": {
+        "SAR": 258,
+        "SL": 3,
+        "TP": 12
+      }
+    },
+    "SL10_TP30": {
+      "config": {
+        "hard_sl": -10.0,
+        "trail_after": null,
+        "trail_dist": null,
+        "take_profit": 30.0
+      },
+      "stats": {
+        "trades": 273,
+        "wins": 123,
+        "losses": 148,
+        "win_rate": 45.05,
+        "avg_return": 1.3,
+        "median": -0.22,
+        "best": 41.86,
+        "worst": -8.73,
+        "std_dev": 7.21,
+        "profit_factor": 2.067,
+        "cum_return": 355.81,
+        "max_dd": 27.93
+      },
+      "exit_reasons": {
+        "SAR": 264,
+        "TP": 9
+      }
+    },
+    "Trail5_a10": {
+      "config": {
+        "hard_sl": null,
+        "trail_after": 10.0,
+        "trail_dist": 5.0,
+        "take_profit": null
+      },
+      "stats": {
+        "trades": 272,
+        "wins": 125,
+        "losses": 146,
+        "win_rate": 45.96,
+        "avg_return": 1.01,
+        "median": -0.18,
+        "best": 32.95,
+        "worst": -8.73,
+        "std_dev": 6.08,
+        "profit_factor": 1.836,
+        "cum_return": 274.31,
+        "max_dd": 33.32
+      },
+      "exit_reasons": {
+        "SAR": 238,
+        "TRAIL": 34
+      }
+    },
+    "Trail3_a7": {
+      "config": {
+        "hard_sl": null,
+        "trail_after": 7.0,
+        "trail_dist": 3.0,
+        "take_profit": null
+      },
+      "stats": {
+        "trades": 274,
+        "wins": 126,
+        "losses": 147,
+        "win_rate": 45.99,
+        "avg_return": 0.78,
+        "median": -0.18,
+        "best": 27.48,
+        "worst": -8.73,
+        "std_dev": 5.12,
+        "profit_factor": 1.641,
+        "cum_return": 212.96,
+        "max_dd": 34.94
+      },
+      "exit_reasons": {
+        "SAR": 229,
+        "TRAIL": 45
+      }
+    },
+    "Trail5_a10_TP25": {
+      "config": {
+        "hard_sl": null,
+        "trail_after": 10.0,
+        "trail_dist": 5.0,
+        "take_profit": 25.0
+      },
+      "stats": {
+        "trades": 272,
+        "wins": 125,
+        "losses": 146,
+        "win_rate": 45.96,
+        "avg_return": 1.21,
+        "median": -0.18,
+        "best": 41.86,
+        "worst": -8.73,
+        "std_dev": 6.77,
+        "profit_factor": 2.004,
+        "cum_return": 329.34,
+        "max_dd": 33.32
+      },
+      "exit_reasons": {
+        "SAR": 238,
+        "TRAIL": 24,
+        "TP": 10
+      }
+    },
+    "SL7_Trail5_a10": {
+      "config": {
+        "hard_sl": -7.0,
+        "trail_after": 10.0,
+        "trail_dist": 5.0,
+        "take_profit": null
+      },
+      "stats": {
+        "trades": 272,
+        "wins": 125,
+        "losses": 146,
+        "win_rate": 45.96,
+        "avg_return": 1.01,
+        "median": -0.18,
+        "best": 32.95,
+        "worst": -8.73,
+        "std_dev": 6.08,
+        "profit_factor": 1.836,
+        "cum_return": 274.31,
+        "max_dd": 33.32
+      },
+      "exit_reasons": {
+        "SAR": 235,
+        "SL": 3,
+        "TRAIL": 34
+      }
+    },
+    "SL7_Trail5_a10_TP20": {
+      "config": {
+        "hard_sl": -7.0,
+        "trail_after": 10.0,
+        "trail_dist": 5.0,
+        "take_profit": 20.0
+      },
+      "stats": {
+        "trades": 272,
+        "wins": 125,
+        "losses": 146,
+        "win_rate": 45.96,
+        "avg_return": 1.09,
+        "median": -0.18,
+        "best": 34.4,
+        "worst": -8.73,
+        "std_dev": 6.16,
+        "profit_factor": 1.902,
+        "cum_return": 295.88,
+        "max_dd": 33.32
+      },
+      "exit_reasons": {
+        "SAR": 235,
+        "SL": 3,
+        "TRAIL": 20,
+        "TP": 14
+      }
+    }
+  }
+}
