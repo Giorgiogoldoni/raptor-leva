@@ -432,7 +432,6 @@ VIX_TICKERS = [
 # ═══════════════════════════════════════════════════════
 
 def calc_kama(close, n=10, fast=2, slow=30):
-    """KAMA generica — parametri variabili"""
     fast_sc = 2/(fast+1)
     slow_sc = 2/(slow+1)
     kama = [None]*len(close)
@@ -447,7 +446,6 @@ def calc_kama(close, n=10, fast=2, slow=30):
     return kama
 
 def calc_ao_fast(high, low):
-    """AO veloce: EMA3 - EMA13 dei midpoint (più reattivo per leva)"""
     mid = [(h+l)/2 for h,l in zip(high,low)]
     if len(mid) < 13: return 0
     def ema(arr, p):
@@ -478,7 +476,6 @@ def calc_rsi(close, n=14):
     return round(100-100/(1+ag/al), 2)
 
 def calc_baffetti_fast(high, low):
-    """Baffetti AO veloce — conta consecutivi crescenti"""
     if len(high) < 3: return 0
     mid = [(h+l)/2 for h,l in zip(high,low)]
     n = 0
@@ -488,15 +485,12 @@ def calc_baffetti_fast(high, low):
     return n
 
 def calc_sar(high, low, step=0.03, max_af=0.25):
-    """Parabolic SAR — parametri aggressivi per leva"""
     if len(high) < 5: return [None]*len(high)
     sar = [None]*len(high)
-    # Init: inizia bearish se prima barra è ribassista
     bull = high[1] > high[0]
     af = step
     ep = max(high[:2]) if bull else min(low[:2])
     sar[1] = min(low[:2]) if bull else max(high[:2])
-
     for i in range(2, len(high)):
         prev_sar = sar[i-1]
         if bull:
@@ -520,9 +514,6 @@ def calc_sar(high, low, step=0.03, max_af=0.25):
     return sar
 
 def calc_sar_flip(close, sar_arr, window=2):
-    """Rileva il primo pallino SAR (flip) entro le ultime `window` barre.
-    Ritorna (direzione, barre_da_flip): direzione 'BULL'|'BEAR'|'';
-    barre_da_flip: 0 = flip sulla barra corrente, 1 = barra precedente, ecc."""
     bull_series = []
     for i in range(len(close)):
         if sar_arr[i] is not None:
@@ -536,14 +527,6 @@ def calc_sar_flip(close, sar_arr, window=2):
     return '', None
 
 def get_zona(price, kama_fast, kama_slow):
-    """
-    Zona operativa doppia KAMA:
-    LONG_CONF  = prezzo > kama_veloce > kama_lenta  (entrata confermata)
-    LONG_EARLY = prezzo > kama_veloce, sotto kama_lenta (entrata anticipata)
-    GRIGIA     = prezzo tra le due KAMA
-    USCITA     = prezzo < kama_lenta (uscita definitiva)
-    STOP       = prezzo < entrambe e distanza > 2%
-    """
     if kama_fast is None or kama_slow is None: return 'ND'
     if price > kama_fast and kama_fast > kama_slow:
         return 'LONG_CONF'
@@ -557,38 +540,32 @@ def get_zona(price, kama_fast, kama_slow):
     return 'GRIGIA'
 
 # ── FILTRI QUALITÀ (v2) ─────────────────────────────────────────
-VOL_MIN_CONF  = 2.0   # volume minimo per LONG_CONF
-VOL_MIN_EARLY = 1.5   # volume minimo per LONG_EARLY
-BAF_MIN_CONF  = 3     # baffetti minimi per LONG_CONF
-BAF_MIN_EARLY = 3     # baffetti minimi per LONG_EARLY
-ER_MIN        = 0.35  # efficiency ratio minimo
-KAMA_GAP_MIN  = 0.003 # gap minimo KAMA fast/slow (0.3%)
-SCORE_MIN     = 65    # score minimo per comparire come segnale
-VIX_BLOCK     = 28    # sopra questa soglia: blocco totale Long
-VIX_ONLY_CONF = 22    # tra 22 e 28: solo LONG_CONF (no EARLY)
+VOL_MIN_CONF  = 2.0
+VOL_MIN_EARLY = 1.5
+BAF_MIN_CONF  = 3
+BAF_MIN_EARLY = 3
+ER_MIN        = 0.35
+KAMA_GAP_MIN  = 0.003
+SCORE_MIN     = 65
+VIX_BLOCK     = 28
+VIX_ONLY_CONF = 22
 
 # ── SUPER BEST BUY (flip SAR) ───────────────────────────────────
-SAR_FLIP_WINDOW = 2     # barre entro cui il flip è considerato "fresco"
-SBB_VOL_MIN     = 1.5   # volume minimo (livello alleggerito rispetto a Best Buy)
-SANITY_PERFOGGI = 4.0   # cap unico perfOggi% per tutti i leva — evita ingressi dopo spike già avvenuto
+SAR_FLIP_WINDOW = 2
+SBB_VOL_MIN     = 1.5
+SANITY_PERFOGGI = 4.0
 
 def get_segnale_leva(zona, ao, vol_ratio, er, baf, kama_fast=None, kama_slow=None, regime='NORMALE', sar_bull=True):
-    """Segnale leva v2 — filtri qualità stretti"""
-    # Blocco VIX in STRESS/PAURA
     if regime in ('STRESS','PAURA'):
         if zona == 'STOP':   return 'STOP'
         if zona == 'USCITA': return 'USCITA'
-        return ''  # nessun Long in regime di paura
-
-    # Gap minimo tra le due KAMA
+        return ''
     kama_gap_ok = True
     if kama_fast and kama_slow and kama_slow > 0:
         kama_gap_ok = abs(kama_fast - kama_slow) / kama_slow >= KAMA_GAP_MIN
-
     if zona == 'LONG_CONF' and ao > 0 and vol_ratio >= VOL_MIN_CONF and baf >= BAF_MIN_CONF and er >= ER_MIN and kama_gap_ok and sar_bull:
         return 'LONG'
     elif zona == 'LONG_EARLY' and ao > 0 and vol_ratio >= VOL_MIN_EARLY and baf >= BAF_MIN_EARLY and er >= ER_MIN and kama_gap_ok and regime not in ('ATTENZIONE',):
-        # In ATTENZIONE solo LONG_CONF
         return 'EARLY'
     elif zona == 'LONG_CONF' or zona == 'LONG_EARLY':
         return 'WATCH'
@@ -601,7 +578,6 @@ def get_segnale_leva(zona, ao, vol_ratio, er, baf, kama_fast=None, kama_slow=Non
     return ''
 
 def get_regime_vix(vix, vstoxx):
-    """Regime di mercato basato su VIX e VSTOXX"""
     v = vix if vix else 20
     vs = vstoxx if vstoxx else 20
     avg = (v + vs) / 2
@@ -612,7 +588,6 @@ def get_regime_vix(vix, vstoxx):
     return             {'regime': 'PAURA',         'mult': 0.50, 'color': 'rosso_scuro'}
 
 def calc_score_leva(zona, ao, vol_ratio, er, baf, regime_mult):
-    """Score leva — penalizza fortemente quando VIX è alto"""
     base = 0
     if zona == 'LONG_CONF':  base = 60
     elif zona == 'LONG_EARLY': base = 40
@@ -656,19 +631,22 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
         low    = [float(x) for x in hist['Low'].values]
         volume = [float(x) for x in hist['Volume'].values]
 
-        # Doppia KAMA
-        kama_fast = calc_kama(close, n=5,  fast=3, slow=20)  # veloce → entrata
-        kama_slow = calc_kama(close, n=20, fast=2, slow=40)  # lenta  → uscita
+        kama_fast = calc_kama(close, n=5,  fast=3, slow=20)
+        kama_slow = calc_kama(close, n=20, fast=2, slow=40)
 
         kf = kama_fast[-1]; ks = kama_slow[-1]
         lc = close[-1]
+
+        # KAMA slow slope (filtro 1x)
+        kama_slow_slope = False
+        if len(kama_slow) > 10 and kama_slow[-1] is not None and kama_slow[-11] is not None:
+            kama_slow_slope = kama_slow[-1] > kama_slow[-11]
 
         ao       = calc_ao_fast(high, low)
         vol_r    = calc_vol_ratio(volume)
         er       = calc_er(close)
         rsi      = calc_rsi(close)
         rsi5     = calc_rsi(close, n=5)
-        # RSI cross: +1 bullish (rsi5 supera rsi14 dal basso), -1 bearish
         rsi_cross = 0
         if len(close) > 16:
             r14p = calc_rsi(close[:-1])
@@ -677,10 +655,8 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
             elif r5p >= r14p and rsi5 < rsi: rsi_cross = -1
         baf      = calc_baffetti_fast(high, low)
 
-        # ── ZONA/SEGNALE (spostato PRIMA di pre_signal — bug fix: zona era usata non definita) ──
         zona     = get_zona(lc, kf, ks)
 
-        # ── PRE-SIGNAL: AO miglioramento 3 barre + RSI cross bullish ──
         ao_history = []
         if len(high) >= 16:
             for ii in range(-4, 0):
@@ -694,7 +670,7 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
                       zona not in ('STOP', 'USCITA'))
         sar_arr  = calc_sar(high, low, step=0.03, max_af=0.25)
         sar_val  = sar_arr[-1] if sar_arr[-1] is not None else None
-        sar_bull = sar_val is not None and lc > sar_val  # prezzo sopra SAR = rialzista
+        sar_bull = sar_val is not None and lc > sar_val
         segnale  = get_segnale_leva(zona, ao, vol_r, er, baf, kf, ks, regime_name, sar_bull)
         score    = calc_score_leva(zona, ao, vol_r, er, baf, regime_mult)
 
@@ -705,7 +681,6 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
         perf5  = _safe_perf(close[-6])  if len(close)>6  else 0
         perf20 = _safe_perf(close[-21]) if len(close)>21 else 0
 
-        # ── SUPER BEST BUY: primo pallino SAR rialzista + AO>0 + AO in miglioramento ──
         sar_flip, bars_since_flip = calc_sar_flip(close, sar_arr, window=SAR_FLIP_WINDOW)
         super_best_buy = (
             sar_flip == 'BULL' and
@@ -714,7 +689,6 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
             vol_r >= SBB_VOL_MIN and
             abs(perf1) <= SANITY_PERFOGGI
         )
-        # ── SUPER BEST BUY 2 (sperimentale): stessa base, senza richiedere AO>0 — solo AO in miglioramento ──
         super_best_buy_2 = (
             sar_flip == 'BULL' and
             ao_improving and
@@ -722,7 +696,6 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
             abs(perf1) <= SANITY_PERFOGGI
         )
 
-        # Data cambio zona (crossover KAMA)
         entry_date = '—'
         try:
             timestamps = [int(t.timestamp()) for t in hist.index]
@@ -750,6 +723,7 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
             'prezzo':    round(lc, 4),
             'kama_fast': round(kf, 4) if kf else None,
             'kama_slow': round(ks, 4) if ks else None,
+            'kama_slow_slope': kama_slow_slope,
             'er':        er,
             'baff':      baf,
             'ao':        round(ao, 4),
@@ -774,6 +748,7 @@ def process_leva(info, regime_mult, regime_name='NORMALE'):
         }
     except Exception:
         return None
+
 
 # ═══════════════════════════════════════════════════════
 # EMAIL ALERT
@@ -821,7 +796,6 @@ def send_alert_email(alerts, vix, vstoxx, regime, now, prev_regime=None):
                 ICONS.get(a['old'],a['old']), ICONS.get(a['new'],a['new']),
                 a['prezzo'], a['kf'], a['ks'], a['score'],
                 round(a.get('vol',0),1), a['entry'])
-    # Inserisci banner regime nel corpo HTML
     rows_html = regime_banner + rows_html if regime_banner else rows_html
     vix_c = '#1a7f37' if (vix or 20)<20 else '#bc4c00' if (vix or 20)<30 else '#cf222e'
     html = """<!DOCTYPE html><html><body style='font-family:"Segoe UI",sans-serif;background:#f5f7fa;padding:20px'>
@@ -869,21 +843,20 @@ def send_alert_email(alerts, vix, vstoxx, regime, now, prev_regime=None):
         print("Errore email: {}".format(e))
 
 # ═══════════════════════════════════════════════════════
-# EXPLOSIVE MOVER — storico perf per z-score + fallback soglia assoluta
+# EXPLOSIVE MOVER
 # ═══════════════════════════════════════════════════════
 PERF_HISTORY_FILE   = 'perf_history.json'
 ALERT_STATE_FILE    = 'explosive_alerted.json'
 HIST_ROLLING_DAYS   = 120
-MIN_HIST_DAYS       = 30     # sotto questa soglia si usa la soglia assoluta
+MIN_HIST_DAYS       = 30
 Z_THRESH_SETT       = 3.0
 Z_THRESH_MESE       = 2.5
-ABS_THRESH_SETT     = 40.0   # % — fallback finché non c'è storico sufficiente
-ABS_THRESH_MESE     = 70.0   # %
-SANITY_CAP_PCT      = 500.0  # oltre questo valore è quasi certamente un rebase/reverse split ETP, non un vero movimento
+ABS_THRESH_SETT     = 40.0
+ABS_THRESH_MESE     = 70.0
+SANITY_CAP_PCT      = 500.0
 COOLDOWN_DAYS       = 5
 
 def update_perf_history(results, now):
-    """Accumula un campione al giorno per ticker (perfSett/perfMese). Rolling window."""
     try:
         with open(PERF_HISTORY_FILE, 'r', encoding='utf-8') as f:
             hist = json.load(f)
@@ -895,7 +868,7 @@ def update_perf_history(results, now):
         entries = hist.setdefault(t, [])
         sample = [today, r.get('perfSett', 0), r.get('perfMese', 0)]
         if entries and entries[-1][0] == today:
-            entries[-1] = sample  # ultima run della giornata vince
+            entries[-1] = sample
         else:
             entries.append(sample)
         if len(entries) > HIST_ROLLING_DAYS:
@@ -909,21 +882,9 @@ def update_perf_history(results, now):
 
 SBB_LOG_FILE         = 'sbb_flip_log.json'
 SBB2_LOG_FILE        = 'sbb2_flip_log.json'
-SBB_LOG_RETENTION_D  = 120    # righe chiuse più vecchie vengono scartate; le aperte restano sempre
+SBB_LOG_RETENTION_D  = 120
 
 def _update_flip_log(results, now, signal_field, log_file):
-    """Log generico riutilizzato per Super Best Buy e Super Best Buy 2: apre una riga
-    al flip BULL del segnale indicato (signal_field), aggiorna l'ultimo prezzo finché
-    resta BULL, chiude al flip opposto con rendimento%. Retention SBB_LOG_RETENTION_D
-    giorni solo sulle righe chiuse.
-
-    FIX v2 (16/10/2026):
-      - Non chiude più una posizione se il prezzo corrente è None/NaN/≤0
-        (evita rendimento_pct=NaN).
-      - Aspetta la prossima run con dati validi per chiudere correttamente.
-      - Non aggiorna ultimo_prezzo con valori non validi.
-      - Non apre una posizione se il prezzo di ingresso non è valido.
-    """
     try:
         with open(log_file, 'r', encoding='utf-8') as f:
             log = json.load(f)
@@ -933,14 +894,12 @@ def _update_flip_log(results, now, signal_field, log_file):
     ts_iso = now.isoformat()
     ts_it  = now.strftime('%d/%m/%Y %H:%M')
 
-    # Indice delle posizioni aperte per ticker (ultima entry aperta, se esiste)
     open_idx = {}
     for i, e in enumerate(log):
         if e.get('stato') == 'aperto':
             open_idx[e['ticker']] = i
 
     def _valid_price(p):
-        """True se p è un numero finito > 0."""
         return isinstance(p, (int, float)) and math.isfinite(p) and p > 0
 
     for r in results:
@@ -950,7 +909,6 @@ def _update_flip_log(results, now, signal_field, log_file):
         is_new_flip = r.get(signal_field) and t not in open_idx
 
         if is_new_flip:
-            # Per aprire una posizione serve un prezzo di ingresso valido
             if not _valid_price(prezzo):
                 continue
             log.append({
@@ -973,24 +931,18 @@ def _update_flip_log(results, now, signal_field, log_file):
 
         elif t in open_idx:
             e = log[open_idx[t]]
-
-            # Se il prezzo è invalido → salta l'aggiornamento (aspetta prossima run)
             if not _valid_price(prezzo):
                 continue
-
             if sar_bull is False:
-                # Flip opposto (BEAR) → chiude la posizione
                 e['stato'] = 'chiuso'
                 e['chiusura_ts_it'] = ts_it
                 e['prezzo_chiusura'] = prezzo
                 if _valid_price(e.get('prezzo_ingresso')):
                     e['rendimento_pct'] = round((prezzo / e['prezzo_ingresso'] - 1) * 100, 2)
             else:
-                # Ancora in trend BULL → aggiorna ultimo prezzo
                 e['ultimo_prezzo'] = prezzo
                 e['ultimo_ts_it'] = ts_it
 
-    # Retention: scarta solo le righe CHIUSE più vecchie di SBB_LOG_RETENTION_D giorni
     cutoff = now - datetime.timedelta(days=SBB_LOG_RETENTION_D)
     kept = []
     for e in log:
@@ -1017,6 +969,77 @@ def update_sbb_flip_log(results, now):
 def update_sbb2_flip_log(results, now):
     return _update_flip_log(results, now, 'super_best_buy_2', SBB2_LOG_FILE)
 
+# ── LIVE 1x (SL10 / TP30) ───────────────────────────────────────
+LIVE_1X_FILE = 'live_trades_1x.json'
+
+def update_live_1x_log(results, now):
+    """Log dedicato agli ETF 1x con strategia SL10/TP30 + SAR Bear."""
+    try:
+        with open(LIVE_1X_FILE, 'r', encoding='utf-8') as f:
+            log = json.load(f)
+    except Exception:
+        log = []
+
+    ts_iso = now.isoformat()
+    ts_it  = now.strftime('%d/%m/%Y %H:%M')
+
+    open_idx = {e['ticker']: i for i, e in enumerate(log) if e.get('stato') == 'aperto'}
+
+    def _valid_price(p):
+        return isinstance(p, (int, float)) and math.isfinite(p) and p > 0
+
+    for r in results:
+        if r.get('leva', 1) != 1:
+            continue
+
+        t = r['ticker']
+        prezzo = r.get('prezzo')
+        if not _valid_price(prezzo):
+            continue
+
+        if t in open_idx:
+            e = log[open_idx[t]]
+            pnl = (prezzo / e['prezzo_ingresso'] - 1) * 100
+            exit_reason = None
+            if pnl <= -10.0:
+                exit_reason = 'SL'
+            elif pnl >= 30.0:
+                exit_reason = 'TP'
+            elif r.get('sarBull') is False:
+                exit_reason = 'SAR'
+
+            if exit_reason:
+                e['stato'] = 'chiuso'
+                e['chiusura_ts_it'] = ts_it
+                e['prezzo_chiusura'] = prezzo
+                e['rendimento_pct'] = round(pnl, 2)
+                e['exit_reason'] = exit_reason
+        else:
+            if (r.get('sar_flip') == 'BULL' and
+                r.get('ao', 0) > 0 and
+                r.get('ao_improving') is True and
+                r.get('volRatio', 0) >= 1.5 and
+                abs(r.get('perfOggi', 0)) <= 4.0 and
+                r.get('kama_slow_slope') is True):
+                log.append({
+                    'ticker': t,
+                    'nome': r.get('nome', ''),
+                    'leva': 1,
+                    'flip_ts': ts_iso,
+                    'flip_ts_it': ts_it,
+                    'prezzo_ingresso': prezzo,
+                    'stato': 'aperto',
+                    'chiusura_ts_it': None,
+                    'prezzo_chiusura': None,
+                    'rendimento_pct': None,
+                    'exit_reason': None
+                })
+                open_idx[t] = len(log) - 1
+
+    with open(LIVE_1X_FILE, 'w', encoding='utf-8') as f:
+        json.dump(log, f, ensure_ascii=False)
+    return log
+
 def _load_alert_state():
     try:
         with open(ALERT_STATE_FILE, 'r', encoding='utf-8') as f:
@@ -1032,8 +1055,6 @@ def _save_alert_state(state):
         print(f"Errore salvataggio {ALERT_STATE_FILE}: {e}")
 
 def check_explosive_movers(results, hist, now):
-    """Individua ticker con Sett%/Mese% anomali rispetto al proprio storico (z-score),
-    con fallback a soglia assoluta se lo storico è insufficiente. Dedup con cooldown."""
     state = _load_alert_state()
     today = now.strftime('%Y-%m-%d')
     movers = []
@@ -1066,7 +1087,6 @@ def check_explosive_movers(results, hist, now):
         if not reasons:
             continue
 
-        # Valori assurdi (decine di migliaia di %) sono quasi sempre rebase/reverse split ETP, non veri mover
         if r.get('perfSett', 0) >= SANITY_CAP_PCT or r.get('perfMese', 0) >= SANITY_CAP_PCT:
             reasons = [f"⚠️ possibile REBASE/SPLIT (valore fuori scala) — verificare manualmente, non trattare come segnale di trading: " + ' · '.join(reasons)]
 
@@ -1078,10 +1098,9 @@ def check_explosive_movers(results, hist, now):
         prev = state.get(t)
         if prev:
             days_since = (now.date() - datetime.datetime.strptime(prev['date'], '%Y-%m-%d').date()).days
-            # confronto valido solo se stesso metodo di rilevazione (scale diverse altrimenti)
             same_method = prev.get('method') == method
             if days_since < COOLDOWN_DAYS and same_method and metric <= prev.get('metric', 0):
-                continue  # in cooldown e non peggiorato ulteriormente
+                continue
 
         movers.append({
             'ticker': t, 'nome': r.get('nome', ''), 'prezzo': r.get('prezzo', 0),
@@ -1168,103 +1187,15 @@ def main():
     print(f"RAPTOR Leva Fetch — {now.strftime('%Y-%m-%d %H:%M')}")
     print(f"Ticker: {len(TICKERS)}")
 
-    # 1. Fetch VIX
     print("Fetching VIX/VSTOXX...")
     vix, vstoxx = fetch_vix()
     print(f"  VIX={vix}  VSTOXX={vstoxx}")
     regime = get_regime_vix(vix, vstoxx)
     print(f"  Regime: {regime['regime']} (mult={regime['mult']})")
 
-    # 2. Fetch ticker
     results = []; errors = 0
     for i, info in enumerate(TICKERS):
         r = process_leva(info, regime['mult'], regime['regime'])
         if r: results.append(r)
         else: errors += 1
-        if (i+1) % 20 == 0:
-            print(f"  {i+1}/{len(TICKERS)} — ok:{len(results)} err:{errors}")
-        time.sleep(0.3)
-
-    # 3. Rileva cambi segnale e manda email
-    prev_zones = {}
-    prev_j = {}
-    try:
-        with open('raptor_leva.json','r',encoding='utf-8') as f:
-            prev_j = json.load(f)
-            for r in prev_j.get('data',[]):
-                prev_zones[r['ticker']] = r.get('zona','')
-    except Exception as e:
-        print(f"Nessun raptor_leva.json precedente o errore lettura: {e}")
-
-    # Cambio regime VIX — avviso indipendente
-    prev_regime = prev_j.get('regime','')
-    regime_changed = prev_regime and prev_regime != regime['regime']
-    if regime_changed:
-        print("REGIME CAMBIATO: {} → {}".format(prev_regime, regime['regime']))
-
-    CAMBI = {
-        ('USCITA','LONG_CONF'),('STOP','LONG_CONF'),('GRIGIA','LONG_CONF'),('LONG_EARLY','LONG_CONF'),
-        ('USCITA','LONG_EARLY'),('STOP','LONG_EARLY'),('GRIGIA','LONG_EARLY'),
-        ('LONG_CONF','USCITA'),('LONG_EARLY','USCITA'),
-        ('LONG_CONF','STOP'),('LONG_EARLY','STOP'),
-    }
-    alert_list = []
-    for r in results:
-        old_z = prev_zones.get(r['ticker'],'')
-        new_z = r.get('zona','')
-        # Solo alert per ticker di qualità (rispettano tutti i filtri)
-        if r.get('quality') and old_z and new_z and old_z != new_z and (old_z,new_z) in CAMBI:
-            if r.get('score',0) >= SCORE_MIN:
-                alert_list.append({'ticker':r['ticker'],'nome':r.get('nome',''),
-                    'old':old_z,'new':new_z,'score':r['score'],'prezzo':r['prezzo'],
-                    'kf':r.get('kama_fast','—'),'ks':r.get('kama_slow','—'),
-                    'entry':r.get('entryDate','—'),'vol':r.get('volRatio',0),
-                    'er':r.get('er',0),'baff':r.get('baff',0)})
-    print("Alert qualità: {}".format(len(alert_list)))
-    if alert_list or regime_changed:
-        send_alert_email(alert_list, vix, vstoxx, regime['regime'], now,
-                        prev_regime if regime_changed else None)
-
-    # 3b. Mover esplosivo (z-score storico per ticker / soglia assoluta di fallback)
-    # Isolato in try/except: un errore qui non deve impedire il salvataggio del JSON principale.
-    try:
-        perf_hist = update_perf_history(results, now)
-        movers = check_explosive_movers(results, perf_hist, now)
-        print("Mover esplosivi: {}".format(len(movers)))
-        if movers:
-            send_explosive_alert_email(movers, now)
-    except Exception as e:
-        print(f"Errore sezione mover esplosivi (non bloccante): {e}")
-
-    # 3c. Super Best Buy — log a console + libro storico flip (sbb_flip_log.json)
-    try:
-        sbb_list = [r for r in results if r.get('super_best_buy')]
-        print("Super Best Buy (flip SAR): {}".format(len(sbb_list)))
-        update_sbb_flip_log(results, now)
-        update_sbb2_flip_log(results, now)
-    except Exception as e:
-        print(f"Errore sezione Super Best Buy log (non bloccante): {e}")
-
-    # 3. Salva
-    output = {
-        'timestamp':    now.isoformat(),
-        'timestamp_it': now.strftime('%d/%m/%Y %H:%M'),
-        'total':   len(TICKERS),
-        'ok':      len(results),
-        'errors':  errors,
-        'vix':     vix,
-        'vstoxx':  vstoxx,
-        'regime':  regime['regime'],
-        'regime_mult': regime['mult'],
-        'regime_color': regime['color'],
-        'data':    results
-    }
-
-    with open('raptor_leva.json','w',encoding='utf-8') as f:
-        json.dump(output, f, ensure_ascii=False, separators=(',',':'))
-
-    print(f"\nSalvato raptor_leva.json — {len(results)} OK, {errors} errori")
-    print(f"Regime: {regime['regime']} | VIX:{vix} VSTOXX:{vstoxx}")
-
-if __name__ == '__main__':
-    main()
+        if (i+1) % 20 ==
