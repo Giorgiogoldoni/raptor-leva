@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAPTOR Dashboard</title>
+    <title>RAPTOR Dashboard - Multi-Motore</title>
     <script src="https://unpkg.com/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         :root {
@@ -13,6 +13,9 @@
             --green: #26a69a;
             --red: #ef5350;
             --border: #2a2e39;
+            --blue: #2962FF;
+            --orange: #FF6D00;
+            --purple: #ab47bc;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -25,10 +28,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 1px solid var(--border);
         }
+        .controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            background: var(--panel);
+            padding: 10px 15px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .controls label { cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 14px; }
         select {
             padding: 8px 12px;
             font-size: 16px;
@@ -38,6 +53,19 @@
             border-radius: 4px;
             width: 300px;
         }
+        .summary {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            background: var(--panel);
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+        .summary-item { display: flex; flex-direction: column; }
+        .summary-item span:first-child { font-size: 12px; color: #b2b5be; }
+        .summary-item span:last-child { font-size: 18px; font-weight: bold; }
+        
         .charts-container {
             display: flex;
             flex-direction: column;
@@ -48,6 +76,7 @@
         #main-chart { flex: 3; border: 1px solid var(--border); border-radius: 4px; position: relative; }
         #indicator-charts { display: flex; flex-direction: column; gap: 10px; flex: 1; }
         .sub-chart { flex: 1; border: 1px solid var(--border); border-radius: 4px; }
+        
         .table-container {
             overflow-x: auto;
             background-color: var(--panel);
@@ -77,7 +106,11 @@
             font-size: 11px;
             font-weight: bold;
         }
-        .badge-in { background: rgba(38, 166, 154, 0.2); color: var(--green); border: 1px solid var(--green); }
+        /* Colori specifici per motore */
+        .badge-gen { background: rgba(41, 98, 255, 0.2); color: #64b5f6; border: 1px solid #64b5f6; }
+        .badge-1x { background: rgba(255, 109, 0, 0.2); color: #ffb74d; border: 1px solid #ffb74d; }
+        .badge-sbb { background: rgba(171, 71, 188, 0.2); color: #ce93d8; border: 1px solid #ce93d8; }
+        
         .badge-out { background: rgba(239, 83, 80, 0.2); color: var(--red); border: 1px solid var(--red); }
         .badge-open { background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid #ffc107; }
         .pos { color: var(--green); font-weight: bold; }
@@ -92,6 +125,19 @@
         <select id="ticker-select">
             <option value="">Caricamento ETF...</option>
         </select>
+    </div>
+
+    <div class="controls" id="filters" style="display:none;">
+        <strong>Filtra Motori:</strong>
+        <label><input type="checkbox" id="chk-gen" checked> <span class="badge badge-gen">Generale (KAMA/AO)</span></label>
+        <label><input type="checkbox" id="chk-1x" checked> <span class="badge badge-1x">Strategia 1x (SAR)</span></label>
+        <label><input type="checkbox" id="chk-sbb" checked> <span class="badge badge-sbb">Super Best Buy (SBB)</span></label>
+    </div>
+
+    <div class="summary" id="summary" style="display:none;">
+        <div class="summary-item"><span>Trade Totali</span><span id="sum-trades">0</span></div>
+        <div class="summary-item"><span>Win Rate</span><span id="sum-winrate">0%</span></div>
+        <div class="summary-item"><span>Rendimento Totale</span><span id="sum-return">0%</span></div>
     </div>
 
     <div id="loading" class="loading">Caricamento dati in corso...</div>
@@ -111,8 +157,9 @@
                 <thead>
                     <tr>
                         <th>#</th>
+                        <th>Motore</th>
                         <th>Data In</th>
-                        <th>Motivo Entrata</th>
+                        <th>Motivo Entrata (Regola)</th>
                         <th>Prezzo In</th>
                         <th>Data Out</th>
                         <th>Motivo Uscita</th>
@@ -132,6 +179,11 @@
         let mainChart, volumeChart, aoChart, rsiChart;
         let allLogs1x = [];
         let allLogsSBB = [];
+        
+        // Variabili globali per i dati correnti
+        let currentChartData = null;
+        let currentTicker = '';
+        let allTrades = [];
 
         async function init() {
             try {
@@ -146,14 +198,12 @@
 
                 const select = document.getElementById('ticker-select');
                 select.innerHTML = '';
-                
                 const uniqueTickers = resIdx.index.sort((a, b) => a.t.localeCompare(b.t));
                 
                 uniqueTickers.forEach(item => {
                     const opt = document.createElement('option');
                     opt.value = item.f;
                     opt.dataset.ticker = item.t;
-                    opt.dataset.yahoo = item.y;
                     opt.textContent = `${item.t} — ${item.y}`;
                     select.appendChild(opt);
                 });
@@ -163,6 +213,11 @@
                     loadTicker(selectedOption.value, selectedOption.dataset.ticker);
                 });
 
+                // Event listeners per i filtri
+                document.getElementById('chk-gen').addEventListener('change', updateUI);
+                document.getElementById('chk-1x').addEventListener('change', updateUI);
+                document.getElementById('chk-sbb').addEventListener('change', updateUI);
+
                 if (uniqueTickers.length > 0) {
                     const first = uniqueTickers[0];
                     select.value = first.f;
@@ -171,6 +226,8 @@
 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
+                document.getElementById('filters').style.display = 'flex';
+                document.getElementById('summary').style.display = 'flex';
 
             } catch (err) {
                 console.error(err);
@@ -180,12 +237,16 @@
 
         async function loadTicker(filename, tickerCode) {
             try {
+                currentTicker = tickerCode;
                 const res = await fetch(BASE_PATH + 'data/charts/' + filename);
                 if (!res.ok) throw new Error("Dati grafico non trovati");
-                const data = await res.json();
+                currentChartData = await res.json();
 
-                renderCharts(data);
-                renderTable(data, tickerCode);
+                // Estrai TUTTI i trade per questo ticker
+                extractAllTrades();
+                
+                // Renderizza in base ai filtri attuali
+                updateUI();
 
             } catch (err) {
                 console.error(err);
@@ -193,7 +254,140 @@
             }
         }
 
-        function renderCharts(data) {
+        // Raccoglie i trade da tutte le fonti
+        function extractAllTrades() {
+            allTrades = [];
+            const data = currentChartData;
+
+            // A. Motore Generale (dal file Chart)
+            let openChartTrade = null;
+            for (let i = 0; i < data.signals.length; i++) {
+                const sig = data.signals[i];
+                const date = data.dates[i];
+                const price = data.closes[i];
+
+                if (sig === 'BUY3' || sig === 'BUY2') {
+                    if (!openChartTrade) {
+                        openChartTrade = { 
+                            engine: 'GEN',
+                            engineName: 'Generale',
+                            inDate: date, inPrice: price, 
+                            inReason: sig + ' (Incrocio KAMA/AO)' 
+                        };
+                    }
+                } else if (sig === 'SELL') {
+                    if (openChartTrade) {
+                        openChartTrade.outDate = date;
+                        openChartTrade.outPrice = price;
+                        openChartTrade.outReason = 'SELL (Rottura KAMA)';
+                        openChartTrade.result = ((price / openChartTrade.inPrice - 1) * 100);
+                        allTrades.push(openChartTrade);
+                        openChartTrade = null;
+                    }
+                }
+            }
+
+            // B. Motore 1x
+            const t1x = allLogs1x.filter(x => x.ticker === currentTicker);
+            t1x.forEach(t => {
+                const isClosed = t.stato === 'chiuso';
+                allTrades.push({
+                    engine: '1X',
+                    engineName: '1x',
+                    inDate: t.flip_ts_it,
+                    inPrice: t.prezzo_ingresso,
+                    inReason: 'Flip SAR BULL + KAMA > 0',
+                    outDate: isClosed ? t.chiusura_ts_it : null,
+                    outPrice: isClosed ? t.prezzo_chiusura : t.ultimo_prezzo,
+                    outReason: isClosed ? (t.exit_reason === 'TP' ? 'Take Profit (+30%)' : t.exit_reason === 'SL' ? 'Stop Loss (-10%)' : 'Flip SAR BEAR') : 'In corso',
+                    result: isClosed ? t.rendimento_pct : ((t.ultimo_prezzo / t.prezzo_ingresso - 1) * 100)
+                });
+            });
+
+            // C. Motore SBB
+            const tsbb = allLogsSBB.filter(x => x.ticker === currentTicker);
+            tsbb.forEach(t => {
+                const isClosed = t.stato === 'chiuso';
+                allTrades.push({
+                    engine: 'SBB',
+                    engineName: 'SBB',
+                    inDate: t.flip_ts_it,
+                    inPrice: t.prezzo_ingresso,
+                    inReason: 'Flip SAR BULL + AO/Vol',
+                    outDate: isClosed ? t.chiusura_ts_it : null,
+                    outPrice: isClosed ? t.prezzo_chiusura : t.ultimo_prezzo,
+                    outReason: isClosed ? 'Flip SAR BEAR' : 'In corso',
+                    result: isClosed ? t.rendimento_pct : ((t.ultimo_prezzo / t.prezzo_ingresso - 1) * 100)
+                });
+            });
+
+            // Ordina per data decrescente
+            allTrades.sort((a, b) => {
+                const parseDate = (d) => {
+                    if (!d) return 0;
+                    if (d.includes('/')) {
+                        const [date, time] = d.split(' ');
+                        const [dd, mm, yyyy] = date.split('/');
+                        return new Date(`${yyyy}-${mm}-${dd}T${time || '00:00'}`).getTime();
+                    }
+                    return new Date(d).getTime();
+                };
+                return parseDate(b.inDate) - parseDate(a.inDate);
+            });
+        }
+
+        // Funzione centrale che aggiorna grafico, tabella e statistiche in base ai filtri
+        function updateUI() {
+            const showGen = document.getElementById('chk-gen').checked;
+            const show1x = document.getElementById('chk-1x').checked;
+            const showSbb = document.getElementById('chk-sbb').checked;
+
+            // Filtra i trade
+            const filteredTrades = allTrades.filter(t => {
+                if (t.engine === 'GEN' && !showGen) return false;
+                if (t.engine === '1X' && !show1x) return false;
+                if (t.engine === 'SBB' && !showSbb) return false;
+                return true;
+            });
+
+            renderCharts(currentChartData, filteredTrades);
+            renderTable(filteredTrades);
+            updateSummary(filteredTrades);
+        }
+
+        function updateSummary(trades) {
+            const closedTrades = trades.filter(t => t.outDate);
+            const total = closedTrades.length;
+            
+            if (total === 0) {
+                document.getElementById('sum-trades').innerText = "0";
+                document.getElementById('sum-winrate').innerText = "-";
+                document.getElementById('sum-return').innerText = "-";
+                return;
+            }
+
+            const wins = closedTrades.filter(t => t.result > 0).length;
+            const winRate = (wins / total * 100).toFixed(1);
+            
+            // Calcolo rendimento totale (semplice somma algebrica dei rendimenti dei trade chiusi)
+            let totalReturn = 0;
+            closedTrades.forEach(t => {
+                totalReturn += parseFloat(t.result);
+            });
+
+            document.getElementById('sum-trades').innerText = total;
+            
+            const winEl = document.getElementById('sum-winrate');
+            winEl.innerText = winRate + "%";
+            winEl.className = winRate >= 50 ? 'pos' : 'neg';
+
+            const retEl = document.getElementById('sum-return');
+            retEl.innerText = (totalReturn > 0 ? '+' : '') + totalReturn.toFixed(2) + "%";
+            retEl.className = totalReturn >= 0 ? 'pos' : 'neg';
+        }
+
+        function renderCharts(data, tradesToRender) {
+            // Distruggi i grafici precedenti
             if (mainChart) mainChart.remove();
             if (volumeChart) volumeChart.remove();
             if (aoChart) aoChart.remove();
@@ -237,18 +431,38 @@
             kamaFastSeries.setData(kamaFastData);
             kamaSlowSeries.setData(kamaSlowData);
 
+            // Genera marcatori (frecce) SOLO per i trade filtrati
             const markers = [];
-            for (let i = 0; i < data.signals.length; i++) {
-                const sig = data.signals[i];
-                if (sig === 'BUY3' || sig === 'BUY2') {
-                    markers.push({ time: data.dates[i], position: 'belowBar', color: '#26a69a', shape: 'arrowUp', text: 'BUY' });
-                } else if (sig === 'SELL') {
-                    markers.push({ time: data.dates[i], position: 'aboveBar', color: '#ef5350', shape: 'arrowDown', text: 'SELL' });
+            tradesToRender.forEach(t => {
+                // Freccia Entrata
+                let colorIn = t.engine === 'GEN' ? '#2962FF' : (t.engine === '1X' ? '#FF6D00' : '#ab47bc');
+                let textIn = t.engineName;
+                
+                markers.push({ 
+                    time: t.inDate.substring(0, 10), // Assicurati che sia YYYY-MM-DD
+                    position: 'belowBar', 
+                    color: colorIn, 
+                    shape: 'arrowUp', 
+                    text: textIn 
+                });
+
+                // Freccia Uscita (se chiuso)
+                if (t.outDate) {
+                    markers.push({ 
+                        time: t.outDate.substring(0, 10), 
+                        position: 'aboveBar', 
+                        color: '#ef5350', 
+                        shape: 'arrowDown', 
+                        text: 'SELL' 
+                    });
                 }
-            }
+            });
+            
+            // Lightweight charts richiede i marcatori ordinati per data
             markers.sort((a, b) => new Date(a.time) - new Date(b.time));
             candlestickSeries.setMarkers(markers);
 
+            // Volume, AO, RSI
             volumeChart = LightweightCharts.createChart(document.getElementById('volume-chart'), { ...commonOptions, timeScale: { visible: false } });
             const volumeSeries = volumeChart.addHistogramSeries({ color: '#26a69a' });
             const volData = data.dates.map((d, i) => ({ time: d, value: data.volumes[i], color: data.closes[i] >= data.opens[i] ? '#26a69a' : '#ef5350' }));
@@ -275,88 +489,29 @@
             });
         }
 
-        function renderTable(chartData, tickerCode) {
+        function renderTable(trades) {
             const tbody = document.getElementById('trade-tbody');
             tbody.innerHTML = '';
 
-            let trades = [];
-
-            let openChartTrade = null;
-            for (let i = 0; i < chartData.signals.length; i++) {
-                const sig = chartData.signals[i];
-                const date = chartData.dates[i];
-                const price = chartData.closes[i];
-
-                if (sig === 'BUY3' || sig === 'BUY2') {
-                    if (!openChartTrade) {
-                        openChartTrade = { 
-                            type: 'Generale', 
-                            inDate: date, inPrice: price, inReason: sig + ' (KAMA/AO)' 
-                        };
-                    }
-                } else if (sig === 'SELL') {
-                    if (openChartTrade) {
-                        openChartTrade.outDate = date;
-                        openChartTrade.outPrice = price;
-                        openChartTrade.outReason = 'SELL (KAMA)';
-                        openChartTrade.result = ((price / openChartTrade.inPrice - 1) * 100).toFixed(2);
-                        trades.push(openChartTrade);
-                        openChartTrade = null;
-                    }
-                }
+            if (trades.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 20px;">Nessun trade trovato per i filtri selezionati.</td></tr>';
+                return;
             }
-
-            const t1x = allLogs1x.filter(x => x.ticker === tickerCode);
-            t1x.forEach(t => {
-                trades.push({
-                    type: '1x',
-                    inDate: t.flip_ts_it,
-                    inPrice: t.prezzo_ingresso,
-                    inReason: 'Flip SAR (KAMA in salita)',
-                    outDate: t.stato === 'chiuso' ? t.chiusura_ts_it : null,
-                    outPrice: t.stato === 'chiuso' ? t.prezzo_chiusura : t.ultimo_prezzo,
-                    outReason: t.stato === 'chiuso' ? (t.exit_reason === 'TP' ? 'Take Profit (+30%)' : t.exit_reason === 'SL' ? 'Stop Loss (-10%)' : 'Flip SAR BEAR') : 'In corso',
-                    result: t.stato === 'chiuso' ? t.rendimento_pct : ((t.ultimo_prezzo / t.prezzo_ingresso - 1) * 100).toFixed(2)
-                });
-            });
-
-            const tsbb = allLogsSBB.filter(x => x.ticker === tickerCode);
-            tsbb.forEach(t => {
-                trades.push({
-                    type: 'SBB',
-                    inDate: t.flip_ts_it,
-                    inPrice: t.prezzo_ingresso,
-                    inReason: 'Super Best Buy (SAR)',
-                    outDate: t.stato === 'chiuso' ? t.chiusura_ts_it : null,
-                    outPrice: t.stato === 'chiuso' ? t.prezzo_chiusura : t.ultimo_prezzo,
-                    outReason: t.stato === 'chiuso' ? 'Flip SAR BEAR' : 'In corso',
-                    result: t.stato === 'chiuso' ? t.rendimento_pct : ((t.ultimo_prezzo / t.prezzo_ingresso - 1) * 100).toFixed(2)
-                });
-            });
-
-            trades.sort((a, b) => {
-                const parseDate = (d) => {
-                    if (!d) return 0;
-                    if (d.includes('/')) {
-                        const [date, time] = d.split(' ');
-                        const [dd, mm, yyyy] = date.split('/');
-                        return new Date(`${yyyy}-${mm}-${dd}T${time || '00:00'}`).getTime();
-                    }
-                    return new Date(d).getTime();
-                };
-                return parseDate(b.inDate) - parseDate(a.inDate);
-            });
 
             let html = '';
             trades.forEach((t, idx) => {
                 const isOpen = !t.outDate;
                 const resClass = t.result > 0 ? 'pos' : 'neg';
-                const resStr = `${t.result > 0 ? '+' : ''}${t.result}%`;
+                const resStr = `${t.result > 0 ? '+' : ''}${t.result.toFixed(2)}%`;
                 
+                // Assegna il colore corretto al badge del motore
+                let badgeClass = t.engine === 'GEN' ? 'badge-gen' : (t.engine === '1X' ? 'badge-1x' : 'badge-sbb');
+
                 html += `<tr>
                     <td>${idx + 1}</td>
+                    <td><span class="badge ${badgeClass}">${t.engineName}</span></td>
                     <td>${t.inDate || '-'}</td>
-                    <td><span class="badge badge-in">${t.inReason}</span></td>
+                    <td>${t.inReason}</td>
                     <td>${t.inPrice ? t.inPrice.toFixed(2) : '-'} €</td>
                     <td>${t.outDate || '<span class="badge badge-open">Aperto</span>'}</td>
                     <td>${t.outReason ? `<span class="badge ${isOpen ? 'badge-open' : 'badge-out'}">${t.outReason}</span>` : '-'}</td>
