@@ -30,11 +30,11 @@ jobs:
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
         run: python raptor_leva_fetch.py
 
-      - name: Commit e push raptor_leva.json
+      - name: Commit e push output
         run: |
           git config user.name  "RAPTOR Bot"
           git config user.email "raptor-bot@noreply.github.com"
-          git add raptor_leva.json perf_history.json explosive_alerted.json sbb_flip_log.json sbb2_flip_log.json
+          git add raptor_leva.json perf_history.json explosive_alerted.json sbb_flip_log.json sbb2_flip_log.json live_trades_1x.json
           git diff --staged --quiet || git commit -m "⚡ RAPTOR leva $(date +'%d/%m/%Y %H:%M')"
           git pull --rebase origin main
           git push
