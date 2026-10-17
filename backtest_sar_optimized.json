@@ -1,0 +1,893 @@
+{
+  "generated_at": "2026-10-17T06:48:18.700092",
+  "results": {
+    "SAR_only": {
+      "config": {
+        "hard_sl": null,
+        "trail_after": null,
+        "trail_dist": null,
+        "take_profit": null
+      },
+      "stats": {
+        "trades": 358,
+        "wins": 154,
+        "losses": 202,
+        "win_rate": 43.02,
+        "avg_return": 0.86,
+        "median": -0.49,
+        "best": 85.85,
+        "worst": -15.77,
+        "std_dev": 8.8,
+        "profit_factor": 1.474,
+        "cum_return": 307.8,
+        "max_dd": 61.13
+      },
+      "by_leva": {
+        "1": {
+          "trades": 273,
+          "wins": 123,
+          "losses": 148,
+          "win_rate": 45.05,
+          "avg_return": 1.24,
+          "median": -0.22,
+          "best": 45.48,
+          "worst": -8.73,
+          "std_dev": 7.26,
+          "profit_factor": 2.014,
+          "cum_return": 338.08,
+          "max_dd": 27.93
+        },
+        "2": {
+          "trades": 24,
+          "wins": 10,
+          "losses": 14,
+          "win_rate": 41.67,
+          "avg_return": 3.44,
+          "median": -0.85,
+          "best": 85.85,
+          "worst": -11.04,
+          "std_dev": 19.21,
+          "profit_factor": 2.2,
+          "cum_return": 82.56,
+          "max_dd": 20.69
+        },
+        "3": {
+          "trades": 48,
+          "wins": 16,
+          "losses": 32,
+          "win_rate": 33.33,
+          "avg_return": -1.97,
+          "median": -2.01,
+          "best": 21.83,
+          "worst": -14.78,
+          "std_dev": 6.93,
+          "profit_factor": 0.467,
+          "cum_return": -94.39,
+          "max_dd": 120.56
+        },
+        "4": {
+          "trades": 2,
+          "wins": 1,
+          "losses": 1,
+          "win_rate": 50.0,
+          "avg_return": 3.02,
+          "median": 3.02,
+          "best": 21.8,
+          "worst": -15.77,
+          "std_dev": 18.79,
+          "profit_factor": 1.382,
+          "cum_return": 6.03,
+          "max_dd": 15.77
+        },
+        "5": {
+          "trades": 11,
+          "wins": 4,
+          "losses": 7,
+          "win_rate": 36.36,
+          "avg_return": -2.23,
+          "median": -5.37,
+          "best": 16.26,
+          "worst": -12.52,
+          "std_dev": 8.55,
+          "profit_factor": 0.553,
+          "cum_return": -24.48,
+          "max_dd": 33.9
+        }
+      },
+      "exit_reasons": {
+        "SAR": 358
+      }
+    },
+    "SL5_TP15": {
+      "config": {
+        "hard_sl": -5.0,
+        "trail_after": null,
+        "trail_dist": null,
+        "take_profit": 15.0
+      },
+      "stats": {
+        "trades": 358,
+        "wins": 154,
+        "losses": 203,
+        "win_rate": 43.02,
+        "avg_return": 0.65,
+        "median": -0.5,
+        "best": 34.4,
+        "worst": -15.77,
+        "std_dev": 6.23,
+        "profit_factor": 1.386,
+        "cum_return": 234.43,
+        "max_dd": 39.08
+      },
+      "by_leva": {
+        "1": {
+          "trades": 273,
+          "wins": 124,
+          "losses": 148,
+          "win_rate": 45.42,
+          "avg_return": 1.13,
+          "median": -0.22,
+          "best": 34.4,
+          "worst": -8.73,
+          "std_dev": 5.78,
+          "profit_factor": 1.927,
+          "cum_return": 307.67,
+          "max_dd": 27.93
+        },
+        "2": {
+          "trades": 24,
+          "wins": 10,
+          "losses": 14,
+          "win_rate": 41.67,
+          "avg_return": 0.74,
+          "median": -0.85,
+          "best": 19.44,
+          "worst": -7.57,
+          "std_dev": 7.41,
+          "profit_factor": 1.312,
+          "cum_return": 17.8,
+          "max_dd": 17.9
+        },
+        "3": {
+          "trades": 48,
+          "wins": 16,
+          "losses": 32,
+          "win_rate": 33.33,
+          "avg_return": -1.25,
+          "median": -2.01,
+          "best": 17.33,
+          "worst": -12.2,
+          "std_dev": 6.16,
+          "profit_factor": 0.59,
+          "cum_return": -59.82,
+          "max_dd": 81.49
+        },
+        "4": {
+          "trades": 2,
+          "wins": 0,
+          "losses": 2,
+          "win_rate": 0.0,
+          "avg_return": -11.68,
+          "median": -11.68,
+          "best": -7.58,
+          "worst": -15.77,
+          "std_dev": 4.09,
+          "profit_factor": 0.0,
+          "cum_return": -23.35,
+          "max_dd": 23.35
+        },
+        "5": {
+          "trades": 11,
+          "wins": 4,
+          "losses": 7,
+          "win_rate": 36.36,
+          "avg_return": -0.72,
+          "median": -5.37,
+          "best": 19.79,
+          "worst": -11.87,
+          "std_dev": 9.83,
+          "profit_factor": 0.841,
+          "cum_return": -7.87,
+          "max_dd": 29.88
+        }
+      },
+      "exit_reasons": {
+        "TP": 29,
+        "SAR": 292,
+        "SL": 37
+      }
+    },
+    "SL7_TP20": {
+      "config": {
+        "hard_sl": -7.0,
+        "trail_after": null,
+        "trail_dist": null,
+        "take_profit": 20.0
+      },
+      "stats": {
+        "trades": 358,
+        "wins": 153,
+        "losses": 203,
+        "win_rate": 42.74,
+        "avg_return": 0.47,
+        "median": -0.5,
+        "best": 34.4,
+        "worst": -15.77,
+        "std_dev": 6.7,
+        "profit_factor": 1.258,
+        "cum_return": 168.3,
+        "max_dd": 57.09
+      },
+      "by_leva": {
+        "1": {
+          "trades": 273,
+          "wins": 123,
+          "losses": 148,
+          "win_rate": 45.05,
+          "avg_return": 1.06,
+          "median": -0.22,
+          "best": 34.4,
+          "worst": -8.73,
+          "std_dev": 6.12,
+          "profit_factor": 1.866,
+          "cum_return": 288.79,
+          "max_dd": 27.93
+        },
+        "2": {
+          "trades": 24,
+          "wins": 10,
+          "losses": 14,
+          "win_rate": 41.67,
+          "avg_return": 0.65,
+          "median": -0.85,
+          "best": 24.71,
+          "worst": -10.51,
+          "std_dev": 8.24,
+          "profit_factor": 1.25,
+          "cum_return": 15.64,
+          "max_dd": 20.5
+        },
+        "3": {
+          "trades": 48,
+          "wins": 16,
+          "losses": 32,
+          "win_rate": 33.33,
+          "avg_return": -1.95,
+          "median": -2.01,
+          "best": 22.7,
+          "worst": -14.78,
+          "std_dev": 6.99,
+          "profit_factor": 0.472,
+          "cum_return": -93.52,
+          "max_dd": 120.56
+        },
+        "4": {
+          "trades": 2,
+          "wins": 0,
+          "losses": 2,
+          "win_rate": 0.0,
+          "avg_return": -11.68,
+          "median": -11.68,
+          "best": -7.58,
+          "worst": -15.77,
+          "std_dev": 4.09,
+          "profit_factor": 0.0,
+          "cum_return": -23.35,
+          "max_dd": 23.35
+        },
+        "5": {
+          "trades": 11,
+          "wins": 4,
+          "losses": 7,
+          "win_rate": 36.36,
+          "avg_return": -1.75,
+          "median": -5.37,
+          "best": 23.18,
+          "worst": -12.52,
+          "std_dev": 10.11,
+          "profit_factor": 0.659,
+          "cum_return": -19.26,
+          "max_dd": 29.88
+        }
+      },
+      "exit_reasons": {
+        "SAR": 319,
+        "SL": 23,
+        "TP": 16
+      }
+    },
+    "SL10_TP30": {
+      "config": {
+        "hard_sl": -10.0,
+        "trail_after": null,
+        "trail_dist": null,
+        "take_profit": 30.0
+      },
+      "stats": {
+        "trades": 358,
+        "wins": 154,
+        "losses": 202,
+        "win_rate": 43.02,
+        "avg_return": 0.83,
+        "median": -0.49,
+        "best": 41.86,
+        "worst": -15.77,
+        "std_dev": 7.98,
+        "profit_factor": 1.458,
+        "cum_return": 297.74,
+        "max_dd": 61.13
+      },
+      "by_leva": {
+        "1": {
+          "trades": 273,
+          "wins": 123,
+          "losses": 148,
+          "win_rate": 45.05,
+          "avg_return": 1.3,
+          "median": -0.22,
+          "best": 41.86,
+          "worst": -8.73,
+          "std_dev": 7.21,
+          "profit_factor": 2.067,
+          "cum_return": 355.81,
+          "max_dd": 27.93
+        },
+        "2": {
+          "trades": 24,
+          "wins": 10,
+          "losses": 14,
+          "win_rate": 41.67,
+          "avg_return": 1.37,
+          "median": -0.85,
+          "best": 38.06,
+          "worst": -11.04,
+          "std_dev": 11.28,
+          "profit_factor": 1.478,
+          "cum_return": 32.87,
+          "max_dd": 20.69
+        },
+        "3": {
+          "trades": 48,
+          "wins": 16,
+          "losses": 32,
+          "win_rate": 33.33,
+          "avg_return": -1.79,
+          "median": -2.01,
+          "best": 30.21,
+          "worst": -14.78,
+          "std_dev": 7.6,
+          "profit_factor": 0.514,
+          "cum_return": -86.01,
+          "max_dd": 120.56
+        },
+        "4": {
+          "trades": 2,
+          "wins": 1,
+          "losses": 1,
+          "win_rate": 50.0,
+          "avg_return": 9.78,
+          "median": 9.78,
+          "best": 35.32,
+          "worst": -15.77,
+          "std_dev": 25.55,
+          "profit_factor": 2.24,
+          "cum_return": 19.55,
+          "max_dd": 15.77
+        },
+        "5": {
+          "trades": 11,
+          "wins": 4,
+          "losses": 7,
+          "win_rate": 36.36,
+          "avg_return": -2.23,
+          "median": -5.37,
+          "best": 16.26,
+          "worst": -12.52,
+          "std_dev": 8.55,
+          "profit_factor": 0.553,
+          "cum_return": -24.48,
+          "max_dd": 33.9
+        }
+      },
+      "exit_reasons": {
+        "SAR": 333,
+        "SL": 12,
+        "TP": 13
+      }
+    },
+    "Trail5_a10": {
+      "config": {
+        "hard_sl": null,
+        "trail_after": 10.0,
+        "trail_dist": 5.0,
+        "take_profit": null
+      },
+      "stats": {
+        "trades": 355,
+        "wins": 157,
+        "losses": 197,
+        "win_rate": 44.23,
+        "avg_return": 0.54,
+        "median": -0.33,
+        "best": 42.13,
+        "worst": -15.77,
+        "std_dev": 6.96,
+        "profit_factor": 1.303,
+        "cum_return": 192.46,
+        "max_dd": 60.6
+      },
+      "by_leva": {
+        "1": {
+          "trades": 272,
+          "wins": 125,
+          "losses": 146,
+          "win_rate": 45.96,
+          "avg_return": 1.01,
+          "median": -0.18,
+          "best": 32.95,
+          "worst": -8.73,
+          "std_dev": 6.08,
+          "profit_factor": 1.836,
+          "cum_return": 274.31,
+          "max_dd": 33.32
+        },
+        "2": {
+          "trades": 24,
+          "wins": 10,
+          "losses": 14,
+          "win_rate": 41.67,
+          "avg_return": -0.12,
+          "median": -0.85,
+          "best": 21.68,
+          "worst": -11.04,
+          "std_dev": 7.44,
+          "profit_factor": 0.958,
+          "cum_return": -2.89,
+          "max_dd": 20.69
+        },
+        "3": {
+          "trades": 46,
+          "wins": 17,
+          "losses": 29,
+          "win_rate": 36.96,
+          "avg_return": -1.49,
+          "median": -1.94,
+          "best": 42.13,
+          "worst": -14.78,
+          "std_dev": 8.74,
+          "profit_factor": 0.592,
+          "cum_return": -68.51,
+          "max_dd": 99.03
+        },
+        "4": {
+          "trades": 2,
+          "wins": 1,
+          "losses": 1,
+          "win_rate": 50.0,
+          "avg_return": 7.02,
+          "median": 7.02,
+          "best": 29.8,
+          "worst": -15.77,
+          "std_dev": 22.79,
+          "profit_factor": 1.89,
+          "cum_return": 14.03,
+          "max_dd": 15.77
+        },
+        "5": {
+          "trades": 11,
+          "wins": 4,
+          "losses": 7,
+          "win_rate": 36.36,
+          "avg_return": -2.23,
+          "median": -5.37,
+          "best": 16.26,
+          "worst": -12.52,
+          "std_dev": 8.55,
+          "profit_factor": 0.553,
+          "cum_return": -24.48,
+          "max_dd": 33.9
+        }
+      },
+      "exit_reasons": {
+        "TRAIL": 48,
+        "SAR": 307
+      }
+    },
+    "Trail3_a7": {
+      "config": {
+        "hard_sl": null,
+        "trail_after": 7.0,
+        "trail_dist": 3.0,
+        "take_profit": null
+      },
+      "stats": {
+        "trades": 359,
+        "wins": 160,
+        "losses": 198,
+        "win_rate": 44.57,
+        "avg_return": 0.35,
+        "median": -0.28,
+        "best": 29.8,
+        "worst": -15.77,
+        "std_dev": 6.01,
+        "profit_factor": 1.197,
+        "cum_return": 125.03,
+        "max_dd": 73.27
+      },
+      "by_leva": {
+        "1": {
+          "trades": 274,
+          "wins": 126,
+          "losses": 147,
+          "win_rate": 45.99,
+          "avg_return": 0.78,
+          "median": -0.18,
+          "best": 27.48,
+          "worst": -8.73,
+          "std_dev": 5.12,
+          "profit_factor": 1.641,
+          "cum_return": 212.96,
+          "max_dd": 34.94
+        },
+        "2": {
+          "trades": 24,
+          "wins": 10,
+          "losses": 14,
+          "win_rate": 41.67,
+          "avg_return": 0.21,
+          "median": -0.85,
+          "best": 21.68,
+          "worst": -11.04,
+          "std_dev": 7.79,
+          "profit_factor": 1.074,
+          "cum_return": 4.95,
+          "max_dd": 20.69
+        },
+        "3": {
+          "trades": 48,
+          "wins": 17,
+          "losses": 31,
+          "win_rate": 35.42,
+          "avg_return": -2.15,
+          "median": -1.94,
+          "best": 14.72,
+          "worst": -14.78,
+          "std_dev": 6.19,
+          "profit_factor": 0.407,
+          "cum_return": -102.96,
+          "max_dd": 117.58
+        },
+        "4": {
+          "trades": 2,
+          "wins": 1,
+          "losses": 1,
+          "win_rate": 50.0,
+          "avg_return": 7.02,
+          "median": 7.02,
+          "best": 29.8,
+          "worst": -15.77,
+          "std_dev": 22.79,
+          "profit_factor": 1.89,
+          "cum_return": 14.03,
+          "max_dd": 15.77
+        },
+        "5": {
+          "trades": 11,
+          "wins": 6,
+          "losses": 5,
+          "win_rate": 54.55,
+          "avg_return": -0.36,
+          "median": 1.53,
+          "best": 20.66,
+          "worst": -12.52,
+          "std_dev": 9.46,
+          "profit_factor": 0.913,
+          "cum_return": -3.95,
+          "max_dd": 28.18
+        }
+      },
+      "exit_reasons": {
+        "TRAIL": 68,
+        "SAR": 291
+      }
+    },
+    "Trail5_a10_TP25": {
+      "config": {
+        "hard_sl": null,
+        "trail_after": 10.0,
+        "trail_dist": 5.0,
+        "take_profit": 25.0
+      },
+      "stats": {
+        "trades": 357,
+        "wins": 157,
+        "losses": 199,
+        "win_rate": 43.98,
+        "avg_return": 0.65,
+        "median": -0.35,
+        "best": 41.86,
+        "worst": -15.77,
+        "std_dev": 7.26,
+        "profit_factor": 1.36,
+        "cum_return": 230.91,
+        "max_dd": 60.6
+      },
+      "by_leva": {
+        "1": {
+          "trades": 272,
+          "wins": 125,
+          "losses": 146,
+          "win_rate": 45.96,
+          "avg_return": 1.21,
+          "median": -0.18,
+          "best": 41.86,
+          "worst": -8.73,
+          "std_dev": 6.77,
+          "profit_factor": 2.004,
+          "cum_return": 329.34,
+          "max_dd": 33.32
+        },
+        "2": {
+          "trades": 24,
+          "wins": 10,
+          "losses": 14,
+          "win_rate": 41.67,
+          "avg_return": 0.15,
+          "median": -0.85,
+          "best": 28.1,
+          "worst": -11.04,
+          "std_dev": 8.29,
+          "profit_factor": 1.051,
+          "cum_return": 3.53,
+          "max_dd": 20.69
+        },
+        "3": {
+          "trades": 48,
+          "wins": 17,
+          "losses": 31,
+          "win_rate": 35.42,
+          "avg_return": -1.9,
+          "median": -1.94,
+          "best": 25.16,
+          "worst": -14.78,
+          "std_dev": 6.96,
+          "profit_factor": 0.475,
+          "cum_return": -91.01,
+          "max_dd": 105.63
+        },
+        "4": {
+          "trades": 2,
+          "wins": 1,
+          "losses": 1,
+          "win_rate": 50.0,
+          "avg_return": 6.77,
+          "median": 6.77,
+          "best": 29.3,
+          "worst": -15.77,
+          "std_dev": 22.54,
+          "profit_factor": 1.858,
+          "cum_return": 13.53,
+          "max_dd": 15.77
+        },
+        "5": {
+          "trades": 11,
+          "wins": 4,
+          "losses": 7,
+          "win_rate": 36.36,
+          "avg_return": -2.23,
+          "median": -5.37,
+          "best": 16.26,
+          "worst": -12.52,
+          "std_dev": 8.55,
+          "profit_factor": 0.553,
+          "cum_return": -24.48,
+          "max_dd": 33.9
+        }
+      },
+      "exit_reasons": {
+        "TRAIL": 35,
+        "SAR": 309,
+        "TP": 13
+      }
+    },
+    "SL7_Trail5_a10": {
+      "config": {
+        "hard_sl": -7.0,
+        "trail_after": 10.0,
+        "trail_dist": 5.0,
+        "take_profit": null
+      },
+      "stats": {
+        "trades": 355,
+        "wins": 156,
+        "losses": 198,
+        "win_rate": 43.94,
+        "avg_return": 0.45,
+        "median": -0.35,
+        "best": 42.13,
+        "worst": -15.77,
+        "std_dev": 6.77,
+        "profit_factor": 1.25,
+        "cum_return": 159.6,
+        "max_dd": 56.56
+      },
+      "by_leva": {
+        "1": {
+          "trades": 272,
+          "wins": 125,
+          "losses": 146,
+          "win_rate": 45.96,
+          "avg_return": 1.01,
+          "median": -0.18,
+          "best": 32.95,
+          "worst": -8.73,
+          "std_dev": 6.08,
+          "profit_factor": 1.836,
+          "cum_return": 274.31,
+          "max_dd": 33.32
+        },
+        "2": {
+          "trades": 24,
+          "wins": 10,
+          "losses": 14,
+          "win_rate": 41.67,
+          "avg_return": 0.14,
+          "median": -0.85,
+          "best": 21.68,
+          "worst": -10.51,
+          "std_dev": 7.13,
+          "profit_factor": 1.053,
+          "cum_return": 3.33,
+          "max_dd": 20.11
+        },
+        "3": {
+          "trades": 46,
+          "wins": 17,
+          "losses": 29,
+          "win_rate": 36.96,
+          "avg_return": -1.49,
+          "median": -1.94,
+          "best": 42.13,
+          "worst": -14.78,
+          "std_dev": 8.74,
+          "profit_factor": 0.592,
+          "cum_return": -68.51,
+          "max_dd": 99.03
+        },
+        "4": {
+          "trades": 2,
+          "wins": 0,
+          "losses": 2,
+          "win_rate": 0.0,
+          "avg_return": -11.68,
+          "median": -11.68,
+          "best": -7.58,
+          "worst": -15.77,
+          "std_dev": 4.09,
+          "profit_factor": 0.0,
+          "cum_return": -23.35,
+          "max_dd": 23.35
+        },
+        "5": {
+          "trades": 11,
+          "wins": 4,
+          "losses": 7,
+          "win_rate": 36.36,
+          "avg_return": -2.38,
+          "median": -5.37,
+          "best": 16.26,
+          "worst": -12.52,
+          "std_dev": 8.65,
+          "profit_factor": 0.536,
+          "cum_return": -26.18,
+          "max_dd": 35.6
+        }
+      },
+      "exit_reasons": {
+        "TRAIL": 47,
+        "SAR": 285,
+        "SL": 23
+      }
+    },
+    "SL7_Trail5_a10_TP20": {
+      "config": {
+        "hard_sl": -7.0,
+        "trail_after": 10.0,
+        "trail_dist": 5.0,
+        "take_profit": 20.0
+      },
+      "stats": {
+        "trades": 357,
+        "wins": 156,
+        "losses": 200,
+        "win_rate": 43.7,
+        "avg_return": 0.48,
+        "median": -0.39,
+        "best": 34.4,
+        "worst": -15.77,
+        "std_dev": 6.67,
+        "profit_factor": 1.265,
+        "cum_return": 170.78,
+        "max_dd": 56.56
+      },
+      "by_leva": {
+        "1": {
+          "trades": 272,
+          "wins": 125,
+          "losses": 146,
+          "win_rate": 45.96,
+          "avg_return": 1.09,
+          "median": -0.18,
+          "best": 34.4,
+          "worst": -8.73,
+          "std_dev": 6.16,
+          "profit_factor": 1.902,
+          "cum_return": 295.88,
+          "max_dd": 33.32
+        },
+        "2": {
+          "trades": 24,
+          "wins": 10,
+          "losses": 14,
+          "win_rate": 41.67,
+          "avg_return": 0.55,
+          "median": -0.85,
+          "best": 24.71,
+          "worst": -10.51,
+          "std_dev": 8.11,
+          "profit_factor": 1.209,
+          "cum_return": 13.11,
+          "max_dd": 20.11
+        },
+        "3": {
+          "trades": 48,
+          "wins": 17,
+          "losses": 31,
+          "win_rate": 35.42,
+          "avg_return": -1.99,
+          "median": -1.94,
+          "best": 20.57,
+          "worst": -14.78,
+          "std_dev": 6.61,
+          "profit_factor": 0.449,
+          "cum_return": -95.6,
+          "max_dd": 110.22
+        },
+        "4": {
+          "trades": 2,
+          "wins": 0,
+          "losses": 2,
+          "win_rate": 0.0,
+          "avg_return": -11.68,
+          "median": -11.68,
+          "best": -7.58,
+          "worst": -15.77,
+          "std_dev": 4.09,
+          "profit_factor": 0.0,
+          "cum_return": -23.35,
+          "max_dd": 23.35
+        },
+        "5": {
+          "trades": 11,
+          "wins": 4,
+          "losses": 7,
+          "win_rate": 36.36,
+          "avg_return": -1.75,
+          "median": -5.37,
+          "best": 23.18,
+          "worst": -12.52,
+          "std_dev": 10.11,
+          "profit_factor": 0.659,
+          "cum_return": -19.26,
+          "max_dd": 29.88
+        }
+      },
+      "exit_reasons": {
+        "TRAIL": 29,
+        "SAR": 287,
+        "SL": 23,
+        "TP": 18
+      }
+    }
+  }
+}
