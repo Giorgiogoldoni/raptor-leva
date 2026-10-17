@@ -1198,4 +1198,89 @@ def main():
         r = process_leva(info, regime['mult'], regime['regime'])
         if r: results.append(r)
         else: errors += 1
-        if (i+1) % 20 ==
+        if (i+1) % 20 == 0:
+            print(f"  {i+1}/{len(TICKERS)} — ok:{len(results)} err:{errors}")
+        time.sleep(0.3)
+
+    prev_zones = {}
+    prev_j = {}
+    try:
+        with open('raptor_leva.json','r',encoding='utf-8') as f:
+            prev_j = json.load(f)
+            for r in prev_j.get('data',[]):
+                prev_zones[r['ticker']] = r.get('zona','')
+    except Exception as e:
+        print(f"Nessun raptor_leva.json precedente o errore lettura: {e}")
+
+    prev_regime = prev_j.get('regime','')
+    regime_changed = prev_regime and prev_regime != regime['regime']
+    if regime_changed:
+        print("REGIME CAMBIATO: {} → {}".format(prev_regime, regime['regime']))
+
+    CAMBI = {
+        ('USCITA','LONG_CONF'),('STOP','LONG_CONF'),('GRIGIA','LONG_CONF'),('LONG_EARLY','LONG_CONF'),
+        ('USCITA','LONG_EARLY'),('STOP','LONG_EARLY'),('GRIGIA','LONG_EARLY'),
+        ('LONG_CONF','USCITA'),('LONG_EARLY','USCITA'),
+        ('LONG_CONF','STOP'),('LONG_EARLY','STOP'),
+    }
+    alert_list = []
+    for r in results:
+        old_z = prev_zones.get(r['ticker'],'')
+        new_z = r.get('zona','')
+        if r.get('quality') and old_z and new_z and old_z != new_z and (old_z,new_z) in CAMBI:
+            if r.get('score',0) >= SCORE_MIN:
+                alert_list.append({'ticker':r['ticker'],'nome':r.get('nome',''),
+                    'old':old_z,'new':new_z,'score':r['score'],'prezzo':r['prezzo'],
+                    'kf':r.get('kama_fast','—'),'ks':r.get('kama_slow','—'),
+                    'entry':r.get('entryDate','—'),'vol':r.get('volRatio',0),
+                    'er':r.get('er',0),'baff':r.get('baff',0)})
+    print("Alert qualità: {}".format(len(alert_list)))
+    if alert_list or regime_changed:
+        send_alert_email(alert_list, vix, vstoxx, regime['regime'], now,
+                        prev_regime if regime_changed else None)
+
+    try:
+        perf_hist = update_perf_history(results, now)
+        movers = check_explosive_movers(results, perf_hist, now)
+        print("Mover esplosivi: {}".format(len(movers)))
+        if movers:
+            send_explosive_alert_email(movers, now)
+    except Exception as e:
+        print(f"Errore sezione mover esplosivi (non bloccante): {e}")
+
+    try:
+        sbb_list = [r for r in results if r.get('super_best_buy')]
+        print("Super Best Buy (flip SAR): {}".format(len(sbb_list)))
+        update_sbb_flip_log(results, now)
+        update_sbb2_flip_log(results, now)
+    except Exception as e:
+        print(f"Errore sezione Super Best Buy log (non bloccante): {e}")
+
+    # 3d. Live 1x (SL10/TP30)
+    try:
+        update_live_1x_log(results, now)
+    except Exception as e:
+        print(f"Errore sezione Live 1x log (non bloccante): {e}")
+
+    output = {
+        'timestamp':    now.isoformat(),
+        'timestamp_it': now.strftime('%d/%m/%Y %H:%M'),
+        'total':   len(TICKERS),
+        'ok':      len(results),
+        'errors':  errors,
+        'vix':     vix,
+        'vstoxx':  vstoxx,
+        'regime':  regime['regime'],
+        'regime_mult': regime['mult'],
+        'regime_color': regime['color'],
+        'data':    results
+    }
+
+    with open('raptor_leva.json','w',encoding='utf-8') as f:
+        json.dump(output, f, ensure_ascii=False, separators=(',',':'))
+
+    print(f"\nSalvato raptor_leva.json — {len(results)} OK, {errors} errori")
+    print(f"Regime: {regime['regime']} | VIX:{vix} VSTOXX:{vstoxx}")
+
+if __name__ == '__main__':
+    main()
