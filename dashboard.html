@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAPTOR Dashboard</title>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        :root {
+            --bg: #131722;
+            --panel: #1e222d;
+            --text: #d1d4dc;
+            --green: #26a69a;
+            --red: #ef5350;
+            --border: #2a2e39;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        select {
+            padding: 8px 12px;
+            font-size: 16px;
+            background-color: var(--panel);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 300px;
+        }
+        .charts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 600px;
+            margin-bottom: 20px;
+        }
+        #main-chart { flex: 3; border: 1px solid var(--border); border-radius: 4px; position: relative; }
+        #indicator-charts { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+        .sub-chart { flex: 1; border: 1px solid var(--border); border-radius: 4px; }
+        .table-container {
+            overflow-x: auto;
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        th, td {
+            padding: 10px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background-color: #2a2e39;
+            font-weight: 600;
+            color: #b2b5be;
+        }
+        tr:hover { background-color: #2a2e39; }
+        .badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .badge-in { background: rgba(38, 166, 154, 0.2); color: var(--green); border: 1px solid var(--green); }
+        .badge-out { background: rgba(239, 83, 80, 0.2); color: var(--red); border: 1px solid var(--red); }
+        .badge-open { background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid #ffc107; }
+        .pos { color: var(--green); font-weight: bold; }
+        .neg { color: var(--red); font-weight: bold; }
+        .loading { text-align: center; padding: 50px; font-size: 18px; color: #b2b5be; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🚀 RAPTOR Dashboard</h1>
+        <select id="ticker-select">
+            <option value="">Caricamento ETF...</option>
+        </select>
+    </div>
+
+    <div id="loading" class="loading">Caricamento dati in corso...</div>
+
+    <div id="content" style="display: none;">
+        <div class="charts-container">
+            <div id="main-chart"></div>
+            <div id="indicator-charts">
+                <div id="volume-chart" class="sub-chart"></div>
+                <div id="ao-chart" class="sub-chart"></div>
+                <div id="rsi-chart" class="sub-chart"></div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="trade-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Data In</th>
+                        <th>Motivo Entrata</th>
+                        <th>Prezzo In</th>
+                        <th>Data Out</th>
+                        <th>Motivo Uscita</th>
+                        <th>Prezzo Out</th>
+                        <th>Risultato</th>
+                    </tr>
+                </thead>
+                <tbody id="trade-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // ── CONFIGURAZIONE ──
+        const IS_LOCAL = window.location.hostname === 'localhost' || window.location.protocol === 'file:';
+        const BASE_PATH = IS_LOCAL ? '../' : 'https://Giorgiogoldoni.github.io/raptor-leva/';
+
+        let mainChart, volumeChart, aoChart, rsiChart;
+        let allLogs1x = [];
+        let allLogsSBB = [];
+
+        // ── INIZIALIZZAZIONE ──
+        async function init() {
+            try {
+                // 1. Carica tutti i log
+                const [res1x, resSBB, resIdx] = await Promise.all([
+                    fetch(BASE_PATH + 'live_trades_1x.json').then(r => r.ok ? r.json() : []).catch(() => []),
+                    fetch(BASE_PATH + 'sbb_flip_log.json').then(r => r.ok ? r.json() : []).catch(() => []),
+                    fetch(BASE_PATH + 'data/charts/index.json').then(r => r.json())
+                ]);
+
+                allLogs1x = Array.isArray(res1x) ? res1x : [];
+                allLogsSBB = Array.isArray(resSBB) ? resSBB : [];
+
+                // 2. Popola il menu a tendina
+                const select = document.getElementById('ticker-select');
+                select.innerHTML = '';
+                
+                // Ordina alfabeticamente per ticker
+                const uniqueTickers = resIdx.index.sort((a, b) => a.t.localeCompare(b.t));
+                
+                uniqueTickers.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.f; // nome file (es. 3SAA_MI.json)
+                    opt.dataset.ticker = item.t;
+                    opt.dataset.yahoo = item.y;
+                    opt.textContent = `${item.t} — ${item.y}`;
+                    select.appendChild(opt);
+                });
+
+                // 3. Event listener per il cambio ETF
+                select.addEventListener('change', (e) => {
+                    const selectedOption = e.target.options[e.target.selectedIndex];
+                    loadTicker(selectedOption.value, selectedOption.dataset.ticker);
+                });
+
+                // 4. Carica il primo ETF di default
+                if (uniqueTickers.length > 0) {
+                    const first = uniqueTickers[0];
+                    select.value = first.f;
+                    loadTicker(first.f, first.t);
+                }
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading').innerText = "Errore nel caricamento dei dati: " + err.message;
+            }
+        }
+
+        // ── CARICAMENTO SINGOLO TICKER ──
+        async function loadTicker(filename, tickerCode) {
+            try {
+                const res = await fetch(BASE_PATH + 'data/charts/' + filename);
+                if (!res.ok) throw new Error("Dati grafico non trovati");
+                const data = await res.json();
+
+                renderCharts(data);
+                renderTable(data, tickerCode);
+
+            } catch (err) {
+                console.error(err);
+                alert("Errore nel caricamento del ticker: " + err.message);
+            }
+        }
+
+        // ── RENDER GRAFICI ──
+        function renderCharts(data) {
+            // Distruggi i grafici precedenti se esistono
+            if (mainChart) mainChart.remove();
+            if (volumeChart) volumeChart.remove();
+            if (aoChart) aoChart.remove();
+            if (rsiChart) rsiChart.remove();
+
+            const commonOptions = {
+                layout: { background: { type: 'solid', color: '#1e222d' }, textColor: '#d1d4dc' },
+                grid: { vertLines: { color: '#2a2e39' }, horzLines: { color: '#2a2e39' } },
+                crosshair: { mode: 0 },
+                timeScale: { timeVisible: true, secondsVisible: false, borderColor: '#2a2e39' },
+                rightPriceScale: { borderColor: '#2a2e39' }
+            };
+
+            // 1. GRAFICO PRINCIPALE (Candele + KAMA + SAR)
+            mainChart = LightweightCharts.createChart(document.getElementById('main-chart'), commonOptions);
+            
+            const candlestickSeries = mainChart.addCandlestickSeries({
+                upColor: '#26a69a', downColor: '#ef5350', borderVisible: false,
+                wickUpColor: '#26a69a', wickDownColor: '#ef5350'
+            });
+
+            const kamaFastSeries = mainChart.addLineSeries({ color: '#2962FF', lineWidth: 2, title: 'KAMA Fast' });
+            const kamaSlowSeries = mainChart.addLineSeries({ color: '#FF6D00', lineWidth: 2, title: 'KAMA Slow' });
+
+            // Prepara i dati
+            const candleData = [];
+            const kamaFastData = [];
+            const kamaSlowData = [];
+
+            for (let i = 0; i < data.dates.length; i++) {
+                candleData.push({
+                    time: data.dates[i],
+                    open: data.opens[i],
+                    high: data.highs[i],
+                    low: data.lows[i],
+                    close: data.closes[i]
+                });
+                if (data.kama_fast[i] !== null) kamaFastData.push({ time: data.dates[i], value: data.kama_fast[i] });
+                if (data.kama_slow[i] !== null) kamaSlowData.push({ time: data.dates[i], value: data.kama_slow[i] });
+            }
+
+            candlestickSeries.setData(candleData);
+            kamaFastSeries.setData(kamaFastData);
+            kamaSlowSeries.setData(kamaSlowData);
+
+            // Aggiungi marcatori (Frecce) dal log
+            // Prendiamo i segnali generali del file chart
+            const markers = [];
+            for (let i = 0; i < data.signals.length; i++) {
+                const sig = data.signals[i];
+                if (sig === 'BUY3' || sig === 'BUY2') {
+                    markers.push({ time: data.dates[i], position: 'belowBar', color: '#26a69a', shape: 'arrowUp', text: 'BUY' });
+                } else if (sig === 'SELL') {
+                    markers.push({ time: data.dates[i], position: 'aboveBar', color: '#ef5350', shape: 'arrowDown', text: 'SELL' });
+                }
+            }
+            // Ordina i marcatori per tempo (richiesto da lightweight-charts)
+            markers.sort((a, b) => new Date(a.time) - new Date(b.time));
+            candlestickSeries.setMarkers(markers);
+
+            // 2. GRAFICO VOLUME
+            volumeChart = LightweightCharts.createChart(document.getElementById('volume-chart'), { ...commonOptions, timeScale: { visible: false } });
+            const volumeSeries = volumeChart.addHistogramSeries({ color: '#26a69a' });
+            const volData = data.dates.map((d, i) => ({ time: d, value: data.volumes[i], color: data.closes[i] >= data.opens[i] ? '#26a69a' : '#ef5350' }));
+            volumeSeries.setData(volData);
+
+            // 3. GRAFICO AO
+            aoChart = LightweightCharts.createChart(document.getElementById('ao-chart'), { ...commonOptions, timeScale: { visible: false } });
+            const aoSeries = aoChart.addLineSeries({ color: '#ab47bc', lineWidth: 1, title: 'AO' });
+            const aoData = data.dates.map((d, i) => ({ time: d, value: data.ao[i] })).filter(x => x.value !== null);
+            aoSeries.setData(aoData);
+
+            // 4. GRAFICO RSI
+            rsiChart = LightweightCharts.createChart(document.getElementById('rsi-chart'), commonOptions);
+            const rsi14Series = rsiChart.addLineSeries({ color: '#f59e0b', lineWidth: 1, title: 'RSI 14' });
+            const rsi5Series = rsiChart.addLineSeries({ color: '#10b981', lineWidth: 1, title: 'RSI 5' });
+            const rsi14Data = data.dates.map((d, i) => ({ time: d, value: data.rsi14[i] })).filter(x => x.value !== null);
+            const rsi5Data = data.dates.map((d, i) => ({ time: d, value: data.rsi5[i] })).filter(x => x.value !== null);
+            rsi14Series.setData(rsi14Data);
+            rsi5Series.setData(rsi5Data);
+
+            // Sincronizza lo zoom tra i grafici
+            mainChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
+                if (!range) return;
+                volumeChart.timeScale().setVisibleLogicalRange(range);
+                aoChart.timeScale().setVisibleLogicalRange(range);
+                rsiChart.timeScale().setVisibleLogicalRange(range);
+            });
+        }
+
+        // ── RENDER TABELLA TRADE (ORIZZONTALE) ──
+        function renderTable(chartData, tickerCode) {
+            const tbody = document.getElementById('trade-tbody');
+            tbody.innerHTML = '';
+
+            let trades = [];
+
+            // A. Estrai segnali dal file Chart (Generale)
+            let openChartTrade = null;
+            for (let i = 0; i < chartData.signals.length; i++) {
+                const sig = chartData.signals[i];
+                const date = chartData.dates[i];
+                const price = chartData.closes[i];
+
+                if (sig === 'BUY3' || sig === 'BUY2') {
+                    if (!openChartTrade) {
+                        openChartTrade = { 
+                            type: 'Generale', 
+                            inDate: date, inPrice: price, inReason: sig + ' (KAMA/AO)' 
+                        };
+                    }
+                } else if (sig === 'SELL') {
+                    if (openChartTrade) {
+                        openChartTrade.outDate = date;
+                        openChartTrade.outPrice = price;
+                        openChartTrade.outReason = 'SELL (KAMA)';
+                        openChartTrade.result = ((price / openChartTrade.inPrice - 1) * 100).toFixed(2);
+                        trades.push(openChartTrade);
+                        openChartTrade = null;
+                    }
+                }
+            }
+
+            // B. Estrai trade dal log LIVE 1x
+            const t1x = allLogs1x.filter(x => x.ticker === tickerCode);
+            t1x.forEach(t => {
+                trades.push({
+                    type: '1x',
+                    inDate: t.flip_ts_it,
+                    inPrice: t.prezzo_ingresso,
+                    inReason: 'Flip SAR (KAMA in salita)',
+                    outDate: t.stato === 'chiuso' ? t.chiusura_ts_it : null,
+                    outPrice: t.stato === 'chiuso' ? t.prezzo_chiusura : t.ultimo_prezzo,
+                    outReason: t.stato === 'chiuso' ? (t.exit_reason === 'TP' ? 'Take Profit (+30%)' : t.exit_reason === 'SL' ? 'Stop Loss (-10%)' : 'Flip SAR BEAR') : 'In corso',
+                    result: t.stato === 'chiuso' ? t.rendimento_pct : ((t.ultimo_prezzo / t.prezzo_ingresso - 1) * 100).toFixed(2)
+                });
+            });
+
+            // C. Estrai trade dal log SBB
+            const tsbb = allLogsSBB.filter(x => x.ticker === tickerCode);
+            tsbb.forEach(t => {
+                trades.push({
+                    type: 'SBB',
+                    inDate: t.flip_ts_it,
+                    inPrice: t.prezzo_ingresso,
+                    inReason: 'Super Best Buy (SAR)',
+                    outDate: t.stato === 'chiuso' ? t.chiusura_ts_it : null,
+                    outPrice: t.stato === 'chiuso' ? t.prezzo_chiusura : t.ultimo_prezzo,
+                    outReason: t.stato === 'chiuso' ? 'Flip SAR BEAR' : 'In corso',
+                    result: t.stato === 'chiuso' ? t.rendimento_pct : ((t.ultimo_prezzo / t.prezzo_ingresso - 1) * 100).toFixed(2)
+                });
+            });
+
+            // Ordina per data di ingresso decrescente (più recenti in alto)
+            trades.sort((a, b) => {
+                // Converte "dd/mm/yyyy hh:mm" o "yyyy-mm-dd" in Date object
+                const parseDate = (d) => {
+                    if (!d) return 0;
+                    if (d.includes('/')) {
+                        const [date, time] = d.split(' ');
+                        const [dd, mm, yyyy] = date.split('/');
+                        return new Date(`${yyyy}-${mm}-${dd}T${time || '00:00'}`).getTime();
+                    }
+                    return new Date(d).getTime();
+                };
+                return parseDate(b.inDate) - parseDate(a.inDate);
+            });
+
+            // Genera righe HTML
+            let html = '';
+            trades.forEach((t, idx) => {
+                const isOpen = !t.outDate;
+                const resClass = t.result > 0 ? 'pos' : 'neg';
+                const resStr = `${t.result > 0 ? '+' : ''}${t.result}%`;
+                
+                html += `<tr>
+                    <td>${idx + 1}</td>
+                    <td>${t.inDate || '-'}</td>
+                    <td><span class="badge badge-in">${t.inReason}</span></td>
+                    <td>${t.inPrice ? t.inPrice.toFixed(2) : '-'} €</td>
+                    <td>${t.outDate || '<span class="badge badge-open">Aperto</span>'}</td>
+                    <td>${t.outReason ? `<span class="badge ${isOpen ? 'badge-open' : 'badge-out'}">${t.outReason}</span>` : '-'}</td>
+                    <td>${t.outPrice ? t.outPrice.toFixed(2) : '-'} €</td>
+                    <td class="${resClass}">${resStr}</td>
+                </tr>`;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // Avvia tutto al caricamento della pagina
+        window.onload = init;
+    </script>
+</body>
+</html>
